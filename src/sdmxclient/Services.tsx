@@ -4,11 +4,15 @@ import * as structure from '../sdmx/structure';
 import * as sdmx from '../sdmx';
 import * as interfaces from '../sdmx/interfaces';
 export interface ServicesProps {
-    onConnect?: any;
-    onQuery?: any;
+    onConnect:Function,
 }
 
 export default class Services extends Component<ServicesProps, any> {
+    private onConnect:Function = null;
+    constructor(a:ServicesProps){
+        super(a);
+        this.setState(this.getInitialState());
+    }
     getInitialState() {
         var array = [];
         array.push("");
@@ -20,27 +24,27 @@ export default class Services extends Component<ServicesProps, any> {
             selected: "",
             queryable: null
         };
-        alert(JSON.stringify(array));
         return o;
     }
-    connect() {
-        this.setState({queryable: sdmx.SdmxIO.connect(this.state.selected)});
-        this.props.onConnect(this.state.queryable);
-        this.props.onQuery(null);
-    }
-    onChange(e) {
-        this.setState({
-            selected: e.target.value
-        }, function () {
-            this.connect();
+    listServices(){
+        var options = [];
+        var index:number = 0;
+        this.state.services.forEach(function(item){
+            options.push(<option>{item}</option>);
+            index++;
         });
-
+        return options;
     }
-    render() {
-        return <div><select value={this.state.selected}>{_.map(this.state.services, this.repeatItem2)}</select></div>
+    changeService(item){
+        var service = item.target.value;
+        var q = sdmx.SdmxIO.connect(service);
+        this.setState({selected:service,queryable:q});
+        this.onConnect(q);
     }
-    repeatItem2(item, itemIndex) {
-        return <option value={itemIndex}>{structure.NameableType.toString(item)}</option>;
+    render(props: ServicesProps,state) {
+        this.onConnect = props.onConnect;
+        if(state.services == null ) return <div><p>No State</p></div>;
+        return <div><select value={state.selected} onChange={(a)=>this.changeService(a)}>{this.listServices()}</select></div>
     }
 }
 

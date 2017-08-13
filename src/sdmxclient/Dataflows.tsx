@@ -1,10 +1,16 @@
 import {h, Component} from 'preact';
 import _ from 'lodash';
+import * as structure from '../sdmx/structure';
 export interface DataflowsProps {
-    name: string
+    dfs: Array<structure.Dataflow>,
+    selectDataflow:Function
 }
 
 export default class Dataflows extends Component<DataflowsProps, any> {
+    constructor(props: DataflowsProps) {
+        super(props);
+
+    }
     getInitialState() {
         return {
             dataflows: [],
@@ -12,39 +18,30 @@ export default class Dataflows extends Component<DataflowsProps, any> {
             selectedObject: null
         };
     }
-    load(dataflows) {
-        var object = null;
-        this.setState({
-            dataflows: dataflows,
-            selectedString: structure.NameableType.toString(object),
-            selectedObject: object
-        });
-        this.forceUpdate();
-        this.props.onSelectDataflow(object);
-
-    },
     change(s) {
         var object = null;
-        for (var i = 0; i < this.state.dataflows.length; i++) {
-            if (structure.NameableType.toString(this.state.dataflows[i]).trim() == s.target.value.trim()) {
-                object = this.state.dataflows[i];
+        for (var i = 0; i < this.props.dfs.length; i++) {
+            if (structure.NameableType.toString(this.props.dfs[i]).trim() == s.target.value.trim()) {
+                object = this.props.dfs[i];
             }
         }
         this.setState({
             selectedString: s.target.value,
             selectedObject: object
         });
-        this.forceUpdate();
-        this.props.onSelectDataflow(object);
-        this.props.onQuery(null);
-    },
-    repeatItem2(item, itemIndex) {
-        return <option value={itemIndex}>{structure.NameableType.toString(item)</option>;
+        this.props.selectDataflow(object);
     }
-    render() {
-        var options = _.map(this.state.dataflows, this.repeatItem2);
-        return <div>
-                <select value=this.state.selectedString onChange=this.change > +options +</select></div>
-            }
+    listDataflowOptions(state) {
+        var options = [];
+        var index = 0;
+        if(this.props.dfs == null ) return [];
+        this.props.dfs.forEach(function(item){
+            options.push(<option>{structure.NameableType.toString(item)}</option>);
+            index++;
+        });
+        return options;
+    }
+    render(props: DataflowsProps,state) {
+        return <div><select value={this.state.selectedString} onChange={(e)=>this.change(e)}>{this.listDataflowOptions(props)}</select></div>
     }
 }
