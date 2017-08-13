@@ -24,7 +24,6 @@ import * as structure from '../sdmx/structure';
 import * as message from '../sdmx/message';
 import * as commonreferences from '../sdmx/commonreferences';
 import * as common from '../sdmx/common';
-import * as data from '../sdmx/data';
 import * as sdmx from '../sdmx';
 import * as timepack from '../sdmx/time';
 export class Query {
