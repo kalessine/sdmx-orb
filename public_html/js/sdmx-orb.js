@@ -31403,7 +31403,6 @@ var Services = (function (_super) {
     function Services(a) {
         var _this = _super.call(this, a) || this;
         _this.onConnect = null;
-        console.log(JSON.stringify(a));
         _this.setState(_this.getInitialState());
         return _this;
     }
@@ -31420,10 +31419,6 @@ var Services = (function (_super) {
         };
         return o;
     };
-    Services.prototype.componentWillReceiveProps = function (props) {
-        alert(JSON.stringify(props));
-        console.log(JSON.stringify(props));
-    };
     Services.prototype.listServices = function () {
         var options = [];
         var index = 0;
@@ -31437,9 +31432,7 @@ var Services = (function (_super) {
         var service = item.target.value;
         var q = sdmx.SdmxIO.connect(service);
         this.setState({ selected: service, queryable: q });
-        alert("1");
         this.onConnect(q);
-        alert("2");
     };
     Services.prototype.render = function (props, state) {
         var _this = this;
