@@ -59,9 +59,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             return;
         }
         this.state.queryable.getRemoteRegistry().listDataflows().then(function (dfs) {
-            alert("DFS!");
             this.setState({dataflows: dfs});
-            alert("DFS2");
         }.bind(this));
     }
     selectDataflow(df: structure.Dataflow) {

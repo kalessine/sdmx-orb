@@ -32774,9 +32774,7 @@ var SdmxClient = (function (_super) {
             return;
         }
         this.state.queryable.getRemoteRegistry().listDataflows().then(function (dfs) {
-            alert("DFS!");
             this.setState({ dataflows: dfs });
-            alert("DFS2");
         }.bind(this));
     };
     SdmxClient.prototype.selectDataflow = function (df) {
