@@ -1,30 +1,36 @@
 {
-  "name": "sdmx-orb",
-  "version": "1.0.0",
-  "description": "SDMX Client Software",
-  "main": "index.js",
-  "scripts": {
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/kalessine/sdmx-orb.git"
-  },
-  "author": "James Gardner",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/kalessine/sdmx-orb/issues"
-  },
-  "homepage": "https://github.com/kalessine/sdmx-orb#readme",
-  "dependencies": {
-    "loader-utils": "^1.1.0",
-    "lodash": "^4.17.4",
-    "moment": "^2.18.1",
-    "preact": "^8.2.1",
-    "ts-loader": "^2.3.2",
-    "typescript": "^2.5.0-dev.20170808",
-    "typescript-collections": "^1.2.3",
-    "webpack": "^3.5.3"
-  }
+    "name": "sdmx-orb",
+    "version": "1.0.0",
+    "description": "SDMX Client Software",
+    "main": "index.js",
+    "scripts": {
+        "build": "webpack",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/kalessine/sdmx-orb.git"
+    },
+    "author": "James Gardner",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/kalessine/sdmx-orb/issues"
+    },
+    "homepage": "https://github.com/kalessine/sdmx-orb#readme",
+    "dependencies": {
+        "loader-utils": "^1.1.0",
+        "lodash": "^4.17.4",
+        "material": "^0.1.1",
+        "material-components-web": "^0.17.0",
+        "moment": "^2.18.1",
+        "preact": "^8.2.1",
+        "preact-material-components": "^1.1.4",
+        "ts-loader": "^2.3.2",
+        "typescript": "^2.5.0-dev.20170808",
+        "typescript-collections": "^1.2.3",
+        "webpack": "^3.5.3"
+    },
+    "devDependencies": {
+        "css-loader": "^0.28.4"
+    }
 }

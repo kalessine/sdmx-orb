@@ -15,6 +15,7 @@
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
+import * as collections from 'typescript-collections';
 import * as moment from 'moment';
 import {Promise} from 'bluebird';
 import * as interfaces from '../sdmx/interfaces';

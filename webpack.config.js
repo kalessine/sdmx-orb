@@ -4,25 +4,31 @@
 
 module.exports = {
     context: 'C:\\Users\\James\\Dropbox\\sdmx-orb',
-     output: {
+    output: {
         path: 'C:\\Users\\James\\Dropbox\\sdmx-orb\\public_html\\js',
         filename: 'sdmx-orb.js'
     },
-  // Currently we need to add '.ts' to the resolve.extensions array.
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx']
-  },
+    // Currently we need to add '.ts' to the resolve.extensions array.
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
+        alias: {"react": "preact-compat",
+            "react-dom": "preact-compat"}
 
-  // Source maps support ('inline-source-map' also works)
-  devtool: 'source-map',
-  entry: ['./src/main'],
-  // Add the loader for .ts files.
-  module: {
-    loaders: [
-      {
-        test: /\.tsx?$/,
-        loader: 'awesome-typescript-loader'
-      }
-    ]
-  }
+    },
+    // Source maps support ('inline-source-map' also works)
+    devtool: 'source-map',
+    entry: ['./src/main'],
+    // Add the loader for .ts files.
+    module: {
+        loaders: [
+            {
+                test: /\.tsx?$/,
+                loader: 'awesome-typescript-loader'
+            },
+            {
+                test: /\.css$/,
+                use: ['css-loader']
+            }
+        ]
+    }
 };

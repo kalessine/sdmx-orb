@@ -3,9 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/SdmxClient.tsx</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/main.tsx</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmxclient/Services.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/SdmxClient.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmxclient/Dataflows.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/.gitignore</file>
         </group>
     </open-files>
 </project-private>
