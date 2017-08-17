@@ -1,9 +1,6 @@
 import {h, Component} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
-import 'preact-material-components/List/style.css';
-import 'preact-material-components/Menu/style.css';
-import 'preact-material-components/Select/style.css';
 import * as structure from '../sdmx/structure';
 import * as sdmx from '../sdmx';
 import * as interfaces from '../sdmx/interfaces';
