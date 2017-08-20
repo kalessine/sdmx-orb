@@ -62,7 +62,7 @@ export class SdmxIO {
         //return ["OECD"];
     }
     public static connect(s: string): interfaces.Queryable {
-        if (s == "ABS") return new abs.ABS("ABS", "http://cors-anywhere.herokuapp.com/http://stat.abs.gov.au/restsdmx/sdmx.ashx/", "");
+        if (s == "ABS") return new abs.ABS("ABS", "http://stat.data.abs.gov.au/restsdmx/sdmx.ashx/", "");
         if (s == "KNOEMA") return new knoema.Knoema("KNOEMA", "http://knoema.com/api/1.0/sdmx", "");
         if (s == "NOMIS") return new nomis.NOMISRESTServiceRegistry("NOMIS", "http://www.nomisweb.co.uk/api", "uid=0xad235cca367972d98bd642ef04ea259da5de264f");
         if (s == "OECD") return new oecd.OECD("OECD", "http://stats.oecd.org/restsdmx/sdmx.ashx/", "");

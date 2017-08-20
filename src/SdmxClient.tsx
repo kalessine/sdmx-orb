@@ -31,6 +31,7 @@ export interface SdmxClientState {
     showFilter: boolean,
     filterConcept: structure.ConceptType,
     filterItemScheme: structure.ItemSchemeType
+    
 }
 
 export default class SdmxClient extends Component<SdmxClientProps, SdmxClientState> {
@@ -56,7 +57,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             query: null,
             showFilter: false,
             filterConcept: null,
-            filterItemScheme: null
+            filterItemScheme: null,
         };
         return o;
     }
@@ -149,10 +150,12 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
             <TableToolbar name="" />
             <MainTable struct={state.struct} registry={state.registry} all_fields={state.all_fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} />
-            <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme}/>
+            <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query}/>
         </div>);
     }
     filterButton(e, id) {
+        e.preventDefault();
+        console.log("id="+id);
         var filterConcept = this.state.registry.findConcept(this.state.struct.findComponentString(id).getConceptIdentity());
         if (this.state.struct.findComponentString(id).getLocalRepresentation()==null)return;
         if (this.state.struct.findComponentString(id).getLocalRepresentation().getEnumeration()==null)return;
@@ -161,10 +164,6 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
         if( filterCodelist == null ) {
             filterCodelist = this.state.registry.findConceptScheme(filterItemScheme);
         }
-        _.forEach(filterCodelist.getItems(),function(item){
-            console.log(structure.NameableType.toString(item));
-            
-        });
         this.setState({filterItemScheme:filterCodelist, filterConcept:filterConcept});
         this.filter.show();
         return false;
