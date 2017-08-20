@@ -33,6 +33,7 @@ export class Query {
     private query: Array<QueryKey> = [];
     private startDate: Date = new Date();
     private endDate: Date = new Date();
+    private timeQueryKey:QueryKey = null;
     private updatedAfter: Date = null;
     private firstNObservations: number = null;
     private lastNObservations: number = null;
@@ -51,10 +52,14 @@ export class Query {
         }
         this.startDate.setFullYear(2000);
         this.endDate.setFullYear(2016);
+        this.timeQueryKey = new QueryKey(flow.getStructure(), registry, this.getTimeKeyName());
     }
     public getQueryKey(id: string) {
         for (var i: number = 0; i < this.query.length; i++) {
             if (this.query[i].getName() == id) return this.query[i];
+        }
+        if (this.timeQueryKey.getName()==id){
+            return this.timeQueryKey;
         }
         return null;
     }
@@ -70,6 +75,14 @@ export class Query {
             keynames.push(dim2.getId().toString());
         }
         return keynames;
+    }
+    
+    public getTimeKeyName():string{
+        var struct: structure.DataStructure = this.registry.findDataStructure(this.structRef);
+        return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
+    }
+    public getTimeQueryKey():QueryKey{
+        return this.timeQueryKey;
     }
     getDataflow(): structure.Dataflow {
         return this.flow;
