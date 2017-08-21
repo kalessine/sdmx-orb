@@ -8308,7 +8308,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var collections = __webpack_require__(23);
+var collections = __webpack_require__(18);
 var LocalRegistry = /** @class */ (function () {
     function LocalRegistry() {
         this.structures = [];
@@ -8548,8 +8548,8 @@ exports.DoubleRegistry = DoubleRegistry;
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__selection_control__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__selection_control__ = __webpack_require__(23);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__foundation__["a"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__component__["a"]; });
 /* unused harmony reexport SelectionControlState */
@@ -8772,7 +8772,7 @@ process.umask = function() { return 0; };
 
 var baseGetTag = __webpack_require__(24),
     getPrototype = __webpack_require__(236),
-    isObjectLike = __webpack_require__(19);
+    isObjectLike = __webpack_require__(20);
 
 /** `Object#toString` result references. */
 var objectTag = '[object Object]';
@@ -14727,258 +14727,6 @@ module.exports = function(module) {
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var freeGlobal = __webpack_require__(176);
-
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-module.exports = root;
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports) {
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return value != null && typeof value == 'object';
-}
-
-module.exports = isObjectLike;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports) {
-
-/**
- * Checks if `value` is the
- * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
- * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an object, else `false`.
- * @example
- *
- * _.isObject({});
- * // => true
- *
- * _.isObject([1, 2, 3]);
- * // => true
- *
- * _.isObject(_.noop);
- * // => true
- *
- * _.isObject(null);
- * // => false
- */
-function isObject(value) {
-  var type = typeof value;
-  return value != null && (type == 'object' || type == 'function');
-}
-
-module.exports = isObject;
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(16);
-/**
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-/**
- * @template F
- */
-class MDCComponent {
-  /**
-   * @param {!Element} root
-   * @return {!MDCComponent}
-   */
-  static attachTo(root) {
-    // Subclasses which extend MDCBase should provide an attachTo() method that takes a root element and
-    // returns an instantiated component with its root set to that element. Also note that in the cases of
-    // subclasses, an explicit foundation class will not have to be passed in; it will simply be initialized
-    // from getDefaultFoundation().
-    return new MDCComponent(root, new __WEBPACK_IMPORTED_MODULE_0__foundation__["a" /* default */]());
-  }
-
-  /**
-   * @param {!Element} root
-   * @param {F=} foundation
-   * @param {...?} args
-   */
-  constructor(root, foundation = undefined, ...args) {
-    /** @protected {!Element} */
-    this.root_ = root;
-    this.initialize(...args);
-    // Note that we initialize foundation here and not within the constructor's default param so that
-    // this.root_ is defined and can be used within the foundation class.
-    /** @protected {!F} */
-    this.foundation_ = foundation === undefined ? this.getDefaultFoundation() : foundation;
-    this.foundation_.init();
-    this.initialSyncWithDOM();
-  }
-
-  initialize(/* ...args */) {
-    // Subclasses can override this to do any additional setup work that would be considered part of a
-    // "constructor". Essentially, it is a hook into the parent constructor before the foundation is
-    // initialized. Any additional arguments besides root and foundation will be passed in here.
-  }
-
-  /**
-   * @return {!F} foundation
-   */
-  getDefaultFoundation() {
-    // Subclasses must override this method to return a properly configured foundation class for the
-    // component.
-    throw new Error('Subclasses must override getDefaultFoundation to return a properly configured ' +
-      'foundation class');
-  }
-
-  initialSyncWithDOM() {
-    // Subclasses should override this method if they need to perform work to synchronize with a host DOM
-    // object. An example of this would be a form control wrapper that needs to synchronize its internal state
-    // to some property or attribute of the host DOM. Please note: this is *not* the place to perform DOM
-    // reads/writes that would cause layout / paint, as this is called synchronously from within the constructor.
-  }
-
-  destroy() {
-    // Subclasses may implement this method to release any resources / deregister any listeners they have
-    // attached. An example of this might be deregistering a resize event from the window object.
-    this.foundation_.destroy();
-  }
-
-  /**
-   * Wrapper method to add an event listener to the component's root element. This is most useful when
-   * listening for custom events.
-   * @param {string} evtType
-   * @param {!Function} handler
-   */
-  listen(evtType, handler) {
-    this.root_.addEventListener(evtType, handler);
-  }
-
-  /**
-   * Wrapper method to remove an event listener to the component's root element. This is most useful when
-   * unlistening for custom events.
-   * @param {string} evtType
-   * @param {!Function} handler
-   */
-  unlisten(evtType, handler) {
-    this.root_.removeEventListener(evtType, handler);
-  }
-
-  /**
-   * Fires a cross-browser-compatible custom event from the component root of the given type,
-   * with the given data.
-   * @param {string} evtType
-   * @param {!Object} evtData
-   * @param {boolean=} shouldBubble
-   */
-  emit(evtType, evtData, shouldBubble = false) {
-    let evt;
-    if (typeof CustomEvent === 'function') {
-      evt = new CustomEvent(evtType, {
-        detail: evtData,
-        bubbles: shouldBubble,
-      });
-    } else {
-      evt = document.createEvent('CustomEvent');
-      evt.initCustomEvent(evtType, shouldBubble, false, evtData);
-    }
-
-    this.root_.dispatchEvent(evt);
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = MDCComponent;
-
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export SelectionControlState */
-/**
- * Copyright 2017 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @typedef {!{
- *   checked: boolean,
- *   indeterminate: boolean,
- *   disabled: boolean,
- *   value: ?string
- * }}
- */
-let SelectionControlState;
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
 var require;var require;var require;(function(f) {
     if (true) {
         module.exports = f()
@@ -18110,6 +17858,258 @@ return require('typescript-collections');
 });
 
 /***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var freeGlobal = __webpack_require__(176);
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+module.exports = root;
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return value != null && (type == 'object' || type == 'function');
+}
+
+module.exports = isObject;
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(16);
+/**
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * @template F
+ */
+class MDCComponent {
+  /**
+   * @param {!Element} root
+   * @return {!MDCComponent}
+   */
+  static attachTo(root) {
+    // Subclasses which extend MDCBase should provide an attachTo() method that takes a root element and
+    // returns an instantiated component with its root set to that element. Also note that in the cases of
+    // subclasses, an explicit foundation class will not have to be passed in; it will simply be initialized
+    // from getDefaultFoundation().
+    return new MDCComponent(root, new __WEBPACK_IMPORTED_MODULE_0__foundation__["a" /* default */]());
+  }
+
+  /**
+   * @param {!Element} root
+   * @param {F=} foundation
+   * @param {...?} args
+   */
+  constructor(root, foundation = undefined, ...args) {
+    /** @protected {!Element} */
+    this.root_ = root;
+    this.initialize(...args);
+    // Note that we initialize foundation here and not within the constructor's default param so that
+    // this.root_ is defined and can be used within the foundation class.
+    /** @protected {!F} */
+    this.foundation_ = foundation === undefined ? this.getDefaultFoundation() : foundation;
+    this.foundation_.init();
+    this.initialSyncWithDOM();
+  }
+
+  initialize(/* ...args */) {
+    // Subclasses can override this to do any additional setup work that would be considered part of a
+    // "constructor". Essentially, it is a hook into the parent constructor before the foundation is
+    // initialized. Any additional arguments besides root and foundation will be passed in here.
+  }
+
+  /**
+   * @return {!F} foundation
+   */
+  getDefaultFoundation() {
+    // Subclasses must override this method to return a properly configured foundation class for the
+    // component.
+    throw new Error('Subclasses must override getDefaultFoundation to return a properly configured ' +
+      'foundation class');
+  }
+
+  initialSyncWithDOM() {
+    // Subclasses should override this method if they need to perform work to synchronize with a host DOM
+    // object. An example of this would be a form control wrapper that needs to synchronize its internal state
+    // to some property or attribute of the host DOM. Please note: this is *not* the place to perform DOM
+    // reads/writes that would cause layout / paint, as this is called synchronously from within the constructor.
+  }
+
+  destroy() {
+    // Subclasses may implement this method to release any resources / deregister any listeners they have
+    // attached. An example of this might be deregistering a resize event from the window object.
+    this.foundation_.destroy();
+  }
+
+  /**
+   * Wrapper method to add an event listener to the component's root element. This is most useful when
+   * listening for custom events.
+   * @param {string} evtType
+   * @param {!Function} handler
+   */
+  listen(evtType, handler) {
+    this.root_.addEventListener(evtType, handler);
+  }
+
+  /**
+   * Wrapper method to remove an event listener to the component's root element. This is most useful when
+   * unlistening for custom events.
+   * @param {string} evtType
+   * @param {!Function} handler
+   */
+  unlisten(evtType, handler) {
+    this.root_.removeEventListener(evtType, handler);
+  }
+
+  /**
+   * Fires a cross-browser-compatible custom event from the component root of the given type,
+   * with the given data.
+   * @param {string} evtType
+   * @param {!Object} evtData
+   * @param {boolean=} shouldBubble
+   */
+  emit(evtType, evtData, shouldBubble = false) {
+    let evt;
+    if (typeof CustomEvent === 'function') {
+      evt = new CustomEvent(evtType, {
+        detail: evtData,
+        bubbles: shouldBubble,
+      });
+    } else {
+      evt = document.createEvent('CustomEvent');
+      evt.initCustomEvent(evtType, shouldBubble, false, evtData);
+    }
+
+    this.root_.dispatchEvent(evt);
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = MDCComponent;
+
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export SelectionControlState */
+/**
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @typedef {!{
+ *   checked: boolean,
+ *   indeterminate: boolean,
+ *   disabled: boolean,
+ *   value: ?string
+ * }}
+ */
+let SelectionControlState;
+
+
+/***/ }),
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18171,7 +18171,7 @@ var _isArray = __webpack_require__(11);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
-var _isObject = __webpack_require__(20);
+var _isObject = __webpack_require__(21);
 
 var _isObject2 = _interopRequireDefault(_isObject);
 
@@ -18473,7 +18473,7 @@ module.exports = getMapData;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isArrayLike = __webpack_require__(49),
-    isObjectLike = __webpack_require__(19);
+    isObjectLike = __webpack_require__(20);
 
 /**
  * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -18617,7 +18617,7 @@ function checkDecoratorArguments(functionName, signature) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__foundation__ = __webpack_require__(207);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(36);
@@ -19399,7 +19399,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var collections = __webpack_require__(23);
+var collections = __webpack_require__(18);
 var structure = __webpack_require__(4);
 var commonreferences = __webpack_require__(6);
 var common = __webpack_require__(5);
@@ -21078,7 +21078,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var root = __webpack_require__(18);
+var root = __webpack_require__(19);
 
 /** Built-in value references. */
 var Symbol = root.Symbol;
@@ -34093,7 +34093,7 @@ module.exports = MapCache;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(24),
-    isObject = __webpack_require__(20);
+    isObject = __webpack_require__(21);
 
 /** `Object#toString` result references. */
 var asyncTag = '[object AsyncFunction]',
@@ -34391,7 +34391,7 @@ module.exports = baseFlatten;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsArguments = __webpack_require__(284),
-    isObjectLike = __webpack_require__(19);
+    isObjectLike = __webpack_require__(20);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -35233,7 +35233,9 @@ var FilterDialog_1 = __webpack_require__(345);
 var TableToolbar_1 = __webpack_require__(362);
 var Drawer_1 = __webpack_require__(363);
 var Button_1 = __webpack_require__(201);
+var structure = __webpack_require__(4);
 var data = __webpack_require__(40);
+var collections = __webpack_require__(18);
 var SdmxClient = /** @class */ (function (_super) {
     __extends(SdmxClient, _super);
     function SdmxClient(props, state) {
@@ -35241,6 +35243,8 @@ var SdmxClient = /** @class */ (function (_super) {
         _this.control = null;
         _this.drawer = null;
         _this.filter = null;
+        _this.state = _this.getInitialState();
+        _this.state = state;
         return _this;
     }
     SdmxClient.prototype.getInitialState = function () {
@@ -35252,6 +35256,7 @@ var SdmxClient = /** @class */ (function (_super) {
             structureRef: null,
             struct: null,
             all_fields: [],
+            fields: [],
             rows: [],
             columns: [],
             data: [],
@@ -35278,6 +35283,7 @@ var SdmxClient = /** @class */ (function (_super) {
         s.dataflow = df;
         s.structureRef = df.getStructure();
         s.all_fields = [];
+        s.fields = [];
         s.columns = [];
         s.rows = [];
         s.data = [];
@@ -35323,6 +35329,7 @@ var SdmxClient = /** @class */ (function (_super) {
     };
     SdmxClient.prototype.render = function (props, state) {
         var _this = this;
+        this.state = state;
         return (preact_1.h("div", { class: "orb-container orb-blue" },
             preact_1.h(Drawer_1.default.TemporaryDrawer, { ref: function (drawer) {
                     _this.drawer = drawer;
@@ -35340,12 +35347,11 @@ var SdmxClient = /** @class */ (function (_super) {
             preact_1.h(Services_1.default, { onConnect: function (q) { return _this.connect(q); } }),
             preact_1.h(Dataflows_1.default, { dfs: state.dataflows, selectDataflow: function (df) { return _this.selectDataflow(df); } }),
             preact_1.h(TableToolbar_1.default, { name: "" }),
-            preact_1.h(MainTable_1.default, { struct: state.struct, registry: state.registry, all_fields: state.all_fields, data: state.data, cols: this.state.columns, rs: this.state.rows, query: state.query, filterButton: function (e, i) { return _this.filterButton(e, i); } }),
+            preact_1.h(MainTable_1.default, { struct: state.struct, registry: state.registry, fields: state.fields, data: state.data, cols: this.state.columns, rs: this.state.rows, query: state.query, filterButton: function (e, i) { return _this.filterButton(e, i); }, dropField: function (a1, a2) { _this.dropField(a1, a2); } }),
             preact_1.h(FilterDialog_1.default, { ref: function (filter) { _this.filter = filter; }, registry: this.state.registry, struct: this.state.struct, concept: this.state.filterConcept, itemScheme: this.state.filterItemScheme, query: this.state.query })));
     };
     SdmxClient.prototype.filterButton = function (e, id) {
         e.preventDefault();
-        console.log("id=" + id);
         var filterConcept = this.state.registry.findConcept(this.state.struct.findComponentString(id).getConceptIdentity());
         if (this.state.struct.findComponentString(id).getLocalRepresentation() == null)
             return;
@@ -35359,6 +35365,79 @@ var SdmxClient = /** @class */ (function (_super) {
         this.setState({ filterItemScheme: filterCodelist, filterConcept: filterConcept });
         this.filter.show();
         return false;
+    };
+    SdmxClient.prototype.dropField = function (bin, field) {
+        var rows = this.state.rows;
+        var columns = this.state.columns;
+        var fields = this.state.fields;
+        var binArray = [];
+        var binIndex = 0;
+        var binNumber = -1;
+        var dropped = bin.substring(bin.indexOf("_") + 1, bin.length);
+        var axe = bin.substring(0, bin.indexOf("_"));
+        if (axe == 'rows') {
+            binNumber = 0;
+            binArray = rows;
+        }
+        else if (axe == 'columns') {
+            binNumber = 1;
+            binArray = columns;
+        }
+        else if (axe == 'fields') {
+            binNumber = 2;
+            binArray = fields;
+        }
+        collections.arrays.forEach(this.state.rows, function (item) {
+            if (field == item) {
+                collections.arrays.remove(rows, item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)) {
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        collections.arrays.forEach(this.state.columns, function (item) {
+            if (field == item) {
+                collections.arrays.remove(columns, item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)) {
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        collections.arrays.forEach(this.state.fields, function (item) {
+            if (field == item) {
+                collections.arrays.remove(fields, item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)) {
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        var newArray = [];
+        collections.arrays.forEach(binArray, function (item) {
+            if (structure.NameableType.toIDString(item) == dropped) {
+                newArray.push(field);
+            }
+            newArray.push(item);
+        });
+        if ("end" == dropped) {
+            newArray.push(field);
+        }
+        switch (binNumber) {
+            case 0:
+                {
+                    this.setState({ rows: newArray, columns: columns, fields: fields });
+                }
+                break;
+            case 1:
+                {
+                    this.setState({ rows: rows, columns: newArray, fields: fields });
+                }
+                break;
+            case 2:
+                {
+                    this.setState({ rows: rows, columns: columns, fields: newArray });
+                }
+                break;
+        }
     };
     return SdmxClient;
 }(preact_1.Component));
@@ -36166,7 +36245,7 @@ class MDCSelect extends __WEBPACK_IMPORTED_MODULE_0__material_base__["a" /* MDCC
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__foundation__ = __webpack_require__(211);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(37);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__foundation__["a"]; });
@@ -37619,7 +37698,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var collections = __webpack_require__(23);
+var collections = __webpack_require__(18);
 var registry = __webpack_require__(7);
 var structure = __webpack_require__(4);
 var message = __webpack_require__(173);
@@ -42123,14 +42202,14 @@ var MainTable = /** @class */ (function (_super) {
     }
     MainTable.prototype.isDropped = function (boxName) {
     };
-    MainTable.prototype.getFields = function (fields, props) {
+    MainTable.prototype.getFields = function (fields, props, rcf) {
         var fields_buttons = [];
         var filterButton = this.props.filterButton;
         _.forEach(fields, function (item) {
-            fields_buttons.push(preact_1.h(ColumnDropTarget_1.default, { accepts: ItemTypes_1.default.Dimension }));
-            fields_buttons.push(preact_1.h(Column_1.default, { item: item, filterButton: props.filterButton, name: structure.NameableType.toIDString(item) }));
+            fields_buttons.push(preact_1.h(ColumnDropTarget_1.default, { accepts: ItemTypes_1.default.Dimension, name: rcf + '_' + structure.NameableType.toIDString(item), onDrop: function (a1, a2) { props.dropField(a1, a2); } }));
+            fields_buttons.push(preact_1.h(Column_1.default, { item: item, filterButton: props.filterButton, name: structure.NameableType.toIDString(item), dropField: function () { } }));
         });
-        fields_buttons.push(preact_1.h(ColumnDropTarget_1.default, { accepts: ItemTypes_1.default.Dimension }));
+        fields_buttons.push(preact_1.h(ColumnDropTarget_1.default, { accepts: ItemTypes_1.default.Dimension, name: rcf + "_end", onDrop: function (a1, a2) { props.dropField(a1, a2); } }));
         return fields_buttons;
     };
     MainTable.prototype.getColumnHeaders = function (props, state) {
@@ -42172,10 +42251,10 @@ var MainTable = /** @class */ (function (_super) {
     MainTable.prototype.render = function (props, state) {
         var registry = props.registry;
         var struct = props.struct;
-        var fields_buttons = this.getFields(props.all_fields, props);
-        var data_buttons = this.getFields(props.data, props);
-        var columns = this.getFields(props.cols, props);
-        var rows = this.getFields(props.rs, props);
+        var fields_buttons = this.getFields(props.fields, props, 'fields');
+        var data_buttons = this.getFields(props.data, props, 'data');
+        var columns = this.getFields(props.cols, props, 'columns');
+        var rows = this.getFields(props.rs, props, 'rows');
         var html = preact_1.h("table", { id: "tbl-1", class: "orb" },
             preact_1.h("tbody", null,
                 preact_1.h("tr", null,
@@ -42221,8 +42300,6 @@ var MainTable = /** @class */ (function (_super) {
         return html;
     };
     MainTable.prototype.handleDrop = function (index, item) {
-        var name = item.name;
-        this.setState({});
     };
     MainTable = __decorate([
         preact_dnd_1.DragDropContext(react_dnd_html5_backend_1.default)
@@ -60284,7 +60361,7 @@ module.exports = hashClear;
 
 var isFunction = __webpack_require__(182),
     isMasked = __webpack_require__(247),
-    isObject = __webpack_require__(20),
+    isObject = __webpack_require__(21),
     toSource = __webpack_require__(249);
 
 /**
@@ -60361,7 +60438,7 @@ module.exports = isMasked;
 /* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var root = __webpack_require__(18);
+var root = __webpack_require__(19);
 
 /** Used to detect overreaching core-js shims. */
 var coreJsData = root['__core-js_shared__'];
@@ -60719,7 +60796,7 @@ module.exports = listCacheSet;
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(27),
-    root = __webpack_require__(18);
+    root = __webpack_require__(19);
 
 /* Built-in method references that are verified to be native. */
 var Map = getNative(root, 'Map');
@@ -61351,7 +61428,7 @@ module.exports = isFlattenable;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(24),
-    isObjectLike = __webpack_require__(19);
+    isObjectLike = __webpack_require__(20);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]';
@@ -61400,7 +61477,7 @@ module.exports = createSet;
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(27),
-    root = __webpack_require__(18);
+    root = __webpack_require__(19);
 
 /* Built-in method references that are verified to be native. */
 var Set = getNative(root, 'Set');
@@ -64703,7 +64780,7 @@ module.exports = createAssigner;
 var eq = __webpack_require__(29),
     isArrayLike = __webpack_require__(49),
     isIndex = __webpack_require__(199),
-    isObject = __webpack_require__(20);
+    isObject = __webpack_require__(21);
 
 /**
  * Checks if the given arguments are from an iteratee call.
@@ -64855,7 +64932,7 @@ module.exports = baseTimes;
 /* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {var root = __webpack_require__(18),
+/* WEBPACK VAR INJECTION */(function(module) {var root = __webpack_require__(19),
     stubFalse = __webpack_require__(327);
 
 /** Detect free variable `exports`. */
@@ -64959,7 +65036,7 @@ module.exports = isTypedArray;
 
 var baseGetTag = __webpack_require__(24),
     isLength = __webpack_require__(186),
-    isObjectLike = __webpack_require__(19);
+    isObjectLike = __webpack_require__(20);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]',
@@ -65052,7 +65129,7 @@ module.exports = nodeUtil;
 /* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(20),
+var isObject = __webpack_require__(21),
     isPrototype = __webpack_require__(332),
     nativeKeysIn = __webpack_require__(333);
 
@@ -65804,22 +65881,14 @@ var style = {
 var boxSource = {
     beginDrag: function (props) {
         return {
-            name: props.name,
+            item: props.item,
         };
     },
     endDrag: function (props, monitor) {
         var item = monitor.getItem();
         var dropResult = monitor.getDropResult();
         if (dropResult) {
-            var alertMessage = '';
-            if (dropResult.allowedDropEffect === 'any' || dropResult.allowedDropEffect === dropResult.dropEffect) {
-                alertMessage = "You " + (dropResult.dropEffect === 'copy' ? 'copied' : 'moved') + " " + item.name + " into " + dropResult.name + "!";
-            }
-            else {
-                alertMessage = "You cannot " + dropResult.dropEffect + " an item into the " + dropResult.name;
-            }
-            window.alert(// eslint-disable-line no-alert
-            alertMessage);
+            props.dropField(item.item, props.name);
         }
     },
 };
@@ -65894,10 +65963,11 @@ var style = {
     fontSize: '1rem',
     lineHeight: 'normal',
     float: 'left',
+    name: "drop"
 };
 var dustbinTarget = {
     drop: function (props, monitor) {
-        props.onDrop(monitor.getItem());
+        props.onDrop(props.name, monitor.getItem().item);
     },
 };
 var ColumnDropTarget = /** @class */ (function (_super) {
@@ -65915,7 +65985,7 @@ var ColumnDropTarget = /** @class */ (function (_super) {
         else if (canDrop) {
             backgroundColor = 'darkkhaki';
         }
-        return connectDropTarget(preact_1.h("div", { class: "drp-indic", style: style }));
+        return connectDropTarget(preact_1.h("div", { class: "drp-indic", style: { style: style } }));
     };
     ColumnDropTarget = __decorate([
         preact_dnd_1.DropTarget(function (props) { return props.accepts; }, dustbinTarget, function (connect, monitor) { return ({
@@ -65954,7 +66024,7 @@ __webpack_require__(359);
 __webpack_require__(360);
 __webpack_require__(361);
 var structure = __webpack_require__(4);
-var collections = __webpack_require__(23);
+var collections = __webpack_require__(18);
 var MyDialog = /** @class */ (function (_super) {
     __extends(MyDialog, _super);
     function MyDialog(props, state) {
@@ -66970,8 +67040,8 @@ class Checkbox extends __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__["a" /* d
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_animation__ = __webpack_require__(355);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_component__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_base_selection_control__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_component__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_base_selection_control__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__foundation__ = __webpack_require__(356);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__material_ripple__ = __webpack_require__(35);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__material_ripple_util__ = __webpack_require__(36);
@@ -67285,7 +67355,7 @@ function getCorrectPropertyName(windowObj, eventType) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_foundation__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_selection_control__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_selection_control__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__adapter__ = __webpack_require__(357);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(358);
 /**
@@ -67583,7 +67653,7 @@ function validDescriptor(inputPropDesc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_selection_control__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_selection_control__ = __webpack_require__(23);
 /**
  * Copyright 2016 Google Inc. All Rights Reserved.
  *

@@ -12,11 +12,12 @@ const style = {
     fontSize: '1rem',
     lineHeight: 'normal',
     float: 'left',
+    name:"drop"
 };
 
 const dustbinTarget = {
     drop(props, monitor) {
-        props.onDrop(monitor.getItem());
+        props.onDrop(props.name,monitor.getItem().item);
     },
 };
 
@@ -27,6 +28,7 @@ export interface ColumnDropTargetProps {
     accepts: Array<string>,
     lastDroppedItem: object,
     onDrop: Function,
+    name:string
 }
 @DropTarget(props => props.accepts, dustbinTarget, (connect, monitor) => ({
     connectDropTarget: connect.dropTarget(),
@@ -46,7 +48,7 @@ export default class ColumnDropTarget extends Component<any, any> {
         }
 
         return connectDropTarget(
-              <div class="drp-indic" style={style}></div>
+              <div class="drp-indic" style={{style}}></div>
         );
     }
 }

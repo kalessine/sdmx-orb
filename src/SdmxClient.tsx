@@ -12,6 +12,8 @@ import * as commonreferences from './sdmx/commonreferences';
 import * as structure from './sdmx/structure';
 import * as data from './sdmx/data';
 import * as _ from 'lodash';
+import * as collections from 'typescript-collections';
+    
 export interface SdmxClientProps {
 
 }
@@ -23,6 +25,7 @@ export interface SdmxClientState {
     structureRef: commonreferences.Reference,
     struct: structure.DataStructure,
     all_fields: Array<structure.ConceptType>,
+    fields: Array<structure.ConceptType>,
     rows: Array<structure.ConceptType>,
     columns: Array<structure.ConceptType>,
     data: Array<structure.ConceptType>,
@@ -38,8 +41,10 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
     private control = null;
     private drawer: any = null;
     private filter: any = null;
+    public state: SdmxClientState = this.getInitialState();
     constructor(props: SdmxClientProps, state: SdmxClientState) {
         super(props, state);
+        this.state=state;
     }
     getInitialState(): SdmxClientState {
         var o: SdmxClientState = {
@@ -50,6 +55,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             structureRef: null,
             struct: null,
             all_fields: [],
+            fields: [],
             rows: [],
             columns: [],
             data: [],
@@ -76,6 +82,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
         s.dataflow = df;
         s.structureRef = df.getStructure();
         s.all_fields = [];
+        s.fields = [];
         s.columns = [];
         s.rows = [];
         s.data = [];
@@ -118,6 +125,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
         this.setState({struct: struct, all_fields: all_fields, rows: rows, columns: columns, data: data_fields, registry: reg, query: q});
     }
     render(props: SdmxClientProps, state: SdmxClientState) {
+        this.state=state;
         return (<div class="orb-container orb-blue">
             <Drawer.TemporaryDrawer
                 ref={drawer => {
@@ -149,13 +157,12 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             <Services onConnect={(q: interfaces.Queryable) => this.connect(q)} />
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
             <TableToolbar name="" />
-            <MainTable struct={state.struct} registry={state.registry} all_fields={state.all_fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} />
+            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} dropField={(a1,a2)=>{this.dropField(a1,a2);}} />
             <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query}/>
         </div>);
     }
     filterButton(e, id) {
         e.preventDefault();
-        console.log("id="+id);
         var filterConcept = this.state.registry.findConcept(this.state.struct.findComponentString(id).getConceptIdentity());
         if (this.state.struct.findComponentString(id).getLocalRepresentation()==null)return;
         if (this.state.struct.findComponentString(id).getLocalRepresentation().getEnumeration()==null)return;
@@ -167,5 +174,71 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
         this.setState({filterItemScheme:filterCodelist, filterConcept:filterConcept});
         this.filter.show();
         return false;
+    }
+    dropField(bin:string,field: structure.ConceptType) {
+        var rows = this.state.rows;
+        var columns = this.state.columns;
+        var fields = this.state.fields;
+        var binArray: Array<structure.ConceptType> = [];
+        var binIndex = 0;
+        var binNumber = -1;
+        var dropped = bin.substring(bin.indexOf("_")+1, bin.length);
+        var axe = bin.substring(0, bin.indexOf("_"));
+        if( axe == 'rows' ) {
+            binNumber = 0;
+            binArray = rows;
+        }else if(axe == 'columns'){
+            binNumber=1;
+            binArray = columns;
+        }else if( axe == 'fields' ) {
+            binNumber=2;
+            binArray = fields;
+        }
+        collections.arrays.forEach(this.state.rows,function(item){
+            if (field==item){
+                collections.arrays.remove(rows,item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)){
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        collections.arrays.forEach(this.state.columns,function(item){
+            if (field==item){
+                collections.arrays.remove(columns,item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)){
+                
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        collections.arrays.forEach(this.state.fields,function(item){
+            if (field==item){
+                collections.arrays.remove(fields,item);
+            }
+            if (dropped == structure.NameableType.toIDString(item)){
+                binIndex = binArray.indexOf(item);
+            }
+        }.bind(this));
+        var newArray:Array<structure.ConceptType> = [];
+        collections.arrays.forEach(binArray, function (item: structure.ConceptType){
+            if (structure.NameableType.toIDString(item)==dropped) {
+                newArray.push(field);
+            }
+            newArray.push(item);
+        });
+        if("end"==dropped) {
+            newArray.push(field);
+        }
+        switch(binNumber) {
+            case 0:{
+                this.setState({rows:newArray,columns:columns,fields:fields});
+            }break;
+            case 1:{
+                this.setState({rows:rows,columns:newArray,fields:fields});
+            }break;
+            case 2:{
+                this.setState({rows:rows,columns:columns,fields:newArray});
+            }break;
+        }
     }
 }

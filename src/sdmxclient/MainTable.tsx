@@ -10,14 +10,15 @@ import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 import Column from './Column';
 import ColumnDropTarget from './ColumnDropTarget';
 export interface MainTableProps {
-    all_fields: Array<structure.ConceptType>,
+    fields: Array<structure.ConceptType>,
     data: Array<structure.ConceptType>,
     cols: Array<structure.ConceptType>,
     rs: Array<structure.ConceptType>,
     registry: interfaces.LocalRegistry,
     struct: structure.DataStructure,
     query: data.Query,
-    filterButton: Function
+    filterButton: Function,
+    dropField:Function
 }
 export interface MainTableState {
 }
@@ -34,14 +35,14 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
     isDropped(boxName) {
         
     }
-    getFields(fields: Array<structure.ConceptType>, props: MainTableProps) {
+    getFields(fields: Array<structure.ConceptType>, props: MainTableProps,rcf:string) {
         var fields_buttons:Array<any> = [];
         var filterButton = this.props.filterButton;
         _.forEach(fields, function (item:structure.ConceptType) {
-            fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} ></ColumnDropTarget>);
-            fields_buttons.push(<Column item={item} filterButton={props.filterButton} name={structure.NameableType.toIDString(item)}></Column>);
+            fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} name={rcf + '_' + structure.NameableType.toIDString(item)} onDrop={(a1:structure.ConceptType,a2:string)=>{props.dropField(a1,a2);}}></ColumnDropTarget>);
+            fields_buttons.push(<Column item={item} filterButton={props.filterButton} name={structure.NameableType.toIDString(item)} dropField={()=>{}}></Column>);
         });
-        fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} ></ColumnDropTarget>);
+        fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} name={rcf+"_end"} onDrop={(a1:structure.ConceptType,a2:string)=>{props.dropField(a1,a2);}}></ColumnDropTarget>);
         return fields_buttons;
     }
     getColumnHeaders(props: MainTableProps, state: MainTableState) {
@@ -60,10 +61,10 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
     render(props: MainTableProps, state: MainTableState) {
         var registry: interfaces.LocalRegistry = props.registry;
         var struct: structure.DataStructure = props.struct;
-        var fields_buttons = this.getFields(props.all_fields,props);
-        var data_buttons = this.getFields(props.data,props);
-        var columns = this.getFields(props.cols,props);
-        var rows = this.getFields(props.rs,props);
+        var fields_buttons = this.getFields(props.fields,props,'fields');
+        var data_buttons = this.getFields(props.data,props,'data');
+        var columns = this.getFields(props.cols,props,'columns');
+        var rows = this.getFields(props.rs,props,'rows');
         var html = <table id="tbl-1" class="orb">
             <tbody>
                 <tr>
@@ -121,7 +122,5 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
         return html;
     }
     handleDrop(index, item) {
-        const {name} = item;
-        this.setState({});
     }
 }

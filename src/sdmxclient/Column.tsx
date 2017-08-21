@@ -7,7 +7,8 @@ export interface ColumnProps {
     filterButton: Function,
     connectDragSource?: Function,
     isDragging?: boolean,
-    name: string
+    name: string,
+    dropField:Function
 }
 
 export interface ColumnState {
@@ -26,7 +27,7 @@ const style = {
 const boxSource = {
     beginDrag(props) {
         return {
-            name: props.name,
+            item: props.item,
         };
     },
 
@@ -35,15 +36,7 @@ const boxSource = {
         const dropResult = monitor.getDropResult();
 
         if (dropResult) {
-            let alertMessage = '';
-            if (dropResult.allowedDropEffect === 'any' || dropResult.allowedDropEffect === dropResult.dropEffect) {
-                alertMessage = `You ${dropResult.dropEffect === 'copy' ? 'copied' : 'moved'} ${item.name} into ${dropResult.name}!`;
-            } else {
-                alertMessage = `You cannot ${dropResult.dropEffect} an item into the ${dropResult.name}`;
-            }
-            window.alert( // eslint-disable-line no-alert
-                alertMessage,
-            );
+            props.dropField(item.item,props.name);
         }
     },
 };
