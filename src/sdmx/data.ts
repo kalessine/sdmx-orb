@@ -33,7 +33,7 @@ export class Query {
     private query: Array<QueryKey> = [];
     private startDate: Date = new Date();
     private endDate: Date = new Date();
-    private timeQueryKey:QueryKey = null;
+    private timeQueryKey: QueryKey = null;
     private updatedAfter: Date = null;
     private firstNObservations: number = null;
     private lastNObservations: number = null;
@@ -58,7 +58,7 @@ export class Query {
         for (var i: number = 0; i < this.query.length; i++) {
             if (this.query[i].getName() == id) return this.query[i];
         }
-        if (this.timeQueryKey.getName()==id){
+        if (this.timeQueryKey.getName() == id) {
             return this.timeQueryKey;
         }
         return null;
@@ -76,12 +76,12 @@ export class Query {
         }
         return keynames;
     }
-    
-    public getTimeKeyName():string{
+
+    public getTimeKeyName(): string {
         var struct: structure.DataStructure = this.registry.findDataStructure(this.structRef);
         return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
     }
-    public getTimeQueryKey():QueryKey{
+    public getTimeQueryKey(): QueryKey {
         return this.timeQueryKey;
     }
     getDataflow(): structure.Dataflow {
@@ -300,8 +300,19 @@ export class AttachmentLevel {
 
 }
 export class AbstractKey {
+    private dict = new collections.Dictionary<string, string>();
+    constructor() {
+
+    }
+
     getComponent(s: string): string {
-        return "";
+        return this.dict.getValue(s);
+    }
+    setComponent(s: string, v: string) {
+        this.dict.setValue(s, v);
+    }
+    toString() {
+        return this.dict.values().join(":");
     }
 }
 export class PartialKey extends AbstractKey {
@@ -1689,7 +1700,7 @@ export class CubeObservation {
             var ca: CubeAttribute = this.getAttribute(at);
             // Attributes
             f.setValue(mapper.getColumnIndex(ca.getConcept()), ca.getValue());
-        });
+        }.bind(this));
         return f;
     }
 }

@@ -57,7 +57,7 @@
 .orb div.hdr-val{float:left}
 .orb .drp-trgt{float:left;width:100%;margin-right:17px;padding:1px 0;min-height:24px}
 .orb .drp-trgt-empty{width:51px}
-.orb .drp-indic{float:left;width:2px;margin-top:0;margin-left:3px;margin-right:3px}
+.orb .drp-indic{float:left;width:2px;margin-top:0;margin-left:3px;margin-right:3px; background-color: '#red';}
 .orb .drp-indic-first{margin-left:0}
 .orb .drp-indic-last{margin-right:0}
 .orb-btn{font-weight:400;text-align:center;margin-right:3px;cursor:pointer}

@@ -24,6 +24,7 @@ import * as common from '../sdmx/common';
 import * as data from '../sdmx/data';
 import * as sdmx from '../sdmx';
 import * as xml from '../sdmx/xml';
+import * as collections from 'typescript-collections';
 export class DataMessage {
     private header: Header = null;
     private dataSets: Array<data.FlatDataSet> = [];

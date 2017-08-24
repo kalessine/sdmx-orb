@@ -26,12 +26,14 @@ const style = {
 
 const boxSource = {
     beginDrag(props) {
+        console.log("Begin Drag");
         return {
             item: props.item,
         };
     },
 
     endDrag(props, monitor) {
+        console.log("End Drag");
         const item = monitor.getItem();
         const dropResult = monitor.getDropResult();
 

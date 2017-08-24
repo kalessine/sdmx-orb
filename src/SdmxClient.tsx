@@ -10,10 +10,11 @@ import * as interfaces from './sdmx/interfaces';
 import * as common from './sdmx/common';
 import * as commonreferences from './sdmx/commonreferences';
 import * as structure from './sdmx/structure';
+import * as message from './sdmx/message';
 import * as data from './sdmx/data';
 import * as _ from 'lodash';
 import * as collections from 'typescript-collections';
-    
+
 export interface SdmxClientProps {
 
 }
@@ -33,8 +34,9 @@ export interface SdmxClientState {
     query: data.Query,
     showFilter: boolean,
     filterConcept: structure.ConceptType,
-    filterItemScheme: structure.ItemSchemeType
-    
+    filterItemScheme: structure.ItemSchemeType,
+    dataMessage: message.DataMessage,
+    cube: data.Cube
 }
 
 export default class SdmxClient extends Component<SdmxClientProps, SdmxClientState> {
@@ -44,7 +46,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
     public state: SdmxClientState = this.getInitialState();
     constructor(props: SdmxClientProps, state: SdmxClientState) {
         super(props, state);
-        this.state=state;
+        this.state = state;
     }
     getInitialState(): SdmxClientState {
         var o: SdmxClientState = {
@@ -64,6 +66,8 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             showFilter: false,
             filterConcept: null,
             filterItemScheme: null,
+            dataMessage: null,
+            cube: null
         };
         return o;
     }
@@ -121,124 +125,115 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             data_fields.push(c);
         }
         var q: data.Query = new data.Query(this.state.dataflow, reg);
+        for (var i: number = 0; i < q.size();i++) {
+            // Select First Value for each dimension.
+            var vals: Array<string> = q.getQueryKey(q.getKeyNames()[i]).possibleValues();
+            q.getQueryKey(q.getKeyNames()[i]).addValue(vals[0]);
+        }
         var s: SdmxClientState = this.state;
         this.setState({struct: struct, all_fields: all_fields, rows: rows, columns: columns, data: data_fields, registry: reg, query: q});
+        this.query();
     }
     render(props: SdmxClientProps, state: SdmxClientState) {
-        this.state=state;
+        this.state = state;
         return (<div class="orb-container orb-blue">
-            <Drawer.TemporaryDrawer
-                ref={drawer => {
-                    this.drawer = drawer;
-                }}
-                onOpen={() => {
-                    console.log("open");
-                }}
-                onClose={() => {
-                    console.log("Close");
-                }}
-            >
-                <Drawer.TemporaryDrawerHeader>
-                    Hello Header
-          </Drawer.TemporaryDrawerHeader>
-                <Drawer.DrawerItem>Item1</Drawer.DrawerItem>
-                <Drawer.DrawerItem selected={true}>Item2</Drawer.DrawerItem>
-            </Drawer.TemporaryDrawer>
-
-            <Button
-                raised={true}
-                accent={true}
-                ripple={true}
-                onClick={e => {
-                    this.drawer.MDComponent.open = true;
-                }}>hi</Button>
-
-
             <Services onConnect={(q: interfaces.Queryable) => this.connect(q)} />
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
-            <TableToolbar name="" />
-            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} dropField={(a1,a2)=>{this.dropField(a1,a2);}} />
-            <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query}/>
+            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube} />
+            <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} />
         </div>);
     }
     filterButton(e, id) {
         e.preventDefault();
         var filterConcept = this.state.registry.findConcept(this.state.struct.findComponentString(id).getConceptIdentity());
-        if (this.state.struct.findComponentString(id).getLocalRepresentation()==null)return;
-        if (this.state.struct.findComponentString(id).getLocalRepresentation().getEnumeration()==null)return;
+        if (this.state.struct.findComponentString(id).getLocalRepresentation() == null) return;
+        if (this.state.struct.findComponentString(id).getLocalRepresentation().getEnumeration() == null) return;
         var filterItemScheme = this.state.struct.findComponentString(id).getLocalRepresentation().getEnumeration();
         var filterCodelist = this.state.registry.findCodelist(filterItemScheme);
-        if( filterCodelist == null ) {
+        if (filterCodelist == null) {
             filterCodelist = this.state.registry.findConceptScheme(filterItemScheme);
         }
-        this.setState({filterItemScheme:filterCodelist, filterConcept:filterConcept});
+        this.setState({filterItemScheme: filterCodelist, filterConcept: filterConcept});
         this.filter.show();
         return false;
     }
-    dropField(bin:string,field: structure.ConceptType) {
+    dropField(bin: string, field: structure.ConceptType) {
         var rows = this.state.rows;
         var columns = this.state.columns;
         var fields = this.state.fields;
         var binArray: Array<structure.ConceptType> = [];
         var binIndex = 0;
         var binNumber = -1;
-        var dropped = bin.substring(bin.indexOf("_")+1, bin.length);
+        var dropped = bin.substring(bin.indexOf("_") + 1, bin.length);
+        if (dropped == field.getId().toString()){return;}
         var axe = bin.substring(0, bin.indexOf("_"));
-        if( axe == 'rows' ) {
+        if (axe == 'rows') {
             binNumber = 0;
             binArray = rows;
-        }else if(axe == 'columns'){
-            binNumber=1;
+        } else if (axe == 'columns') {
+            binNumber = 1;
             binArray = columns;
-        }else if( axe == 'fields' ) {
-            binNumber=2;
+        } else if (axe == 'fields') {
+            binNumber = 2;
             binArray = fields;
         }
-        collections.arrays.forEach(this.state.rows,function(item){
-            if (field==item){
-                collections.arrays.remove(rows,item);
+        collections.arrays.forEach(this.state.rows, function (item) {
+            if (field == item) {
+                collections.arrays.remove(rows, item);
             }
-            if (dropped == structure.NameableType.toIDString(item)){
+            if (dropped == structure.NameableType.toIDString(item)) {
                 binIndex = binArray.indexOf(item);
             }
         }.bind(this));
-        collections.arrays.forEach(this.state.columns,function(item){
-            if (field==item){
-                collections.arrays.remove(columns,item);
+        collections.arrays.forEach(this.state.columns, function (item) {
+            if (field == item) {
+                collections.arrays.remove(columns, item);
             }
-            if (dropped == structure.NameableType.toIDString(item)){
-                
+            if (dropped == structure.NameableType.toIDString(item)) {
+
                 binIndex = binArray.indexOf(item);
             }
         }.bind(this));
-        collections.arrays.forEach(this.state.fields,function(item){
-            if (field==item){
-                collections.arrays.remove(fields,item);
+        collections.arrays.forEach(this.state.fields, function (item) {
+            if (field == item) {
+                collections.arrays.remove(fields, item);
             }
-            if (dropped == structure.NameableType.toIDString(item)){
+            if (dropped == structure.NameableType.toIDString(item)) {
                 binIndex = binArray.indexOf(item);
             }
         }.bind(this));
-        var newArray:Array<structure.ConceptType> = [];
-        collections.arrays.forEach(binArray, function (item: structure.ConceptType){
-            if (structure.NameableType.toIDString(item)==dropped) {
+        var newArray: Array<structure.ConceptType> = [];
+        collections.arrays.forEach(binArray, function (item: structure.ConceptType) {
+            if (structure.NameableType.toIDString(item) == dropped) {
                 newArray.push(field);
             }
             newArray.push(item);
         });
-        if("end"==dropped) {
+        if ("end" == dropped) {
             newArray.push(field);
         }
-        switch(binNumber) {
-            case 0:{
-                this.setState({rows:newArray,columns:columns,fields:fields});
-            }break;
-            case 1:{
-                this.setState({rows:rows,columns:newArray,fields:fields});
-            }break;
-            case 2:{
-                this.setState({rows:rows,columns:columns,fields:newArray});
-            }break;
+        switch (binNumber) {
+            case 0: {
+                this.setState({rows: newArray, columns: columns, fields: fields});
+            } break;
+            case 1: {
+                this.setState({rows: rows, columns: newArray, fields: fields});
+            } break;
+            case 2: {
+                this.setState({rows: rows, columns: columns, fields: newArray});
+            } break;
         }
+    }
+    public query() {
+        this.state.queryable.getRepository().query(this.state.query).then(function (dataMessage: message.DataMessage) {
+            if (dataMessage) {
+                var cube: data.Cube = new data.Cube(this.state.struct, this.state.registry);
+                for (var i: number = 0; i < dataMessage.getDataSet(0).size(); i++) {
+                    cube.putObservation(null, dataMessage.getDataSet(0).getColumnMapper(), dataMessage.getDataSet(0).getFlatObs(i));
+                }
+                this.setState({dataMessage: dataMessage, cube: cube});
+            } else {
+            }
+        }.bind(this));
     }
 }

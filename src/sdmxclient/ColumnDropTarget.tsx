@@ -2,17 +2,18 @@ import {h, Component} from 'preact';
 import {DropTarget} from 'preact-dnd';
 
 const style = {
-    height: '1rem',
-    width: '0.11rem',
+    height: '1.0rem',
+    width: '1.0rem',
     marginRight: '.0rem',
     marginBottom: '.0rem',
-    color: 'white',
-    padding: '1rem',
+    color: '0',
+    padding: '0rem',
     textAlign: 'center',
     fontSize: '1rem',
     lineHeight: 'normal',
     float: 'left',
-    name:"drop"
+    name:"drop",
+    "bg-color":'#0'
 };
 
 const dustbinTarget = {
@@ -46,9 +47,11 @@ export default class ColumnDropTarget extends Component<any, any> {
         } else if (canDrop) {
             backgroundColor = 'darkkhaki';
         }
+        //style.backgroundColor=backgroundColor;
+        var sc:string = "";
 
         return connectDropTarget(
-              <div class="drp-indic" style={{style}}></div>
+              <div style={style}>&#1421;</div>
         );
     }
 }

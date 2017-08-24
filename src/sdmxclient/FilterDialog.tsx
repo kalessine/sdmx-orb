@@ -16,7 +16,8 @@ export interface FilterDialogProps {
     struct: structure.DataStructure,
     concept: structure.ConceptType,
     itemScheme: structure.ItemSchemeType,
-    query: data.Query
+    query: data.Query,
+    queryFunc: Function
 }
 export interface FilterDialogState {
     open?: boolean
@@ -108,7 +109,7 @@ export default class MyDialog extends Component<FilterDialogProps, FilterDialogS
                     <Dialog.Footer>
                         <Dialog.FooterButton onClick={() => {this.selectAll();}}>Select All</Dialog.FooterButton>
                         <Dialog.FooterButton onClick={() => {this.clear();}}>Clear</Dialog.FooterButton>
-                        <Dialog.FooterButton accept={true}>Accept</Dialog.FooterButton>
+                        <Dialog.FooterButton accept={true} onClick={() => props.queryFunc()}>Accept</Dialog.FooterButton>
                     </Dialog.Footer>
                 </Dialog>
             </div>
