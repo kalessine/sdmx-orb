@@ -1,4 +1,5 @@
-import {h, Component} from 'preact';
+import React,{Component} from 'preact-compat';
+import {h} from 'preact';
 
 export interface TableToolbarProps {
     name: string

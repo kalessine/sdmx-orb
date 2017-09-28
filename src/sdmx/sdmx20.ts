@@ -32,6 +32,11 @@ export function parseXml(s: string): any {
     var parseXml: DOMParser;
     parseXml = new DOMParser();
     var xmlDoc = parseXml.parseFromString(s, "text/xml");
+    
+    
+    
+    
+    
     return xmlDoc;
 }
 
@@ -514,7 +519,22 @@ export class Sdmx20StructureReaderTools {
     constructor(s: string, reg: interfaces.LocalRegistry) {
         this.registry = reg;
         var dom: any = parseXml(s);
-        this.struct = this.toStructureType(dom.documentElement);
+        var node = dom;
+
+        var structNode = this.findStructureNode(dom.documentElement);
+        console.log(structNode);
+        this.struct = this.toStructureType(structNode);
+    }
+    findStructureNode(node){
+        if( node.nodeName.indexOf("Structure")!=-1&&node.nodeName!="GetDataStructureDefinitionResult"&&node.nodeName!="GetDataStructureDefinitionResponse"){
+            return node;
+        }
+        var st = null;
+        for(var i:number=0;i<node.childNodes.length&&st==null;i++) {
+            st = this.findStructureNode(node.childNodes[i]);
+            if( st !=null ) {return st;}
+        }
+        return null;
     }
     toStructureType(structureNode: any): message.StructureType {
         this.struct = new message.StructureType();
@@ -534,6 +554,7 @@ export class Sdmx20StructureReaderTools {
         return this.struct;
     }
     toHeader(headerNode: any) {
+        if( headerNode == null ) return null;
         var header: message.Header = new message.Header();
         header.setId(this.findNodeName("ID", headerNode.childNodes).childNodes[0].nodeValue);
         var test: string = this.findNodeName("Test", headerNode.childNodes).childNodes[0].nodeValue;
@@ -802,6 +823,7 @@ export class Sdmx20StructureReaderTools {
         return components;
     }
     toDimensionList(dims: Array<any>): structure.DimensionList {
+        if( dims == null ) {return null;}
         var dimList: structure.DimensionList = new structure.DimensionList();
         var dimArray: Array<structure.Dimension> = [];
         for (var i: number = 0; i < dims.length; i++) {

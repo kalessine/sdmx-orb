@@ -1,4 +1,5 @@
-import {h, Component} from 'preact';
+import React,{Component} from 'preact-compat';
+import {h} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
 import * as structure from '../sdmx/structure';

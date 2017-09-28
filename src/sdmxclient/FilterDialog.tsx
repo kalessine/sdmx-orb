@@ -1,11 +1,9 @@
-import {h, Component} from 'preact';
+import React,{Component} from 'preact-compat';
+import {h} from 'preact';
 import Dialog from 'preact-material-components/Dialog';
 import Button from 'preact-material-components/Button';
 import List from 'preact-material-components/List';
 import Checkbox from 'preact-material-components/Checkbox';
-import 'preact-material-components/List/style.css';
-import 'preact-material-components/Button/style.css';
-import 'preact-material-components/Dialog/style.css';
 import * as interfaces from '../sdmx/interfaces';
 import * as structure from '../sdmx/structure';
 import * as data from '../sdmx/data';

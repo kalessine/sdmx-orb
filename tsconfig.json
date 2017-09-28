@@ -2,14 +2,23 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "sourceMap": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es6",
+      "scripthost",
+      "es2015.iterable"
+    ],
     "module": "commonjs",
     "jsx": "react",
     "jsxFactory": "h",
     "target": "es5",
-    "experimentalDecorators":true
+    "experimentalDecorators":true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/*.ts",
     "src/*.tsx"
   ]
+  
 }

@@ -1,4 +1,5 @@
-import {h, Component} from 'preact';
+import React,{Component} from 'preact-compat';
+import {h} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
 import * as structure from '../sdmx/structure';
@@ -40,7 +41,7 @@ export default class Dataflows extends Component<DataflowsProps, any> {
         });
         return options;
     }
-    render(props: DataflowsProps,state) {
+    render(props: DataflowsProps,state) :Element{
         return (<div><Select hintText="Select a Dataflow"
             ref={presel => {this.presel = presel;}}
             selectedIndex={this.state.chosenIndex}

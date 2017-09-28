@@ -1,12 +1,13 @@
-import {h, Component} from 'preact';
+import React, {Component} from 'preact-compat';
+import {h} from 'preact';
 import * as _ from 'lodash';
 import * as structure from '../sdmx/structure';
 import * as interfaces from '../sdmx/interfaces';
 import * as data from '../sdmx/data';
 import {DragSource} from 'preact-dnd';
 import ItemTypes from './ItemTypes';
-import {DragDropContext} from 'preact-dnd';
-import HTML5Backend, {NativeTypes} from 'react-dnd-html5-backend';
+import {DragDropContext} from 'react-dnd';
+import * as HTML5Backend from 'react-dnd-html5-backend';
 import Column from './Column';
 import ColumnDropTarget from './ColumnDropTarget';
 import {IntCartesianProduct} from './IntCartesianProduct';
@@ -21,12 +22,15 @@ export interface MainTableProps {
     struct: structure.DataStructure,
     query: data.Query,
     filterButton: Function,
+    filterTimeButton: Function,
     dropField: Function,
-    cube: data.Cube
+    cube: data.Cube,
+    time_fields: Array<string>
 }
 export interface MainTableState {
 }
 
+console.log(HTML5Backend);
 
 @DragDropContext(HTML5Backend)
 export default class MainTable extends Component<MainTableProps, MainTableState> {
@@ -44,7 +48,7 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
         var filterButton = this.props.filterButton;
         _.forEach(fields, function (item: structure.ConceptType) {
             fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} name={rcf + '_' + structure.NameableType.toIDString(item)} onDrop={(a1: structure.ConceptType, a2: string) => {props.dropField(a1, a2);}}></ColumnDropTarget>);
-            fields_buttons.push(<Column item={item} filterButton={props.filterButton} name={structure.NameableType.toIDString(item)} dropField={() => {}}></Column>);
+            fields_buttons.push(<Column item={item} filterButton={props.filterButton} name={structure.NameableType.toIDString(item)} filterTimeButton={props.filterTimeButton} dropField={() => {}}></Column>);
         });
         fields_buttons.push(<ColumnDropTarget accepts={ItemTypes.Dimension} name={rcf + "_end"} onDrop={(a1: structure.ConceptType, a2: string) => {props.dropField(a1, a2);}}></ColumnDropTarget>);
         return fields_buttons;
@@ -53,8 +57,16 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
         var fields_buttons = this.getFields(props.fields, props, 'fields');
         var data_buttons = this.getFields(props.data, props, 'data');
         var columns = this.getFields(props.cols, props, 'columns');
-        //if (this.props.cube == null) return [];
         if (props.rs == null) return [];
+        if (props.query != null) {
+            _.forEach(props.query.getTimeQueryKey().getValues(), function (e) {
+                props.query.getTimeQueryKey().removeValue(e);
+            });
+            _.forEach(props.time_fields, function (e) {
+                props.query.getTimeQueryKey().addValue(e);
+            });
+        }
+
         var cols: number = 0;
         for (var i: number = 0; i < props.cols.length; i++) {
             if (cols == 0) {cols = props.query.getQueryKey(props.cols[i].getId().toString()).getValues().length;}
@@ -132,13 +144,23 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
                     key.setComponent(this.props.rs[k].getId().toString(), this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowValues[k]]);
                     // console.log(this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowValues[k]]);
                 }
+                var measure = "OBS_VALUE";
+                if( props.struct==null ) return htmlrow;
+                if (props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+                    measure = props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString();
+                }
                 if (this.props.cube != null) {
+
                     var flatObs = this.props.cube.findLatestFlatObs(key, false);
                     var dat = "";
                     if (flatObs != null) {
-                        dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
+                        for (var l: number = 0; l < this.props.data.length; l++) {
+                            //key.setComponent(measure, this.props.data[l].getId().toString());
+                            dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.data[l].getId().toString()));
+                            htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
+                        }
                     }
-                    htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
+                    
                 }
             }
             html.push(<tr>{htmlrow}</tr>);

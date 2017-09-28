@@ -12,7 +12,8 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
         alias: {"react": "preact-compat",
-            "react-dom": "preact-compat"}
+            "react-dom": "preact-compat",
+        "react-dnd": "preact-dnd"}
 
     },
     // Source maps support ('inline-source-map' also works)
@@ -21,13 +22,26 @@ module.exports = {
     // Add the loader for .ts files.
     module: {
         loaders: [
+{
+        test: /\.css$/,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              modules: true, // default is false
+              sourceMap: true,
+              importLoaders: 1,
+              localIdentName: "[name]--[local]--[hash:base64:8]"
+            }
+          },
+          "postcss-loader"
+        ]
+      },
             {
                 test: /\.tsx?$/,
-                loader: 'awesome-typescript-loader'
-            },
-            {
-                test: /\.css$/,
-                use: ['css-loader']
+                loader: 'ts-loader',
+                exclude: "c:\\Users\\James\\Dropbox\\sdmx-orb\\node_modules"
             }
         ]
     }

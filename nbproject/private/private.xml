@@ -3,7 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmxclient/MainTable.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/abs2.ts</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/SdmxClient.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/abs.ts</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/sdmx20.ts</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/data.ts</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/insee.ts</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx.ts</file>
         </group>
     </open-files>
 </project-private>

@@ -16,7 +16,7 @@
     Copyright (C) 2016 James Gardner
 */
 import * as moment from 'moment';
-import { Promise } from 'bluebird';
+import {Promise} from 'bluebird';
 import * as interfaces from '../sdmx/interfaces';
 import * as registry from '../sdmx/registry';
 import * as structure from '../sdmx/structure';
@@ -38,8 +38,8 @@ export class IdentifiableType extends common.AnnotableType {
     public getId(): commonreferences.ID {
         return this.id;
     }
-    public getURN(): xml.anyURI { return this.urn; }
-    public getURI(): xml.anyURI { return this.uri; }
+    public getURN(): xml.anyURI {return this.urn;}
+    public getURI(): xml.anyURI {return this.uri;}
     public setId(id: commonreferences.ID) {
         this.id = id;
     }
@@ -379,7 +379,7 @@ export class MaintainableType extends VersionableType {
         //if (this.getVersion()!=null&&vers2!=null){
         //console.log("myv:" + this.getVersion() + " compare:" + vers2.toString());
         //}
-        
+
         if (vers2 == null || this.getVersion() == null) {
             if (this.agencyId.equalsNestedNCNameID(agency2) && this.getId().equalsNestedID(id2)) {
                 //console.log("Identifies me1");
@@ -553,11 +553,11 @@ export class Dataflow extends StructureUsageType {
         super();
     }
     public asReference() {
-        var ref:commonreferences.Ref = new commonreferences.Ref();
+        var ref: commonreferences.Ref = new commonreferences.Ref();
         ref.setAgencyId(this.getAgencyId());
         ref.setId(this.getId());
         ref.setVersion(this.getVersion());
-        var reference:commonreferences.Reference = new commonreferences.Reference(ref,null);
+        var reference: commonreferences.Reference = new commonreferences.Reference(ref, null);
         return reference;
     }
 }
@@ -611,17 +611,17 @@ export class Component extends IdentifiableType {
     }
 }
 export class ComponentUtil {
-    public static getRepresentation(reg: interfaces.LocalRegistry,c:Component):RepresentationType{
-        var rep:RepresentationType = c.getLocalRepresentation();
-        if( rep==null ) {
+    public static getRepresentation(reg: interfaces.LocalRegistry, c: Component): RepresentationType {
+        var rep: RepresentationType = c.getLocalRepresentation();
+        if (rep == null) {
             var concept: ConceptType = reg.findConcept(c.getConceptIdentity());
             //return concept.getCoreRepresentation();
             return null;
         }
         return c.getLocalRepresentation();
     }
-    public static getLocalRepresentation(c:Component):RepresentationType {
-        if( c == null ) return null;
+    public static getLocalRepresentation(c: Component): RepresentationType {
+        if (c == null) return null;
         return c.getLocalRepresentation();
     }
 }
@@ -651,11 +651,11 @@ export class DimensionList {
     private dimensions: Array<Dimension> = [];
     private timeDimension: TimeDimension = null;
     private measureDimension: MeasureDimension = null;
-    public getDimensions(): Array<Dimension> { return this.dimensions; }
+    public getDimensions(): Array<Dimension> {return this.dimensions;}
     public setDimensions(dims: Array<Dimension>) {
         this.dimensions = dims;
     }
-    public getMeasureDimension(): MeasureDimension { return this.measureDimension; }
+    public getMeasureDimension(): MeasureDimension {return this.measureDimension;}
     public setMeasureDimension(md: MeasureDimension) {
         this.measureDimension = md;
     }
@@ -669,15 +669,15 @@ export class DimensionList {
 }
 export class AttributeList {
     private attributes: Array<Attribute> = [];
-    public getAttributes(): Array<Attribute> { return this.attributes; }
+    public getAttributes(): Array<Attribute> {return this.attributes;}
     public setAttributes(at: Array<Attribute>) {
         this.attributes = at;
     }
 }
 export class MeasureList {
     private primaryMeasure: PrimaryMeasure = null;
-    public getPrimaryMeasure(): PrimaryMeasure { return this.primaryMeasure; }
-    public setPrimaryMeasure(pm: PrimaryMeasure) { this.primaryMeasure = pm; }
+    public getPrimaryMeasure(): PrimaryMeasure {return this.primaryMeasure;}
+    public setPrimaryMeasure(pm: PrimaryMeasure) {this.primaryMeasure = pm;}
 
 }
 export class DataStructureComponents {
@@ -840,8 +840,8 @@ export class DataStructure extends MaintainableType {
         return false;
     }
     public isPrimaryMeasure(s: string): boolean {
-        if ("OBS_VALUE" == s) return true;
-        else if (this.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString() == s) { return true; }
+        if ("OBS_VALUE" == s) {return true;}
+        if (this.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString() == s) {return true;}
         return false;
     }
     public getKeyPosition(s: string): number {
@@ -1015,16 +1015,16 @@ export class Concepts {
         return cl;
     }
     findConceptSchemeReference(ref: commonreferences.Reference): ConceptSchemeType {
-        if (ref == null) { return null; }
+        if (ref == null) {return null;}
         else {
             var cs: ConceptSchemeType = this.findConceptScheme(ref.getAgencyId(), ref.getMaintainableParentId(), ref.getVersion());
-            if (cs == null) { return null; }
+            if (cs == null) {return null;}
             return cs;
         }
     }
 
     merge(conceptsType: Concepts) {
-        if (conceptsType == null) { return; }
+        if (conceptsType == null) {return;}
         for (var i: number = 0; i < conceptsType.getConceptSchemes().length; i++) {
             this.concepts.push(conceptsType.getConceptSchemes()[i]);
         }
@@ -1117,7 +1117,7 @@ export class Structures implements interfaces.LocalRegistry {
     }
     // Registry
     listDataflows(): Array<structure.Dataflow> {
-        if (this.dataflows == null) { return []; }
+        if (this.dataflows == null) {return [];}
         return this.dataflows.getDataflowList();
     }
     clear(): void {
@@ -1149,13 +1149,13 @@ export class Structures implements interfaces.LocalRegistry {
         return null;
     }
     findConcept(ref: commonreferences.Reference): structure.ConceptType {
-        if (this.concepts == null) { return null; }
+        if (this.concepts == null) {return null;}
         var cs: ConceptSchemeType = this.concepts.findConceptSchemeReference(ref);
-        if (cs == null) { return null; }
+        if (cs == null) {return null;}
         return cs.findItemId(ref.getId().asID());
     }
     findConceptScheme(ref: commonreferences.Reference): structure.ConceptSchemeType {
-        if (this.concepts == null) { return null; }
+        if (this.concepts == null) {return null;}
         return this.concepts.findConceptSchemeReference(ref);
     }
     searchDataStructure(ref: commonreferences.Reference): Array<structure.DataStructure> {
@@ -1278,16 +1278,16 @@ export class TextFormatType {
         this.isMultiLingual = b;
     }
 }
-export class BasicComponentTextFormatType extends TextFormatType { }
-export class SimpleComponentTextFormatType extends BasicComponentTextFormatType { }
-export class CodededTextFormatType extends SimpleComponentTextFormatType { }
+export class BasicComponentTextFormatType extends TextFormatType {}
+export class SimpleComponentTextFormatType extends BasicComponentTextFormatType {}
+export class CodededTextFormatType extends SimpleComponentTextFormatType {}
 export class RepresentationType {
 
     private textFormat: TextFormatType = null;
     private enumeration: commonreferences.Reference = null;
     private enumerationFormat: CodededTextFormatType = null;
 
-    constructor() { }
+    constructor() {}
 
     /**
      * @return the textFormat
@@ -1331,3 +1331,4 @@ export class RepresentationType {
         this.enumerationFormat = enumerationForma;
     }
 }
+

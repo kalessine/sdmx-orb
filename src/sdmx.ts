@@ -26,6 +26,7 @@ import * as knoema from './sdmx/knoema';
 import * as nomis from './sdmx/nomis';
 import * as ilo from './sdmx/ilo';
 import * as estat from './sdmx/estat';
+import * as insee from './sdmx/insee';
 export class SdmxIO {
     public static SANITISE_NAMES: boolean = false;
     public static PARSER: Array<interfaces.SdmxParserProvider> = [];
@@ -57,18 +58,19 @@ export class SdmxIO {
 
     }
     public static listServices(): Array<string> {
-        return ["NOMIS", "ABS",
+        return ["NOMIS", "ABS","INSEE",
             "OECD", "KNOEMA", "AfDB", "ILO", "ESTAT"];
         //return ["OECD"];
     }
     public static connect(s: string): interfaces.Queryable {
-        if (s == "ABS") return new abs.ABS("ABS", "http://stat.data.abs.gov.au/restsdmx/sdmx.ashx/", "");
+        if (s == "ABS") return new abs.ABS("ABS", "http://cors-anywhere.herokuapp.com/http://stat.data.abs.gov.au/sdmxws/sdmx.asmx ", "http://stats.oecd.org/OECDStatWS/SDMX/");
         if (s == "KNOEMA") return new knoema.Knoema("KNOEMA", "http://knoema.com/api/1.0/sdmx", "");
         if (s == "NOMIS") return new nomis.NOMISRESTServiceRegistry("NOMIS", "http://www.nomisweb.co.uk/api", "uid=0xad235cca367972d98bd642ef04ea259da5de264f");
-        if (s == "OECD") return new oecd.OECD("OECD", "http://stats.oecd.org/restsdmx/sdmx.ashx/", "");
+        if (s == "OECD") return new oecd.OECD("OECD", "http://cors-anywhere.herokuapp.com/http://stats.oecd.org/Sdmxws/sdmx.asmx", "http://stats.oecd.org/OECDStatWS/SDMX/");
         if (s == "AfDB") return new knoema.Knoema("AfDB", "http://opendataforafrica.org/api/1.0/sdmx", "");
         if (s == "ILO") return new ilo.ILO("ILO", "http://cors-anywhere.herokuapp.com/http://www.ilo.org/ilostat/sdmx/ws/rest", "");
         if (s == "ESTAT") return new estat.ESTAT("ESTAT", "http://ec.europa.eu/eurostat/SDMX/diss-web/rest", "");
+        if (s == "INSEE") return new insee.INSEE("INSEE", "http://cors-anywhere.herokuapp.com/http://www.bdm.insee.fr/series/sdmx", "");
     }
     public static setTruncateNames(n: number) {
         SdmxIO.TRUNCATE_NAMES = n;

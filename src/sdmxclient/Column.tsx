@@ -1,10 +1,12 @@
-import {h, Component} from 'preact';
+import React,{Component } from 'preact-compat';
+import {h} from 'preact';
 import * as structure from '../sdmx/structure';
 import {DragSource} from 'preact-dnd';
 import ItemTypes from './ItemTypes';
 export interface ColumnProps {
     item: structure.ConceptType,
     filterButton: Function,
+    filterTimeButton: Function,
     connectDragSource?: Function,
     isDragging?: boolean,
     name: string,
@@ -51,16 +53,27 @@ export default class Column extends Component<ColumnProps, ColumnState> {
         super(props, state);
 
     }
-    render(props, state) {
+    render(props, state):Element {
         var item = props.item;
         const {isDragging, connectDragSource} = this.props;
         const opacity = isDragging ? 0.4 : 1;
+        const isTime = this.props.name=="TIME"||this.props.name=="TIME_PERIOD";
+        if( isTime ) {
         return connectDragSource(<td><div class="fld-btn">
             <table><tbody>
-                <tr> <td class="caption"><span>{structure.NameableType.toString(item)}</span><span></span ></td><td><div class="sort-indicator "></div> </td><td class="filter"><div class="fltr-btn" onClick={(e) => props.filterButton(e, structure.NameableType.toIDString(item))}></div></td>
+                <tr> <td class="caption"><span>{structure.NameableType.toString(item)}</span><span></span ></td><td><div class="sort-indicator "></div> </td><td class="filter"><div class="fltr-btn" onClick={(e) => { props.filterTimeButton(e, structure.NameableType.toIDString(item));}}></div></td>
                 </tr>
             </tbody>
             </table>
         </div></td >);
+        }else {
+        return connectDragSource(<td><div class="fld-btn">
+            <table><tbody>
+                <tr> <td class="caption"><span>{structure.NameableType.toString(item)}</span><span></span ></td><td><div class="sort-indicator "></div> </td><td class="filter"><div class="fltr-btn" onClick={(e) => { props.filterButton(e, structure.NameableType.toIDString(item))}}></div></td>
+                </tr>
+            </tbody>
+            </table>
+        </div></td >);
+        }
     }
 }

@@ -52,7 +52,9 @@ export class Query {
         }
         this.startDate.setFullYear(2000);
         this.endDate.setFullYear(2016);
-        this.timeQueryKey = new QueryKey(flow.getStructure(), registry, this.getTimeKeyName());
+        if (this.getTimeKeyName() != null) {
+            this.timeQueryKey = new QueryKey(flow.getStructure(), registry, this.getTimeKeyName());
+        }
     }
     public getQueryKey(id: string) {
         for (var i: number = 0; i < this.query.length; i++) {
@@ -199,6 +201,10 @@ export class QueryKey {
     public possibleValues(): Array<string> {
         var result = [];
         var itemScheme: structure.ItemSchemeType = this.getItemScheme();
+        if(itemScheme==null) {
+            alert(this.name+" has null itemscheme");
+            
+        }
         for (var i: number = 0; i < itemScheme.size(); i++) {
             var itm: structure.ItemType = itemScheme.getItem(i);
             result.push(itm.getId().toString());
