@@ -81,6 +81,7 @@ export class Query {
 
     public getTimeKeyName(): string {
         var struct: structure.DataStructure = this.registry.findDataStructure(this.structRef);
+        if (struct.getDataStructureComponents().getDimensionList().getTimeDimension()==null) {return null;}
         return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
     }
     public getTimeQueryKey(): QueryKey {
@@ -1218,14 +1219,14 @@ export class Cube {
     public getCubeObsColumnMapper(): interfaces.ColumnMapper {
         return this.cubeObsMapper;
     }
-    public find(key: FullKey): CubeObs {
-        return this.findLatest(key, false);
+    public findCubeObs(key: FullKey): CubeObs {
+        return this.findLatestCubeObs(key, false);
     }
-    public findFlatObs(key: FullKey): CubeObs {
-        return this.findLatest(key, false);
+    public findFlatObs(key: FullKey): FlatObs {
+        return this.findLatestFlatObs(key, false);
     }
 
-    public findLatest(key: FullKey, latest: boolean): CubeObs {
+    public findLatestCubeObs(key: FullKey, latest: boolean): CubeObs {
         var dim: CubeDimension = this.getRootCubeDimension();
         var oldDim: CubeDimension = dim;
         for (var i: number = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
@@ -1342,6 +1343,8 @@ export class Cube {
                 var measure: string = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
                 //tcd.dump();
                 //System.out.println("Measure="+measure);
+                var co: CubeObservation = tcd.getObservation(measure);
+                if( co == null ) return null;
                 return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
             } else {
                 var co: CubeObservation = tcd.getObservation(null);

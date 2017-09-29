@@ -1,5 +1,5 @@
-import React,{Component} from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
 import * as structure from '../sdmx/structure';
@@ -10,7 +10,9 @@ export interface ServicesProps {
     onConnect: Function,
 }
 
-export default class Services extends Component<ServicesProps, any> {
+export default class Services extends React.Component<ServicesProps, any> {
+    private props:ServiceProps = {};
+    private state:any = {};
     private onConnect: Function = null;
     private presel = null;
     constructor(a: ServicesProps) {
@@ -46,7 +48,9 @@ export default class Services extends Component<ServicesProps, any> {
         this.setState({chosenIndex:e.selectedIndex, selected: service, queryable: q});
         this.onConnect(q);
     }
-    render(props: ServicesProps, state) {
+    render():React.ReactElement<any> {
+        var props: ServicesProps=this.props;
+        var state:any = this.state;
         this.onConnect = props.onConnect;
         if (state.services == null) return <div><p>No State</p></div>;
         return (<div><Select hintText="Select an SDMX Serviceoption"

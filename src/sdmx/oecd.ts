@@ -54,7 +54,6 @@ export class OECD implements interfaces.Queryable, interfaces.RemoteRegistry {
         opts.url = urlString;
         opts.method = "POST";
         return this.makeRequest(opts, send).then(function (a) {
-            console.log("Got Data Response");
             var dm = sdmx.SdmxIO.parseData(a);
             var payload = new common.PayloadStructureType();
             payload.setStructure(dataflow.getStructure());
@@ -131,9 +130,9 @@ export class OECD implements interfaces.Queryable, interfaces.RemoteRegistry {
         }
         var opts: any = {};
         opts.url = urlString;
-        opts.method = "POST";
+        opts.method = "GET";
         opts.headers = {"Origin": document.location};
-        return this.makeRequest(opts).then(function (a) {
+        return this.makeRequest(opts,"").then(function (a) {
             return a;
         });
     }

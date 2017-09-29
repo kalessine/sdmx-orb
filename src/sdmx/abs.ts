@@ -46,6 +46,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
     }
     query(q: data.Query): Promise<message.DataMessage> {
         var url = '';
+        var data= null;
         if (this.getLocalRegistry().findDataStructure(q.getDataflow().getStructure()).getDataStructureComponents().getDimensionList().getTimeDimension() != null) {
             url = this.serviceURL;
             data = this.toGetDataQuery(q, this.options);
@@ -138,9 +139,9 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
         }
         var opts: any = {};
         opts.url = urlString;
-        opts.method = "POST";
+        opts.method = "GET";
         opts.headers = {"Origin": document.location};
-        return this.makeRequest(opts).then(function (a) {
+        return this.makeRequest(opts,"").then(function (a) {
             return a;
         });
     }

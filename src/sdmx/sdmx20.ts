@@ -113,9 +113,19 @@ export class Sdmx20DataReaderTools {
         //console.log("sdmx20 parsing data");
         var dom: any = parseXml(s);
         //console.log("sdmx20 creating DataMessage");
-        this.msg = this.toDataMessage(dom.documentElement);
+        this.msg = this.toDataMessage(this.findCompactDataNode(dom.documentElement));
     }
-
+    findCompactDataNode(node){
+        if( node.nodeName.indexOf("CompactData")!=-1&&node.nodeName!="GetCompactDataResult"&&node.nodeName!="GetCompactDataResponse"){
+            return node;
+        }
+        var st = null;
+        for(var i:number=0;i<node.childNodes.length&&st==null;i++) {
+            st = this.findCompactDataNode(node.childNodes[i]);
+            if( st !=null ) {return st;}
+        }
+        return null;
+    }
     getDataMessage(): message.DataMessage { return this.msg; }
     toDataMessage(dm: any): message.DataMessage {
         var msg: message.DataMessage = new message.DataMessage();
@@ -311,7 +321,18 @@ export class Sdmx20GenericDataReaderTools {
         //console.log("sdmx20 parsing data");
         var dom: any = parseXml(s);
         //console.log("sdmx20 creating DataMessage");
-        this.msg = this.toDataMessage(dom.documentElement);
+        this.msg = this.toDataMessage(this.findGenericDataNode(dom.documentElement));
+    }
+    findGenericDataNode(node){
+        if( node.nodeName.indexOf("GenericData")!=-1&&node.nodeName!="GetGenericDataResult"&&node.nodeName!="GetGenericDataResponse"){
+            return node;
+        }
+        var st = null;
+        for(var i:number=0;i<node.childNodes.length&&st==null;i++) {
+            st = this.findGenericDataNode(node.childNodes[i]);
+            if( st !=null ) {return st;}
+        }
+        return null;
     }
 
     getDataMessage(): message.DataMessage { return this.msg; }

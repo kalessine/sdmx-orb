@@ -1,5 +1,5 @@
-import React,{Component} from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 import Dialog from 'preact-material-components/Dialog';
 import Button from 'preact-material-components/Button';
 import List from 'preact-material-components/List';
@@ -21,7 +21,10 @@ export interface FilterDialogState {
     open?: boolean
 }
 
-export default class MyDialog extends Component<FilterDialogProps, FilterDialogState> {
+export default class MyDialog extends React.Component<FilterDialogProps, FilterDialogState> {
+    private props:FilterDialogProps = {};
+    private state:FilterDialogState = {};
+    
     private scrollingDlg = null;
     private items = [];
     constructor(props: FilterDialogProps, state: FilterDialogState) {
@@ -94,7 +97,9 @@ export default class MyDialog extends Component<FilterDialogProps, FilterDialogS
         });
         this.setState({open: true});
     }
-    render(props: FilterDialogProps, state: FilterDialogState) {
+    render():JSX.Element{
+        var props: FilterDialogProps=this.props;
+        var state: FilterDialogState=this.state;
         return (
             <div>
                 <Dialog ref={(scrollingDlg) => {this.scrollingDlg = scrollingDlg}}>

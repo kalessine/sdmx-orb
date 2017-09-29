@@ -1,5 +1,5 @@
-import React, {Component} from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h, Component} from 'preact';
 import * as _ from 'lodash';
 import * as structure from '../sdmx/structure';
 import * as interfaces from '../sdmx/interfaces';
@@ -33,12 +33,11 @@ export interface MainTableState {
 console.log(HTML5Backend);
 
 @DragDropContext(HTML5Backend)
-export default class MainTable extends Component<MainTableProps, MainTableState> {
-
+export default class MainTable extends React.Component<MainTableProps, MainTableState> {
+    private props: MainTableProps = {};
+    private state: MainTableState = {};
     constructor(props: MainTableProps, state: MainTableState) {
         super(props, state);
-        this.state = {
-        };
     }
     isDropped(boxName) {
 
@@ -145,22 +144,30 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
                     // console.log(this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowValues[k]]);
                 }
                 var measure = "OBS_VALUE";
-                if( props.struct==null ) return htmlrow;
+                if (props.struct == null) return htmlrow;
                 if (props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
                     measure = props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString();
                 }
                 if (this.props.cube != null) {
-
-                    var flatObs = this.props.cube.findLatestFlatObs(key, false);
                     var dat = "";
-                    if (flatObs != null) {
-                        for (var l: number = 0; l < this.props.data.length; l++) {
-                            //key.setComponent(measure, this.props.data[l].getId().toString());
-                            dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.data[l].getId().toString()));
+                    if (measure == "OBS_VALUE") {
+                        var flatObs = this.props.cube.findFlatObs(key);
+                        if (flatObs != null) {
+                            dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
                             htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
                         }
+                    } else {
+                        for (var l: number = 0; l < this.props.data.length; l++) {
+                            key.setComponent(measure, this.props.data[l].getId().toString());
+                            var flatObs = this.props.cube.findFlatObs(key);
+                            if (flatObs != null) {
+                                console.log(flatObs);
+                                console.log(this.props.cube.getFlatColumnMapper());
+                                dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString()));
+                                htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
+                            }
+                        }
                     }
-                    
                 }
             }
             html.push(<tr>{htmlrow}</tr>);
@@ -187,7 +194,7 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
             for (var k: number = 0; k < this.props.cols.length; k++) {
                 var id = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getValues()[colVars[k]];
                 var it = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getItemScheme().findItemString(id);
-                fields.push(<tr><td><div style="text-align: right; transform: rotate(-45deg);">{structure.NameableType.toString(it)}</div></td></tr>);
+                fields.push(<tr><td><div>{structure.NameableType.toString(it)}</div></td></tr>);
             }
             cols.push(<td><table>{fields}</table></td>);
         }
@@ -225,7 +232,9 @@ export default class MainTable extends Component<MainTableProps, MainTableState>
         console.log(html);
         return html;
     }
-    render(props: MainTableProps, state: MainTableState) {
+    render() {
+        var props: MainTableProps = this.props;
+        var state: MainTableState = this.state;
         var registry: interfaces.LocalRegistry = props.registry;
         var struct: structure.DataStructure = props.struct;
 

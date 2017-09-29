@@ -1,5 +1,6 @@
-import React,{Component} from 'preact-compat';
+import * as React from 'preact-compat';
 import {h} from 'preact';
+import {Component} from 'preact';
 import Services from './sdmxclient/Services';
 import Dataflows from './sdmxclient/Dataflows';
 import MainTable from './sdmxclient/MainTable';
@@ -39,10 +40,12 @@ export interface SdmxClientState {
     filterItemScheme: structure.ItemSchemeType,
     dataMessage: message.DataMessage,
     cube: data.Cube,
-    time_fields:Array<string>
+    time_fields: Array<string>
 }
 
-export default class SdmxClient extends Component<SdmxClientProps, SdmxClientState> {
+export default class SdmxClient extends React.Component<SdmxClientProps, SdmxClientState> {
+    private props: SdmxClientProps = {};
+    private state: SdmxClientState = {};
     private control = null;
     private drawer: any = null;
     private filter: any = null;
@@ -72,7 +75,7 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
             filterItemScheme: null,
             dataMessage: null,
             cube: null,
-            time_fields:null
+            time_fields: null
         };
         return o;
     }
@@ -139,15 +142,16 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
         this.setState({struct: struct, all_fields: all_fields, rows: rows, columns: columns, data: data_fields, registry: reg, query: q});
         this.query();
     }
-    render(props: SdmxClientProps, state: SdmxClientState):Element {
-        this.state = state;
+    render(): React.ReactElement<any> {
+        var state: SdmxClientState = this.state;
+        var props: SdmxClientProps = this.props;
         return (<div class="orb-container orb-blue">
             <Services onConnect={(q: interfaces.Queryable) => this.connect(q)} />
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
-            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} filterTimeButton={(e, i) => this.filterTimeButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube}  time_fields={this.state.time_fields} />
+            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} filterTimeButton={(e, i) => this.filterTimeButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube} time_fields={this.state.time_fields} />
             <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} />
             <MyTimeDialog ref={(filterTime) => {this.filterTime = filterTime}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} time_fields={this.state.time_fields} />
-            </div>);
+        </div>);
     }
     filterButton(e, id) {
         e.preventDefault();
@@ -252,7 +256,15 @@ export default class SdmxClient extends Component<SdmxClientProps, SdmxClientSta
                     cube.putObservation(null, dataMessage.getDataSet(0).getColumnMapper(), dataMessage.getDataSet(0).getFlatObs(i));
                 }
                 var time_dim = this.state.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId();
-                this.setState({dataMessage: dataMessage, cube: cube, time_fields: cube.getValues(time_dim)});
+                if (this.state != null && this.state.query != null) {
+                    _.forEach(this.state.query.getTimeQueryKey().getValues(), function (td) {
+                        this.state.query.getTimeQueryKey().removeValue(td);
+                    }.bind(this));
+                    _.forEach(cube.getValues(time_dim), function (td) {
+                        this.state.query.getTimeQueryKey().addValue(td);
+                    }.bind(this));
+                }
+                this.setState({dataMessage: dataMessage, cube: cube, time_fields: cube.getValues(time_dim), query: this.state.query});
             } else {
             }
         }.bind(this));

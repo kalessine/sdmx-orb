@@ -1,5 +1,5 @@
-import React,{Component } from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 import * as structure from '../sdmx/structure';
 import {DragSource} from 'preact-dnd';
 import ItemTypes from './ItemTypes';
@@ -48,12 +48,16 @@ const boxSource = {
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }))
-export default class Column extends Component<ColumnProps, ColumnState> {
+export default class Column extends React.Component<ColumnProps, ColumnState> {
+    private props:ColumnProps = {};
+    private state:ColumnState = {};
     constructor(props: ColumnProps, state: ColumnState) {
         super(props, state);
 
     }
-    render(props, state):Element {
+    render():React.ReactElement<any> {
+        var state:ColumnState = this.state;
+        var props:ColumnProps = this.props;
         var item = props.item;
         const {isDragging, connectDragSource} = this.props;
         const opacity = isDragging ? 0.4 : 1;

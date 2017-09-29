@@ -1,5 +1,5 @@
-import React,{Component} from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 import Dialog from 'preact-material-components/Dialog';
 import Button from 'preact-material-components/Button';
 import List from 'preact-material-components/List';
@@ -23,7 +23,9 @@ export interface TimeDialogState {
     open?: boolean
 }
 
-export class MyTimeDialog extends Component<TimeDialogProps, TimeDialogState> {
+export class MyTimeDialog extends React.Component<TimeDialogProps, TimeDialogState> {
+    private props:TimeDialogProps = {};
+    private state:TimeDialogState = {};
     private scrollingDlg = null;
     private items = [];
     public state:TimeDialogState = null;
@@ -61,7 +63,7 @@ export class MyTimeDialog extends Component<TimeDialogProps, TimeDialogState> {
         if (props.time_fields == null) return list;
         this.items = [];
         collections.arrays.forEach(props.time_fields, function (item) {
-            var id: string = structure.NameableType.toIDString(item);
+            var id: string = item;
             var selected = false;
             collections.arrays.forEach(dim.getValues(), function (item) {
                 if (item == id) {selected = true;}
@@ -110,11 +112,13 @@ export class MyTimeDialog extends Component<TimeDialogProps, TimeDialogState> {
     handleChange = (item, value) => {
         alert("test");
     };
-    render(props: TimeDialogProps, state: TimeDialogState) {
+    render():React.ReactElement<any> {
+        var props: TimeDialogProps=this.props;
+        var state: TimeDialogState=this.state;
         if (!props.query) return <div></div>;
         var html = [];
-        html.push(<DatePicker value={props.query.getStartDate()} onChange={this.changeStartDate.bind(this,props)}/>);
-        html.push(<DatePicker value={props.query.getEndDate()} onChange={this.changeEndDate.bind(this,props)}/>);
+        html.push(<DatePicker value={props.query.getStartDate()} onChange={this.changeStartDate.bind(this, props)} />);
+        html.push(<DatePicker value={props.query.getEndDate()} onChange={this.changeEndDate.bind(this,props)} />);
         return (
             <div>
                 <Dialog ref={(scrollingDlg) => {this.scrollingDlg = scrollingDlg}}>

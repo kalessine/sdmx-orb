@@ -1,5 +1,5 @@
-import React,{Component} from 'preact-compat';
-import {h} from 'preact';
+import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 
 export interface TableToolbarProps {
     name: string
@@ -18,7 +18,7 @@ export default class TableToolbar extends Component<TableToolbarProps, any> {
             alert("beep"+action);
         }
     }
-    render() {
+    render():React.ReactElement {
    var configButtons:Array<any> = //config.toolbar.buttons ?
             //defaultToolbarConfig.buttons.concat(config.toolbar.buttons) :
             defaultToolbarConfig.buttons;

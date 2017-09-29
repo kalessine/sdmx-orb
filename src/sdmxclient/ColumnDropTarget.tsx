@@ -1,5 +1,5 @@
-import React,{Component} from 'preact-compat';
-import {h} from 'preact';
+//import * as React from 'preact-compat';
+import {h,Component} from 'preact';
 import {DropTarget} from 'preact-dnd';
 
 const style = {
