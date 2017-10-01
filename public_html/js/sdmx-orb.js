@@ -56326,6 +56326,7 @@ var Dataflows_1 = __webpack_require__(288);
 var MainTable_1 = __webpack_require__(289);
 var FilterDialog_1 = __webpack_require__(406);
 var MyTimeDialog_1 = __webpack_require__(423);
+var TableToolbar_1 = __webpack_require__(478);
 var structure = __webpack_require__(10);
 var data = __webpack_require__(34);
 var _ = __webpack_require__(201);
@@ -56335,7 +56336,7 @@ var SdmxClient = /** @class */ (function (_super) {
     function SdmxClient(props, state) {
         var _this = _super.call(this, props, state) || this;
         _this.props = {};
-        _this.state = {};
+        _this.state = _this.getInitialState();
         _this.control = null;
         _this.drawer = null;
         _this.filter = null;
@@ -56364,9 +56365,15 @@ var SdmxClient = /** @class */ (function (_super) {
             filterItemScheme: null,
             dataMessage: null,
             cube: null,
-            time_fields: null
+            time_fields: null,
+            empty_columns: false,
+            empty_rows: false
         };
         return o;
+    };
+    SdmxClient.prototype.getState = function () {
+        console.log(this.state);
+        return this.state;
     };
     SdmxClient.prototype.connect = function (q) {
         this.setState({ queryable: q });
@@ -56379,7 +56386,7 @@ var SdmxClient = /** @class */ (function (_super) {
         }.bind(this));
     };
     SdmxClient.prototype.selectDataflow = function (df) {
-        var s = this.state;
+        var s = {};
         s.dataflow = df;
         s.structureRef = df.getStructure();
         s.all_fields = [];
@@ -56440,7 +56447,8 @@ var SdmxClient = /** @class */ (function (_super) {
         return (preact_1.h("div", { class: "orb-container orb-blue" },
             preact_1.h(Services_1.default, { onConnect: function (q) { return _this.connect(q); } }),
             preact_1.h(Dataflows_1.default, { dfs: state.dataflows, selectDataflow: function (df) { return _this.selectDataflow(df); } }),
-            preact_1.h(MainTable_1.default, { struct: state.struct, registry: state.registry, fields: state.fields, data: state.data, cols: this.state.columns, rs: this.state.rows, query: state.query, filterButton: function (e, i) { return _this.filterButton(e, i); }, filterTimeButton: function (e, i) { return _this.filterTimeButton(e, i); }, dropField: function (a1, a2) { _this.dropField(a1, a2); }, cube: this.state.cube, time_fields: this.state.time_fields }),
+            preact_1.h(TableToolbar_1.default, { setState: this.setState.bind(this), getState: this.getState.bind(this) }),
+            preact_1.h(MainTable_1.default, { struct: state.struct, registry: state.registry, fields: state.fields, data: state.data, cols: this.state.columns, rs: this.state.rows, query: state.query, filterButton: function (e, i) { return _this.filterButton(e, i); }, filterTimeButton: function (e, i) { return _this.filterTimeButton(e, i); }, dropField: function (a1, a2) { _this.dropField(a1, a2); }, cube: this.state.cube, time_fields: this.state.time_fields, empty_columns: this.state.empty_columns, empty_rows: this.state.empty_rows }),
             preact_1.h(FilterDialog_1.default, { ref: function (filter) { _this.filter = filter; }, registry: this.state.registry, struct: this.state.struct, concept: this.state.filterConcept, itemScheme: this.state.filterItemScheme, query: this.state.query, queryFunc: function () { _this.query(); } }),
             preact_1.h(MyTimeDialog_1.MyTimeDialog, { ref: function (filterTime) { _this.filterTime = filterTime; }, registry: this.state.registry, struct: this.state.struct, concept: this.state.filterConcept, itemScheme: this.state.filterItemScheme, query: this.state.query, queryFunc: function () { _this.query(); }, time_fields: this.state.time_fields })));
     };
@@ -65418,7 +65426,6 @@ var HTML5Backend = __webpack_require__(375);
 var Column_1 = __webpack_require__(403);
 var ColumnDropTarget_1 = __webpack_require__(404);
 var IntCartesianProduct_1 = __webpack_require__(405);
-console.log(HTML5Backend);
 var MainTable = /** @class */ (function (_super) {
     __extends(MainTable, _super);
     function MainTable(props, state) {
@@ -65512,10 +65519,12 @@ var MainTable = /** @class */ (function (_super) {
             var htmlrow = [];
             htmlrow.push(this.getRowHeaders(this.props, this.state, i));
             var rowValues = cartesianrows.next();
+            var hasColumns = false;
             cartesiancols = new IntCartesianProduct_1.IntCartesianProduct(collengths);
             for (var j = 0; j < cartesiancols.getMaxIndex(); j++) {
                 var key = new data.FullKey();
                 var colValues = cartesiancols.next();
+                var hasRows = false;
                 // console.log(colValues);
                 for (var k = 0; k < this.props.cols.length; k++) {
                     key.setComponent(this.props.cols[k].getId().toString(), this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getValues()[colValues[k]]);
@@ -65539,6 +65548,8 @@ var MainTable = /** @class */ (function (_super) {
                         var flatObs = this.props.cube.findFlatObs(key);
                         if (flatObs != null) {
                             dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
+                            hasColumns = true;
+                            hasRows = true;
                             htmlrow.push(preact_1.h("td", null,
                                 preact_1.h("div", { class: "cell" },
                                     preact_1.h("div", { class: "cell-data" }, dat))));
@@ -65549,9 +65560,9 @@ var MainTable = /** @class */ (function (_super) {
                             key.setComponent(measure, this.props.data[l].getId().toString());
                             var flatObs = this.props.cube.findFlatObs(key);
                             if (flatObs != null) {
-                                console.log(flatObs);
-                                console.log(this.props.cube.getFlatColumnMapper());
                                 dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString()));
+                                hasColumns = true;
+                                hasRows = true;
                                 htmlrow.push(preact_1.h("td", null,
                                     preact_1.h("div", { class: "cell" },
                                         preact_1.h("div", { class: "cell-data" }, dat))));
@@ -65560,7 +65571,24 @@ var MainTable = /** @class */ (function (_super) {
                     }
                 }
             }
-            html.push(preact_1.h("tr", null, htmlrow));
+            if (!props.empty_rows && !props.empty_columns) {
+                if (hasRows || hasColumns) {
+                    html.push(preact_1.h("tr", null, htmlrow));
+                }
+            }
+            if (props.empty_rows && !props.empty_columns) {
+                if (hasColumns) {
+                    html.push(preact_1.h("tr", null, htmlrow));
+                }
+            }
+            if (props.empty_columns && !props.empty_rows) {
+                if (hasRows) {
+                    html.push(preact_1.h("tr", null, htmlrow));
+                }
+            }
+            if (props.empty_rows && props.empty_columns) {
+                html.push(preact_1.h("tr", null, htmlrow));
+            }
         }
         return preact_1.h("table", { class: "orb" }, html);
     };
@@ -65581,17 +65609,79 @@ var MainTable = /** @class */ (function (_super) {
         var cartesiancols = new IntCartesianProduct_1.IntCartesianProduct(collengths);
         var ht = [];
         for (var j = 0; j < cartesiancols.getMaxIndex(); j++) {
+            var hasColumns = false;
+            var key = new data.FullKey();
             var fields = [];
             var colVars = cartesiancols.next();
             for (var k = 0; k < this.props.cols.length; k++) {
                 var id = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getValues()[colVars[k]];
                 var it = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getItemScheme().findItemString(id);
-                fields.push(preact_1.h("tr", null,
-                    preact_1.h("td", null,
-                        preact_1.h("div", null, structure.NameableType.toString(it)))));
+                if (this.props.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString() == this.props.cols[k].getId().toString()) {
+                    fields.push(preact_1.h("tr", null,
+                        preact_1.h("td", null,
+                            preact_1.h("div", null, id))));
+                }
+                else {
+                    fields.push(preact_1.h("tr", null,
+                        preact_1.h("td", null,
+                            preact_1.h("div", null, structure.NameableType.toString(it)))));
+                }
+                key.setComponent(this.props.cols[k].getId().toString(), id);
             }
-            cols.push(preact_1.h("td", null,
-                preact_1.h("table", null, fields)));
+            var rowlengths = [];
+            for (var k = 0; k < this.props.rs.length; k++) {
+                rowlengths.push(this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues().length);
+            }
+            var cartesianrows = new IntCartesianProduct_1.IntCartesianProduct(rowlengths);
+            for (var i = 0; i < cartesianrows.getMaxIndex(); i++) {
+                var rowValues = cartesianrows.next();
+                for (var k = 0; k < this.props.rs.length; k++) {
+                    key.setComponent(this.props.rs[k].getId().toString(), this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowValues[k]]);
+                }
+                var measure = "OBS_VALUE;";
+                var hasRows = false;
+                if (this.props.cube != null) {
+                    var dat = "";
+                    if (props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() == null) {
+                        var flatObs = this.props.cube.findFlatObs(key);
+                        if (flatObs != null) {
+                            dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
+                            hasRows = true;
+                            hasColumns = true;
+                        }
+                    }
+                    else {
+                        var measure = props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString();
+                        for (var l = 0; l < this.props.data.length; l++) {
+                            key.setComponent(measure, this.props.data[l].getId().toString());
+                            var flatObs = this.props.cube.findFlatObs(key);
+                            if (flatObs != null) {
+                                dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString()));
+                                hasRows = true;
+                                hasColumns = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!props.empty_rows && !props.empty_columns) {
+                if (hasRows || hasColumns) {
+                    cols.push(preact_1.h("td", null, fields));
+                }
+            }
+            if (props.empty_rows && !props.empty_columns) {
+                if (hasColumns) {
+                    cols.push(preact_1.h("td", null, fields));
+                }
+            }
+            if (props.empty_columns && !props.empty_rows) {
+                if (hasRows) {
+                    cols.push(preact_1.h("td", null, fields));
+                }
+            }
+            if (props.empty_rows && props.empty_columns) {
+                cols.push(preact_1.h("td", null, fields));
+            }
         }
         var html = cols;
         return html;
@@ -65620,15 +65710,21 @@ var MainTable = /** @class */ (function (_super) {
         for (var k = 0; k < this.props.rs.length; k++) {
             var id = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowVars[k]];
             var it = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getItemScheme().findItemString(id);
-            fields.push(preact_1.h("td", null,
-                preact_1.h("div", null, structure.NameableType.toString(it))));
+            if (this.props.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString() == this.props.rs[k].getId().toString()) {
+                id = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowVars[k]];
+                fields.push(preact_1.h("td", null,
+                    preact_1.h("div", null, id)));
+            }
+            else {
+                fields.push(preact_1.h("td", null,
+                    preact_1.h("div", null, structure.NameableType.toString(it))));
+            }
         }
         rows.push(fields);
         var html = [];
         for (var k = 0; k < rows.length; k++) {
             html.push(rows[k]);
         }
-        console.log(html);
         return html;
     };
     MainTable.prototype.render = function () {
@@ -78676,6 +78772,196 @@ exports.locals = {
 	"slideLeftEnterActive": "theme--slideLeftEnterActive--3gdF0Six",
 	"slideLeftLeaveActive": "theme--slideLeftLeaveActive--1lAUazT-"
 };
+
+/***/ }),
+/* 478 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var preact_1 = __webpack_require__(3);
+var TableToolbar = /** @class */ (function (_super) {
+    __extends(TableToolbar, _super);
+    function TableToolbar(props) {
+        return _super.call(this, props) || this;
+    }
+    TableToolbar.prototype.componentDidMount = function () {
+    };
+    TableToolbar.prototype.componentDidUpdate = function () {
+    };
+    TableToolbar.prototype.createCallback = function (action) {
+        if (action != null)
+            return action.bind(this);
+        return function () {
+            alert("beep" + action);
+        };
+    };
+    TableToolbar.prototype.render = function () {
+        var configButtons = 
+        //defaultToolbarConfig.buttons.concat(config.toolbar.buttons) :
+        defaultToolbarConfig.buttons;
+        var buttons = [];
+        for (var i = 0; i < configButtons.length; i++) {
+            var btnConfig = configButtons[i];
+            var refName = 'btn' + i;
+            if (btnConfig.type == 'separator') {
+                buttons.push(preact_1.h("div", { key: i.toString(), className: "orb-tlbr-sep" }));
+            }
+            else if (btnConfig.type == 'label') {
+                buttons.push(preact_1.h("div", { key: i.toString(), className: "orb-tlbr-lbl" }, btnConfig.text));
+            }
+            else {
+                buttons.push(preact_1.h("div", { key: i.toString(), className: 'orb-tlbr-btn ' + btnConfig.cssClass, title: btnConfig.tooltip, onClick: this.createCallback(btnConfig.action) }));
+            }
+        }
+        return preact_1.h("div", { class: "orb-toolbar" },
+            preact_1.h("div", null, buttons));
+    };
+    return TableToolbar;
+}(preact_1.Component));
+exports.default = TableToolbar;
+;
+//var excelExport = require('../orb.export.excel');
+var defaultToolbarConfig = {
+    showEmptyRows: function (pgridComponent, button) {
+        this.props.setState({ empty_rows: !this.props.getState().empty_rows });
+    },
+    showEmptyColumns: function (pgridComponent, button) {
+        this.props.setState({ empty_columns: !this.props.getState().empty_columns });
+    },
+    exportToExcel: function (pgridComponent, button) {
+        /*
+                        var a = document.createElement('a');
+                a.download = "orbpivotgrid.xls";
+                a.href = excelExport(pgridComponent.props.pgridwidget);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+        */
+    },
+    expandAllRows: function (pgridComponent, button) {
+        //pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, true);
+    },
+    collapseAllRows: function (pgridComponent, button) {
+        //pgridComponent.toggleFieldExpansion(axe.Type.ROWS, null, false);
+    },
+    expandAllColumns: function (pgridComponent, button) {
+        //pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, true);
+    },
+    collapseAllColumns: function (pgridComponent, button) {
+        //pgridComponent.toggleFieldExpansion(axe.Type.COLUMNS, null, false);
+    },
+    updateSubtotalsButton: function (axetype, pgridComponent, button) {
+        /*
+        var subTotalsState = pgridComponent.pgridwidget.areSubtotalsVisible(axetype);
+        button.style.display = subTotalsState === null ? 'none' : '';
+
+        var classToAdd = '';
+        var classToRemove = '';
+        if (subTotalsState) {
+            classToAdd = 'subtotals-visible';
+            classToRemove = 'subtotals-hidden';
+        } else {
+            classToAdd = 'subtotals-hidden';
+            classToRemove = 'subtotals-visible';
+        }
+*/
+        //reactUtils.removeClass(button, classToRemove);
+        //reactUtils.addClass(button, classToAdd);
+    },
+    initSubtotals: function (axetype) {
+        //var self = this;
+        //return function (pgridComponent, button) {
+        //            self.updateSubtotalsButton(axetype, pgridComponent, button);
+        //        };
+    },
+    toggleSubtotals: function (axetype) {
+        //        var self = this;
+        //        return function (pgridComponent, button) {
+        //            pgridComponent.toggleSubtotals(axetype);
+        //            self.updateSubtotalsButton(axetype, pgridComponent, button);
+        //        };
+    },
+    updateGrandtotalButton: function (axetype, pgridComponent, button) {
+        //        var subTotalsState = pgridComponent.pgridwidget.isGrandtotalVisible(axetype);
+        //        button.style.display = subTotalsState === null ? 'none' : '';
+        //
+        //        var classToAdd = '';
+        //        var classToRemove = '';
+        //        if (subTotalsState) {
+        //            classToAdd = 'grndtotal-visible';
+        //            classToRemove = 'grndtotal-hidden';
+        //        } else {
+        //            classToAdd = 'grndtotal-hidden';
+        //            classToRemove = 'grndtotal-visible';
+        //        }
+        //
+        //        reactUtils.removeClass(button, classToRemove);
+        //        reactUtils.addClass(button, classToAdd);
+    },
+    initGrandtotal: function (axetype) {
+        //        var self = this;
+        //        return function (pgridComponent, button) {
+        //            self.updateGrandtotalButton(axetype, pgridComponent, button);
+        //        };
+    },
+    toggleGrandtotal: function (axetype) {
+        //        var self = this;
+        //        return function (pgridComponent, button) {
+        //            pgridComponent.toggleGrandtotal(axetype);
+        //            self.updateGrandtotalButton(axetype, pgridComponent, button);
+        //        };
+    }
+};
+defaultToolbarConfig.buttons = [
+    { type: 'label', text: 'Rows:' },
+    { type: 'button', tooltip: 'Show Empty Rows', cssClass: 'empty-rows', action: defaultToolbarConfig.showEmptyRows },
+    { type: 'button', tooltip: 'Show Empty Columns', cssClass: 'empty-columns', action: defaultToolbarConfig.showEmptyColumns },
+    { type: 'button', tooltip: 'Expand all rows', cssClass: 'expand-all', action: defaultToolbarConfig.expandAllRows },
+    { type: 'button', tooltip: 'Collapse all rows', cssClass: 'collapse-all', action: defaultToolbarConfig.collapseAllRows },
+    {
+        type: 'button', tooltip: 'Toggle rows sub totals'
+        // init: defaultToolbarConfig.initSubtotals(axe.Type.ROWS),
+        //action: defaultToolbarConfig.toggleSubtotals(axe.Type.ROWS)
+    },
+    {
+        type: 'button', tooltip: 'Toggle rows grand total'
+        // init: defaultToolbarConfig.initGrandtotal(axe.Type.ROWS),
+        //action: defaultToolbarConfig.toggleGrandtotal(axe.Type.ROWS)
+    },
+    { type: 'separator' },
+    { type: 'label', text: 'Columns:' },
+    { type: 'button', tooltip: 'Expand all columns', cssClass: 'expand-all' },
+    // action: defaultToolbarConfig.expandAllColumns},
+    { type: 'button', tooltip: 'Collapse all columns', cssClass: 'collapse-all' },
+    //action: defaultToolbarConfig.collapseAllColumns},
+    {
+        type: 'button', tooltip: 'Toggle columns sub totals'
+        // init: defaultToolbarConfig.initSubtotals(axe.Type.COLUMNS),
+        //action: defaultToolbarConfig.toggleSubtotals(axe.Type.COLUMNS)
+    },
+    {
+        type: 'button', tooltip: 'Toggle columns grand total'
+        // init: defaultToolbarConfig.initGrandtotal(axe.Type.COLUMNS),
+        //action: defaultToolbarConfig.toggleGrandtotal(axe.Type.COLUMNS)
+    },
+    { type: 'separator' },
+    { type: 'label', text: 'Export:' },
+    { type: 'button', tooltip: 'Export to Excel', cssClass: 'export-xls' }
+    // action: defaultToolbarConfig.exportToExcel},
+];
+
 
 /***/ })
 /******/ ]);

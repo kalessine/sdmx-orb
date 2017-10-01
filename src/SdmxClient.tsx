@@ -40,12 +40,15 @@ export interface SdmxClientState {
     filterItemScheme: structure.ItemSchemeType,
     dataMessage: message.DataMessage,
     cube: data.Cube,
-    time_fields: Array<string>
+    time_fields: Array<string>,
+    empty_columns: boolean,
+    empty_rows: boolean
+
 }
 
 export default class SdmxClient extends React.Component<SdmxClientProps, SdmxClientState> {
-    private props: SdmxClientProps = {};
-    private state: SdmxClientState = {};
+    public props: SdmxClientProps = {};
+    public state: SdmxClientState = this.getInitialState();
     private control = null;
     private drawer: any = null;
     private filter: any = null;
@@ -75,9 +78,15 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
             filterItemScheme: null,
             dataMessage: null,
             cube: null,
-            time_fields: null
+            time_fields: null,
+            empty_columns: false,
+            empty_rows: false
         };
         return o;
+    }
+    getState(): SdmxClientState {
+        console.log(this.state);
+        return this.state;
     }
     connect(q: interfaces.Queryable) {
         this.setState({queryable: q});
@@ -90,7 +99,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         }.bind(this));
     }
     selectDataflow(df: structure.Dataflow) {
-        var s: SdmxClientState = this.state;
+        var s: SdmxClientState = {};
         s.dataflow = df;
         s.structureRef = df.getStructure();
         s.all_fields = [];
@@ -148,7 +157,8 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         return (<div class="orb-container orb-blue">
             <Services onConnect={(q: interfaces.Queryable) => this.connect(q)} />
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
-            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} filterTimeButton={(e, i) => this.filterTimeButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube} time_fields={this.state.time_fields} />
+            <TableToolbar setState={this.setState.bind(this)} getState={this.getState.bind(this)} />
+            <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} filterTimeButton={(e, i) => this.filterTimeButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube} time_fields={this.state.time_fields} empty_columns={this.state.empty_columns} empty_rows={this.state.empty_rows} />
             <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} />
             <MyTimeDialog ref={(filterTime) => {this.filterTime = filterTime}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} time_fields={this.state.time_fields} />
         </div>);

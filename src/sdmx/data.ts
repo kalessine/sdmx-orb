@@ -1180,8 +1180,8 @@ export class Cube {
             if (!collections.arrays.contains(this.validCodes[dimId2.toString()], cross)) {
                 this.validCodes[dimId2.toString()].push(cross);
             }
-
         }
+        
         var dimId3: commonreferences.ID = this.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId();
         if (dimId2 != null) {
             cubeobs = new CubeObservation(dimId2.toString(), cross, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));

@@ -1,8 +1,9 @@
 import * as React from 'preact-compat';
-import {h,Component} from 'preact';
+import {h, Component} from 'preact';
 
 export interface TableToolbarProps {
-    name: string
+    getState: Function,
+    setState: Function
 }
 
 export default class TableToolbar extends Component<TableToolbarProps, any> {
@@ -14,18 +15,19 @@ export default class TableToolbar extends Component<TableToolbarProps, any> {
     componentDidUpdate() {
     }
     createCallback(action) {
-        return function(){
-            alert("beep"+action);
+        if (action != null) return action.bind(this);
+        return function () {
+            alert("beep" + action);
         }
     }
-    render():React.ReactElement {
-   var configButtons:Array<any> = //config.toolbar.buttons ?
+    render(): React.ReactElement {
+        var configButtons: Array<any> = //config.toolbar.buttons ?
             //defaultToolbarConfig.buttons.concat(config.toolbar.buttons) :
             defaultToolbarConfig.buttons;
 
         var buttons = [];
         for (var i = 0; i < configButtons.length; i++) {
-            var btnConfig:any = configButtons[i];
+            var btnConfig: any = configButtons[i];
             var refName = 'btn' + i;
 
             if (btnConfig.type == 'separator') {
@@ -44,7 +46,13 @@ export default class TableToolbar extends Component<TableToolbarProps, any> {
 
 //var excelExport = require('../orb.export.excel');
 
-var defaultToolbarConfig:any = {
+var defaultToolbarConfig: any = {
+    showEmptyRows: function (pgridComponent, button) {
+        this.props.setState({empty_rows: !this.props.getState().empty_rows});
+    },
+    showEmptyColumns: function (pgridComponent, button) {
+        this.props.setState({empty_columns: !this.props.getState().empty_columns});
+    },
     exportToExcel: function (pgridComponent, button) {
         /*
                         var a = document.createElement('a');
@@ -131,11 +139,13 @@ var defaultToolbarConfig:any = {
 };
 defaultToolbarConfig.buttons = [
     {type: 'label', text: 'Rows:'},
+    {type: 'button', tooltip: 'Show Empty Rows', cssClass: 'empty-rows', action: defaultToolbarConfig.showEmptyRows},
+    {type: 'button', tooltip: 'Show Empty Columns', cssClass: 'empty-columns', action: defaultToolbarConfig.showEmptyColumns},
     {type: 'button', tooltip: 'Expand all rows', cssClass: 'expand-all', action: defaultToolbarConfig.expandAllRows},
     {type: 'button', tooltip: 'Collapse all rows', cssClass: 'collapse-all', action: defaultToolbarConfig.collapseAllRows},
     {
         type: 'button', tooltip: 'Toggle rows sub totals'
-       // init: defaultToolbarConfig.initSubtotals(axe.Type.ROWS),
+        // init: defaultToolbarConfig.initSubtotals(axe.Type.ROWS),
         //action: defaultToolbarConfig.toggleSubtotals(axe.Type.ROWS)
     },
     {

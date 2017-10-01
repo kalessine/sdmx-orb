@@ -25,13 +25,12 @@ export interface MainTableProps {
     filterTimeButton: Function,
     dropField: Function,
     cube: data.Cube,
-    time_fields: Array<string>
+    time_fields: Array<string>,
+    empty_columns: boolean,
+    empty_rows: boolean
 }
 export interface MainTableState {
 }
-
-console.log(HTML5Backend);
-
 @DragDropContext(HTML5Backend)
 export default class MainTable extends React.Component<MainTableProps, MainTableState> {
     private props: MainTableProps = {};
@@ -127,11 +126,12 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
             var htmlrow = [];
             htmlrow.push(this.getRowHeaders(this.props, this.state, i));
             var rowValues = cartesianrows.next();
-
+            var hasColumns = false;
             cartesiancols = new IntCartesianProduct(collengths);
             for (var j: number = 0; j < cartesiancols.getMaxIndex(); j++) {
                 var key: data.FullKey = new data.FullKey();
                 var colValues = cartesiancols.next();
+                var hasRows = false;
                 // console.log(colValues);
                 for (var k: number = 0; k < this.props.cols.length; k++) {
                     key.setComponent(this.props.cols[k].getId().toString(), this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getValues()[colValues[k]]);
@@ -154,6 +154,8 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
                         var flatObs = this.props.cube.findFlatObs(key);
                         if (flatObs != null) {
                             dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
+                            hasColumns = true;
+                            hasRows = true;
                             htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
                         }
                     } else {
@@ -161,16 +163,33 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
                             key.setComponent(measure, this.props.data[l].getId().toString());
                             var flatObs = this.props.cube.findFlatObs(key);
                             if (flatObs != null) {
-                                console.log(flatObs);
-                                console.log(this.props.cube.getFlatColumnMapper());
                                 dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString()));
+                                hasColumns = true;
+                                hasRows = true;
                                 htmlrow.push(<td><div class="cell"><div class="cell-data">{dat}</div></div></td>);
                             }
                         }
                     }
                 }
             }
-            html.push(<tr>{htmlrow}</tr>);
+            if (!props.empty_rows && !props.empty_columns) {
+                if (hasRows || hasColumns) {
+                    html.push(<tr>{htmlrow}</tr>);
+                }
+            }
+            if (props.empty_rows && !props.empty_columns) {
+                if (hasColumns) {
+                    html.push(<tr>{htmlrow}</tr>);
+                }
+            }
+            if (props.empty_columns && !props.empty_rows) {
+                if (hasRows) {
+                    html.push(<tr>{htmlrow}</tr>);
+                }
+            }
+            if (props.empty_rows && props.empty_columns) {
+                html.push(<tr>{htmlrow}</tr>);
+            }
         }
         return <table class="orb">{html}</table>
     }
@@ -189,14 +208,73 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
         var cartesiancols = new IntCartesianProduct(collengths);
         var ht = [];
         for (var j: number = 0; j < cartesiancols.getMaxIndex(); j++) {
+            var hasColumns = false;
+            var key: data.FullKey = new data.FullKey();
             var fields = [];
             var colVars: Array<number> = cartesiancols.next();
             for (var k: number = 0; k < this.props.cols.length; k++) {
                 var id = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getValues()[colVars[k]];
                 var it = this.props.query.getQueryKey(this.props.cols[k].getId().toString()).getItemScheme().findItemString(id);
-                fields.push(<tr><td><div>{structure.NameableType.toString(it)}</div></td></tr>);
+                if (this.props.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString() == this.props.cols[k].getId().toString()) {
+                    fields.push(<tr><td><div>{id}</div></td></tr>);
+                } else {
+                    fields.push(<tr><td><div>{structure.NameableType.toString(it)}</div></td></tr>);
+                }
+                key.setComponent(this.props.cols[k].getId().toString(), id);
             }
-            cols.push(<td><table>{fields}</table></td>);
+            var rowlengths: Array<number> = [];
+            for (var k: number = 0; k < this.props.rs.length; k++) {
+                rowlengths.push(this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues().length);
+            }
+            var cartesianrows = new IntCartesianProduct(rowlengths);
+            for (var i: number = 0; i < cartesianrows.getMaxIndex(); i++) {
+                var rowValues = cartesianrows.next();
+                for (var k: number = 0; k < this.props.rs.length; k++) {
+                    key.setComponent(this.props.rs[k].getId().toString(), this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowValues[k]]);
+                }
+                var measure: string = "OBS_VALUE;"
+                var hasRows = false;
+                if (this.props.cube != null) {
+                    var dat = "";
+                    if (props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() == null) {
+                        var flatObs = this.props.cube.findFlatObs(key);
+                        if (flatObs != null) {
+                            dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex("OBS_VALUE"));
+                            hasRows = true;
+                            hasColumns = true;
+                        }
+                    } else {
+                        var measure = props.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString();
+                        for (var l: number = 0; l < this.props.data.length; l++) {
+                            key.setComponent(measure, this.props.data[l].getId().toString());
+                            var flatObs = this.props.cube.findFlatObs(key);
+                            if (flatObs != null) {
+                                dat = flatObs.getValue(this.props.cube.getFlatColumnMapper().getColumnIndex(this.props.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString()));
+                                hasRows = true;
+                                hasColumns = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!props.empty_rows && !props.empty_columns) {
+                if (hasRows || hasColumns) {
+                    cols.push(<td>{fields}</td>);
+                }
+            }
+            if (props.empty_rows && !props.empty_columns) {
+                if (hasColumns) {
+                    cols.push(<td>{fields}</td>);
+                }
+            }
+            if (props.empty_columns && !props.empty_rows) {
+                if (hasRows) {
+                    cols.push(<td>{fields}</td>);
+                }
+            }
+            if (props.empty_rows && props.empty_columns) {
+                cols.push(<td>{fields}</td>);
+            }
         }
         var html = cols;
         return html;
@@ -222,14 +300,20 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
         for (var k: number = 0; k < this.props.rs.length; k++) {
             var id = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowVars[k]];
             var it = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getItemScheme().findItemString(id);
-            fields.push(<td><div>{structure.NameableType.toString(it)}</div></td>);
+            if (this.props.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString() == this.props.rs[k].getId().toString()) {
+                id = this.props.query.getQueryKey(this.props.rs[k].getId().toString()).getValues()[rowVars[k]];
+                fields.push(<td><div>{id}</div></td>);
+            }
+            else {
+                fields.push(<td><div>{structure.NameableType.toString(it)}</div></td>);
+            }
+
         }
         rows.push(fields);
         var html = [];
         for (var k: number = 0; k < rows.length; k++) {
             html.push(rows[k]);
         }
-        console.log(html);
         return html;
     }
     render() {
