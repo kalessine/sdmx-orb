@@ -722,7 +722,7 @@ export class Sdmx21StructureReaderTools {
         c.setId(this.toID(codeNode));
         if (codeNode.getAttribute("parentCode") != null) {
             var ref: commonreferences.Ref = new commonreferences.Ref();
-            ref.setMaintainableParentId(new commonreferences.ID(codeNode.getAttribute("parentCode")));
+            ref.setId(new commonreferences.ID(codeNode.getAttribute("parentCode")));
             var reference: commonreferences.Reference = new commonreferences.Reference(ref, null);
             c.setParent(reference);
         }

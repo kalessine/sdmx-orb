@@ -21,6 +21,7 @@
     "@types/react-dnd-html5-backend": "^2.1.8",
     "bluebird": "^3.5.0",
     "classnames": "^2.2.5",
+    "flexlayout-react": "^0.2.5",
     "loader-utils": "^1.1.0",
     "lodash": "^4.17.4",
     "material": "^0.1.1",
@@ -36,9 +37,17 @@
     "preact-compat": "^3.17.0",
     "preact-dnd": "^2.1.5",
     "preact-material-components": "^1.1.7",
+    "preact-virtual-list": "^0.3.1",
     "react-base": "^0.2.0",
     "react-dnd-html5-backend": "^2.5.1",
-    "react-toolbox": "^2.0.0-beta.12"
+    "react-simple-tree": "^0.1.0",
+    "react-simpletabs": "^0.7.0",
+    "react-split-pane": "^0.1.70",
+    "react-tabs": "^2.1.0",
+    "react-tiny-virtual-list": "^2.1.4",
+    "react-toolbox": "^2.0.0-beta.12",
+    "react-treeview": "^0.4.7",
+    "react-virtual-list": "^2.2.2"
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.3",

@@ -81,7 +81,7 @@ export class Query {
 
     public getTimeKeyName(): string {
         var struct: structure.DataStructure = this.registry.findDataStructure(this.structRef);
-        if (struct.getDataStructureComponents().getDimensionList().getTimeDimension()==null) {return null;}
+        if (struct.getDataStructureComponents().getDimensionList().getTimeDimension() == null) {return null;}
         return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
     }
     public getTimeQueryKey(): QueryKey {
@@ -202,13 +202,25 @@ export class QueryKey {
     public possibleValues(): Array<string> {
         var result = [];
         var itemScheme: structure.ItemSchemeType = this.getItemScheme();
-        if(itemScheme==null) {
-            alert(this.name+" has null itemscheme");
-            
+        if (itemScheme == null) {
+            alert(this.name + " has null itemscheme");
+
         }
         for (var i: number = 0; i < itemScheme.size(); i++) {
             var itm: structure.ItemType = itemScheme.getItem(i);
             result.push(itm.getId().toString());
+        }
+        return result;;
+    }
+    public possibleValuesItems(): Array<structure.ItemType> {
+        var result = [];
+        var itemScheme: structure.ItemSchemeType = this.getItemScheme();
+        if (itemScheme == null) {
+            return [];
+        }
+        for (var i: number = 0; i < itemScheme.size(); i++) {
+            var itm: structure.ItemType = itemScheme.getItem(i);
+            result.push(itm);
         }
         return result;;
     }
@@ -225,6 +237,12 @@ export class QueryKey {
             }
             return s;
         }
+    }
+    public containsValue(s:string) {
+        for (var i: number = 0; i < this.values.length;i++) {
+            if (this.values[i]==s ) return true;
+        }
+        return false;
     }
 }
 
@@ -1181,7 +1199,7 @@ export class Cube {
                 this.validCodes[dimId2.toString()].push(cross);
             }
         }
-        
+
         var dimId3: commonreferences.ID = this.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId();
         if (dimId2 != null) {
             cubeobs = new CubeObservation(dimId2.toString(), cross, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));
@@ -1323,8 +1341,6 @@ export class Cube {
             }
             if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
                 var measure: string = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
-                //tcd.dump();
-                //System.out.println("Measure="+measure);
                 return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
 
             } else {
@@ -1342,9 +1358,9 @@ export class Cube {
             if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
                 var measure: string = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
                 //tcd.dump();
-                //System.out.println("Measure="+measure);
+                //console.log("Measure=" + measure);
                 var co: CubeObservation = tcd.getObservation(measure);
-                if( co == null ) return null;
+                if (co == null) return null;
                 return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
             } else {
                 var co: CubeObservation = tcd.getObservation(null);
@@ -1572,8 +1588,12 @@ export class TimeCubeDimension extends CubeDimension {
     public getObservation(id: string): CubeObservation {
         for (var i: number = 0; i < this.obs.length; i++) {
             var c: CubeObservation = this.obs[i];
-            if (c.getCrossSection() == null) {return c;}
-            if (c.getCrossSection() == id) {return c;}
+            if (c.getCrossSection() == null) {
+                return c;
+            }
+            if (c.getCrossSection() == id) {
+                return c;
+            }
         }
         return null;
     }
@@ -1704,6 +1724,7 @@ export class CubeObservation {
         // Cross Sectional Data
         if (this.concept != null) {f.setValue(mapper.getColumnIndex(this.concept), this.cross);}
         // OBS_VALUE
+        if (!mapper.containsColumn(this.observationConcept)) {mapper.registerColumn(this.observationConcept, AttachmentLevel.OBSERVATION);}
         f.setValue(mapper.getColumnIndex(this.observationConcept), this.value);
         this.map.forEach(function (at: string) {
             var ca: CubeAttribute = this.getAttribute(at);

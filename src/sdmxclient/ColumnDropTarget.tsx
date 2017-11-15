@@ -1,4 +1,4 @@
-//import * as React from 'preact-compat';
+import * as React from 'preact-compat';
 import {h,Component} from 'preact';
 import {DropTarget} from 'preact-dnd';
 
@@ -37,7 +37,7 @@ export interface ColumnDropTargetProps {
     isOver: monitor.isOver(),
     canDrop: monitor.canDrop(),
 }))
-export default class ColumnDropTarget extends Component<any, any> {
+export default class ColumnDropTarget extends React.Component<any, any> {
     render(props, state) {
         const {accepts, isOver, canDrop, connectDropTarget, lastDroppedItem} = props;
         const isActive = isOver && canDrop;

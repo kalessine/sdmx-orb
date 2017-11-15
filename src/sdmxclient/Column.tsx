@@ -49,8 +49,8 @@ const boxSource = {
   isDragging: monitor.isDragging(),
 }))
 export default class Column extends React.Component<ColumnProps, ColumnState> {
-    private props:ColumnProps = {};
-    private state:ColumnState = {};
+    private props:ColumnProps = {} as ColumnProps;
+    private state:ColumnState = {} as ColumnState; 
     constructor(props: ColumnProps, state: ColumnState) {
         super(props, state);
 
@@ -69,7 +69,7 @@ export default class Column extends React.Component<ColumnProps, ColumnState> {
                 </tr>
             </tbody>
             </table>
-        </div></td >);
+        </div></td>);
         }else {
         return connectDragSource(<td><div class="fld-btn">
             <table><tbody>
@@ -77,7 +77,7 @@ export default class Column extends React.Component<ColumnProps, ColumnState> {
                 </tr>
             </tbody>
             </table>
-        </div></td >);
+        </div></td>);
         }
     }
 }

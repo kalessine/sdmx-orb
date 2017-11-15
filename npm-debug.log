@@ -10,7 +10,7 @@
 6 silly lifecycle sdmx-orb@1.0.0~prebuild: no script for prebuild, continuing
 7 info lifecycle sdmx-orb@1.0.0~build: sdmx-orb@1.0.0
 8 verbose lifecycle sdmx-orb@1.0.0~build: unsafe-perm in lifecycle true
-9 verbose lifecycle sdmx-orb@1.0.0~build: PATH: C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\James\Dropbox\sdmx-orb\node_modules\.bin;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Skype\Phone\;c:\Program Files (x86)\Common Files\Adobe\AGL;C:\Program Files\Git\cmd;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\nodejs\;C:\Ruby24-x64\bin;C:\Users\James\AppData\Local\Microsoft\WindowsApps;C:\ant\bin;C:\Users\James\AppData\Local\GitHubDesktop\bin;C:\Users\James\AppData\Roaming\npm
+9 verbose lifecycle sdmx-orb@1.0.0~build: PATH: C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\James\Dropbox\sdmx-orb\node_modules\.bin;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Skype\Phone\;c:\Program Files (x86)\Common Files\Adobe\AGL;C:\Program Files\Git\cmd;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\nodejs\;C:\Program Files (x86)\Common Files\Apple\Internet Services\;C:\Ruby24-x64\bin;C:\Users\James\AppData\Local\Microsoft\WindowsApps;C:\ant\bin;C:\Users\James\AppData\Local\GitHubDesktop\bin;C:\Users\James\AppData\Roaming\npm
 10 verbose lifecycle sdmx-orb@1.0.0~build: CWD: C:\Users\James\Dropbox\sdmx-orb
 11 silly lifecycle sdmx-orb@1.0.0~build: Args: [ '/d /s /c', 'webpack' ]
 12 silly lifecycle sdmx-orb@1.0.0~build: Returned: code: 2  signal: null

@@ -1,5 +1,6 @@
 import * as React from 'preact-compat';
 import {h} from 'preact';
+import * as visual from 'visual/visual';
 import {Component} from 'preact';
 import Services from './sdmxclient/Services';
 import Dataflows from './sdmxclient/Dataflows';
@@ -53,7 +54,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
     private drawer: any = null;
     private filter: any = null;
     private filterTime: any = null;
-    public state: SdmxClientState = this.getInitialState();
+
     constructor(props: SdmxClientProps, state: SdmxClientState) {
         super(props, state);
         this.state = state;
@@ -89,9 +90,9 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         return this.state;
     }
     connect(q: interfaces.Queryable) {
-        this.setState({queryable: q});
+        super.setState({queryable: q});
         if (this.state.queryable == null) {
-            this.setState({dataflows: []});
+            super.setState({dataflows: []});
             return;
         }
         this.state.queryable.getRemoteRegistry().listDataflows().then(function (dfs) {
@@ -107,7 +108,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         s.columns = [];
         s.rows = [];
         s.data = [];
-        this.setState(s);
+        super.setState(s);
         this.state.queryable.getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct: structure.DataStructure) {
             this.selectStructure(struct);
         }.bind(this));
@@ -147,8 +148,14 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
             var vals: Array<string> = q.getQueryKey(q.getKeyNames()[i]).possibleValues();
             q.getQueryKey(q.getKeyNames()[i]).addValue(vals[0]);
         }
+        if (struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+            var cs: structure.ConceptSchemeType = reg.findConceptScheme(struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getLocalRepresentation().getEnumeration());
+            for (var i: number = 0; i < cs.size(); i++) {
+                q.getQueryKey(struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString()).addValue(cs.getItem(i).getId().toString());
+            }
+        }
         var s: SdmxClientState = this.state;
-        this.setState({struct: struct, all_fields: all_fields, rows: rows, columns: columns, data: data_fields, registry: reg, query: q});
+        super.setState({struct: struct, all_fields: all_fields, rows: rows, columns: columns, data: data_fields, registry: reg, query: q});
         this.query();
     }
     render(): React.ReactElement<any> {
@@ -157,7 +164,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         return (<div class="orb-container orb-blue">
             <Services onConnect={(q: interfaces.Queryable) => this.connect(q)} />
             <Dataflows dfs={state.dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />
-            <TableToolbar setState={this.setState.bind(this)} getState={this.getState.bind(this)} />
+            <TableToolbar setState={super.setState.bind(this)} getState={this.getState.bind(this)} />
             <MainTable struct={state.struct} registry={state.registry} fields={state.fields} data={state.data} cols={this.state.columns} rs={this.state.rows} query={state.query} filterButton={(e, i) => this.filterButton(e, i)} filterTimeButton={(e, i) => this.filterTimeButton(e, i)} dropField={(a1, a2) => {this.dropField(a1, a2);}} cube={this.state.cube} time_fields={this.state.time_fields} empty_columns={this.state.empty_columns} empty_rows={this.state.empty_rows} />
             <FilterDialog ref={(filter) => {this.filter = filter}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} />
             <MyTimeDialog ref={(filterTime) => {this.filterTime = filterTime}} registry={this.state.registry} struct={this.state.struct} concept={this.state.filterConcept} itemScheme={this.state.filterItemScheme} query={this.state.query} queryFunc={() => {this.query();}} time_fields={this.state.time_fields} />
@@ -173,7 +180,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         if (filterCodelist == null) {
             filterCodelist = this.state.registry.findConceptScheme(filterItemScheme);
         }
-        this.setState({filterItemScheme: filterCodelist, filterConcept: filterConcept});
+        super.setState({filterItemScheme: filterCodelist, filterConcept: filterConcept});
         this.filter.show();
         return false;
     }
@@ -187,7 +194,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         if (filterCodelist == null) {
             filterCodelist = this.state.registry.findConceptScheme(filterItemScheme);
         }
-        this.setState({filterItemScheme: filterCodelist, filterConcept: filterConcept});
+        super.setState({filterItemScheme: filterCodelist, filterConcept: filterConcept});
         this.filterTime.show();
         return false;
     }
@@ -248,19 +255,19 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         }
         switch (binNumber) {
             case 0: {
-                this.setState({rows: newArray, columns: columns, fields: fields});
+                super.setState({rows: newArray, columns: columns, fields: fields});
             } break;
             case 1: {
-                this.setState({rows: rows, columns: newArray, fields: fields});
+                super.setState({rows: rows, columns: newArray, fields: fields});
             } break;
             case 2: {
-                this.setState({rows: rows, columns: columns, fields: newArray});
+                super.setState({rows: rows, columns: columns, fields: newArray});
             } break;
         }
     }
     public query() {
         this.state.queryable.getRepository().query(this.state.query).then(function (dataMessage: message.DataMessage) {
-            if (dataMessage) {
+            if (dataMessage && dataMessage.size()>0) {
                 var cube: data.Cube = new data.Cube(this.state.struct, this.state.registry);
                 for (var i: number = 0; i < dataMessage.getDataSet(0).size(); i++) {
                     cube.putObservation(null, dataMessage.getDataSet(0).getColumnMapper(), dataMessage.getDataSet(0).getFlatObs(i));

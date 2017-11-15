@@ -11,13 +11,13 @@ export interface ServicesProps {
 }
 
 export default class Services extends React.Component<ServicesProps, any> {
-    private props:ServiceProps = {};
-    private state:any = {};
+    private props:ServicesProps = {};
+    public state:any = {};
     private onConnect: Function = null;
     private presel = null;
     constructor(a: ServicesProps) {
         super(a);
-        this.setState(this.getInitialState());
+        super.setState(this.getInitialState());
     }
     getInitialState() {
         var array = [];
@@ -45,7 +45,7 @@ export default class Services extends React.Component<ServicesProps, any> {
     changeService(e) {
         var service:string = this.state.services[e.selectedIndex];
         var q = sdmx.SdmxIO.connect(service);
-        this.setState({chosenIndex:e.selectedIndex, selected: service, queryable: q});
+        super.setState({chosenIndex:e.selectedIndex, selected: service, queryable: q});
         this.onConnect(q);
     }
     render():React.ReactElement<any> {

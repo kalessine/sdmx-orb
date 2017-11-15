@@ -491,6 +491,9 @@ export class ItemSchemeType extends MaintainableType {
         return null;
     }
     public findSubItemsString(s: string): Array<ItemType> {
+        if( s == null ) {
+            return this.findSubItemsId(null);
+        }
         return this.findSubItemsId(new commonreferences.ID(s));
     }
 
@@ -507,12 +510,33 @@ export class ItemSchemeType extends MaintainableType {
         } else {
             for (var i: number = 0; i < this.items.length; i++) {
                 var item: ItemType = this.items[i];
-                if (item.getParent().getId().equalsID(id)) {
+                if (item.getParent() != null && item.getParent().getId() != null && item.getParent().getId().equalsID(id)) {
                     result.push(item);
                 }
             }
             return result;
         }
+    }
+    public isFlat() {
+        for (var i: number = 0; i < this.size(); i++) {
+            if (this.items[i].getParent() != null && this.items[i].getParent().getId() != null) {
+                return false;
+            }else{
+                //console.log(this.items[i].getParent());
+            }
+        }
+        return true;
+
+    }
+    public getLevel(s:string):number {
+        if( s == null ) return 0;
+        var id:commonreferences.ID = new commonreferences.ID(s);
+        var itm: structure.ItemType = this.findItemId(id);
+        var i:number = 1;
+        for (; i < 30 && itm.getParent()!=null;i++) {
+            itm = this.findItemString(itm.getParent().getId().toString());
+        }
+        return i;
     }
 }
 

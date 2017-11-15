@@ -78,13 +78,16 @@ export class ID extends NestedID {
 
     public equalsID(id: ID): boolean {
         if (id == null) {
-            console.log("passed null id into ID.equalsID(...)");
+            //console.log("passed null id into ID.equalsID(...)");
             return false;
         }
 
         if (this.getString() == "") {
             console.log("this ID has a null string as ID");
             return false;
+        }
+        if (!id.getString ){
+            console.log(id);
         }
         if (id.getString() == "") {
             console.log("hat ID has a null string in equalsID(...)");

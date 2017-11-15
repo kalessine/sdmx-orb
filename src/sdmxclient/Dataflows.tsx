@@ -1,4 +1,4 @@
-//import * as React from 'preact-compat';
+import * as React from 'preact-compat';
 import {h,Component} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
@@ -8,8 +8,9 @@ export interface DataflowsProps {
     selectDataflow:Function
 }
 
-export default class Dataflows extends Component<DataflowsProps, any> {
+export default class Dataflows extends React.Component<DataflowsProps, any> {
     private presel = null;
+    public props:DataflowsProps = {} as DataflowsProps;
     constructor(props: DataflowsProps) {
         super(props);
 
@@ -24,7 +25,7 @@ export default class Dataflows extends Component<DataflowsProps, any> {
     change(s) {
         var o:structure.Dataflow = null;
         o = this.props.dfs[s.selectedIndex];
-        this.setState({
+        super.setState({
             chosenIndex:s.selectedIndex,
             selectedString: structure.NameableType.toString(o),
             selectedObject:o
