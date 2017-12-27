@@ -24,7 +24,7 @@ import * as message from './message';
 import * as commonreferences from './commonreferences';
 import * as common from './common';
 import * as data from './data';
-import * as sdmx from './sdmxIO';
+import * as sdmx from '../sdmx';
 import * as time from './time';
 import * as xml from './xml';
 export class Widukind implements interfaces.Queryable, interfaces.RemoteRegistry, interfaces.Repository {

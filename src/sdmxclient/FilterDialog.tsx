@@ -150,32 +150,30 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
             for (var i = 0; i < subs.length; i++) {
                 this.renderRow(html2, itemScheme, subs[i].getId());
             }
-            html.push(<Tree.Node><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {evt.stopPropagation(); this.change(id, checked, evt)}} /><label>{structure.NameableType.toString(item)}</label><button onclick={(evt) => {this.toggle(item.getId().toString())}}>Toggle</button><Tree preventdefaultmousedown={false} style='float:left; margin-left:{20*level}px;' depth={level}>{html2}</Tree></Tree.Node>);
+            var style = {display:"block","float":"left", "margin-left":(20*level)+"px;",clear:"both",width:"100%"};
+            html.push(<Tree.Node><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {evt.stopPropagation(); this.change(id, checked, evt)}} /><label>{structure.NameableType.toString(item)}</label><button onclick={(evt) => {evt.stopPropagation();this.toggle(item.getId().toString())}}>Toggle</button><Tree preventdefaultmousedown={false} style={JSON.stringify(style)} depth={level}>{html2}</Tree></Tree.Node>);
         } else {
-            html.push(<Tree.Node style='float:left; margin-left:{20*level}px;'><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {evt.stopPropagation(); this.change(id, checked, evt)}} />
+            html.push(<Tree.Node style={JSON.stringify(style)}><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {evt.stopPropagation(); this.change(id, checked, evt)}} />
                 <label>{structure.NameableType.toString(item)}</label></Tree.Node>);
         }
     }
-    render(props: FilterDialogProps, state: FilterDialogState): JSX.Element {
-        if (!props.open) {
-            this.props = props;
-            this.state.data = null;
-        }
+    render(): JSX.Element {
         var data = [];
         var html = [];
         var tree = this.state.tree;
-        if (props.itemScheme) {
-            data = props.itemScheme.getItems();
-            if (props.itemScheme.isFlat()) {
+        if (this.props.itemScheme) {
+            data = this.props.itemScheme.getItems();
+            if (this.props.itemScheme.isFlat()) {
                 return <div>
                     <Dialog ref={(scrollingDlg) => {this.scrollingDlg = scrollingDlg}}>
-                        <Dialog.Header>Filter {structure.NameableType.toString(props.concept)}</Dialog.Header>
+                        <Dialog.Header>Filter {structure.NameableType.toString(this.props.concept)}</Dialog.Header>
                         <Dialog.Body scrollable={true}><VirtualList
                             width='100%'
                             height={600}
                             itemCount={data.length}
                             itemSize={20} // Also supports variable heights (array or function getter)
-                            renderItem={({index, style}) =>
+                            renderItem={({index, style}) =>{
+                                console.log(style);
                                 var item: structure.ItemSchemeType = data[index];
                                 var dim: data.QueryKey = this.props.query.getQueryKey(this.props.concept.getId().toString());
                                 var selected = false;
@@ -186,13 +184,13 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
                                 });
                                 var checked = selected;
                                 var id: string = structure.NameableType.toIDString(item);
-                                return <div key={index} style={style} ><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {this.change(id, checked, evt)}} />
+                                return <div key={index}><Checkbox checked={checked} id={this.props.concept.getId().toString + "_" + id} onclick={(evt) => {this.change(id, checked, evt)}} />
                                     <label>{structure.NameableType.toString(item)}()</label></div>;
                             } /></Dialog.Body>
                         <Dialog.Footer>
                             <Dialog.FooterButton onClick={() => {this.selectAll();}}>Select All</Dialog.FooterButton>
                             <Dialog.FooterButton onClick={() => {this.clear();}}>Clear</Dialog.FooterButton>
-                            <Dialog.FooterButton accept={true} onClick={() => props.queryFunc()}>Accept</Dialog.FooterButton>
+                            <Dialog.FooterButton accept={true} onClick={() => this.props.queryFunc()}>Accept</Dialog.FooterButton>
                         </Dialog.Footer>
                     </Dialog>
                 </div>
@@ -202,18 +200,18 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
                 var array = this.props.itemScheme.findSubItemsString(null);
                 var html2 = [];
                 for (var i: number = 0; i < array.length; i++) {
-                    this.renderRow(html2, props.itemScheme, array[i].getId());
+                    this.renderRow(html2, this.props.itemScheme, array[i].getId());
                 }
-                var tree = <Tree preventdefaultmousedown="false">{html2}</Tree>;
+                var tree:any = <Tree preventdefaultmousedown="false">{html2}</Tree>;
                 return <div><Dialog ref={(scrollingDlg) => {this.scrollingDlg = scrollingDlg}}>
-                    <Dialog.Header>Filter {structure.NameableType.toString(props.concept)}</Dialog.Header>
+                    <Dialog.Header>Filter {structure.NameableType.toString(this.props.concept)}</Dialog.Header>
                     <Dialog.Body scrollable={true}>
                         {tree}
                     </Dialog.Body>
                     <Dialog.Footer>
                         <Dialog.FooterButton onClick={() => {this.selectAll();}}>Select All</Dialog.FooterButton>
                         <Dialog.FooterButton onClick={() => {this.clear();}}>Clear</Dialog.FooterButton>
-                        <Dialog.FooterButton accept={true} onClick={() => props.queryFunc()}>Accept</Dialog.FooterButton>
+                        <Dialog.FooterButton accept={true} onClick={() => this.props.queryFunc()}>Accept</Dialog.FooterButton>
                     </Dialog.Footer>
                 </Dialog>
                 </div >

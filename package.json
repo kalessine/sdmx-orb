@@ -19,7 +19,7 @@
   "homepage": "https://github.com/kalessine/sdmx-orb#readme",
   "dependencies": {
     "@types/react-dnd-html5-backend": "^2.1.8",
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.1",
     "classnames": "^2.2.5",
     "flexlayout-react": "^0.2.5",
     "loader-utils": "^1.1.0",
@@ -27,7 +27,7 @@
     "material": "^0.1.1",
     "material-components-web": "0.8.0",
     "material-design-icons": "^3.0.0",
-    "moment": "^2.18.1",
+    "moment": "^2.19.2",
     "postcss": "^6.0.11",
     "postcss-cssnext": "^3.0.2",
     "postcss-each": "^0.10.0",
@@ -50,7 +50,7 @@
     "react-virtual-list": "^2.2.2"
   },
   "devDependencies": {
-    "awesome-typescript-loader": "^3.2.3",
+    "awesome-typescript-loader": "^3.4.1",
     "css-loader": "^0.28.7",
     "extract-text-webpack-plugin": "^3.0.0",
     "node-sass": "^4.5.3",
@@ -63,7 +63,7 @@
     "ts-loader": "^2.3.2",
     "typed-css-modules-loader": "0.0.10",
     "typescript": "^2.5.0-dev.20170808",
-    "typescript-collections": "^1.2.3",
-    "webpack": "^3.5.3"
+    "typescript-collections": "^1.2.5",
+    "webpack": "^3.8.1"
   }
 }

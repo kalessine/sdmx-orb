@@ -10,14 +10,14 @@ export interface ServicesProps {
     onConnect: Function,
 }
 
-export default class Services extends React.Component<ServicesProps, any> {
-    private props:ServicesProps = {};
-    public state:any = {};
+export default class Services extends React.Component {
+    private props:ServicesProps = {} as any;
+    public state:any = {} as any;
     private onConnect: Function = null;
     private presel = null;
-    constructor(a: ServicesProps) {
-        super(a);
-        super.setState(this.getInitialState());
+    constructor(a: ServicesProps,b:any) {
+        super(a,b);
+        this.state = this.getInitialState();
     }
     getInitialState() {
         var array = [];
@@ -60,7 +60,7 @@ export default class Services extends React.Component<ServicesProps, any> {
                 this.changeService(a)
             }}>
             {this.listServices()}
-        </Select></div>)
+        </Select></div>);
         //return <div><select value={state.selected} onChange={(a) => this.changeService(a)}></select></div>
     }
 }

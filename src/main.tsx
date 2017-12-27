@@ -1,20 +1,36 @@
 import * as React from 'preact-compat';
 import {h, render, Component} from 'preact';
 import SdmxClient from './SdmxClient';
+import Editor from './visual/editor';
 import JSONResultPanel from './visualmaker/JSONResultPanel';
 import * as Tabs from "react-simpletabs";
+import * as visual from './visual/visual';
+import * as bindings from './visual/bindings';
+import * as customisedialog from './visual/CustomiseDialog';
+import * as bindingsX from './visual/bindingsX';
+
 export class Main extends React.Component {
-    constructor() {
+    public props = {};
+    public state = {};
+    public context = {};
+    public getChildContext() {return this.context;}
+
+    constructor(props: any, state: any) {
+        super(props, state);
+        this.props = props;
+        this.state = state;
     }
-    public render(props, state) {
+    public render() {
         return (
             <Tabs>
                 <Tabs.Panel title='SdmxClient'>
-                    <SdmxClient />
+                    <div>
+                        <SdmxClient />
+                    </div>
                 </Tabs.Panel>
                 <Tabs.Panel title='Tab #2'>
                     <div>
-                        <p>this is a test!?</p>
+                        <Editor />
                     </div>
                 </Tabs.Panel>
                 <Tabs.Panel title='Tab #3'>
@@ -33,5 +49,5 @@ export class Main extends React.Component {
 
 
 React.render(<Main />, document.querySelector('#app'));
-//import HelloWorld2 from './HelloWorld2';
-//render(<HelloWorld2 name="James" />, document.querySelector('#app'));
+
+

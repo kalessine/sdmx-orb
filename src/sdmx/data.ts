@@ -244,6 +244,9 @@ export class QueryKey {
         }
         return false;
     }
+    public clear() {
+        this.values = [];
+    }
 }
 
 export class FlatObs {
