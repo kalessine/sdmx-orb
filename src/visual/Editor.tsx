@@ -1,21 +1,41 @@
+console.log('0.1');
 import * as React from 'preact-compat';
+console.log('0.2');
 import {h} from 'preact';
+console.log('0.3');
 import * as visual from './visual';
+console.log('0.4');
 import * as bindings from './bindings';
+console.log('0.5');
 import * as structure from '../sdmx/structure';
+console.log('0.6');
 import * as message from '../sdmx/message';
+console.log('0.7');
 import * as interfaces from '../sdmx/interfaces';
+console.log('0.8');
 import * as _ from 'lodash';
+console.log('0.9');
 import Select from 'preact-material-components/Select';
+console.log('1.0');
 import Services from './Services';
+console.log('1.0');
 import Dataflows from './Dataflows';
+console.log('1.1');
 import JSONResultPanel from './JSONResultPanel';
+console.log('1.2');
 import CustomiseDialog from './CustomiseDialog';
+console.log('1.3');
 import 'preact-material-components/List/style.css';
+console.log('1.4');
 import 'preact-material-components/Menu/style.css';
+console.log('1.5');
 import 'preact-material-components/Select/style.css';
+console.log('1.6');
 import Button from 'preact-material-components/Button';
-
+console.log('1.7');
+import * as adapter from './adapter';
+console.log('1.8');
+console.log('10');
 export interface EditorProps {
 
 }
@@ -58,6 +78,7 @@ export default class Editor extends React.Component {
     public selectDataflow(df: structure.Dataflow) {
         var s: EditorState = this.getState();
         s.dataflow = df;
+        s.visual=null;
         super.setState(s);
         this.getState().queryable.getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct: structure.DataStructure) {
             this.selectStructure(struct);
@@ -111,8 +132,7 @@ export default class Editor extends React.Component {
             }
             i++;
         });
-        console.log("SelectedBE="+concept+":" + index);
-        return (<Select selectedIndex={index} onChange={(a) => {this.setBinding(concept, a['selectedIndex'], bindings.DimensionBindingRegister.register)}>{html}</Select>);
+        return (<Select selectedIndex={index} onChange={(a) => {this.setBinding(concept, a['selectedIndex'], reg)}>{html}</Select>);
     }
     public setBinding(concept: string, i: number, reg: bindings.BindingRegister) {
         var html = [];
@@ -122,19 +142,15 @@ export default class Editor extends React.Component {
             if (i == index) {entry = item;}
             index++;
         });
-        console.log("Entruy=");
-        console.log(entry);
         if (entry == null) {return;}
         var cn = entry.getCreateNew();
         var b = new cn(this.state.visual, concept);
-        console.log(b);
-        console.log(b.getBoundTo());
         this.state.visual.setBinding(b);
         this.forceUpdate();
     }
 
-    public customRow(concept) {
-        return (<div><p>{concept.getId().toString()}:{structure.NameableType.toString(concept)}</p>{this.selectBinding(concept.getId().toString(), bindings.DimensionBindingRegister.register, this.state.visual.findBinding(concept.getId().toString()).getBoundTo())}<Button onclick={(e) => {this.customise(concept.getId().toString());}>Customise</Button></div>);
+    public customRow(concept: structure.ConceptType,register:bindings.) {
+        return (<div><p>{concept.getId().toString()}:{structure.NameableType.toString(concept)}</p>{this.selectBinding(concept.getId().toString(), register, this.state.visual.findBinding(concept.getId().toString()).getBoundTo())}<Button onclick={(e) => {this.customise(concept.getId().toString());}>Customise</Button></div>);
     }
     public customise(s: string) {
         var st = this.state;
@@ -144,9 +160,8 @@ export default class Editor extends React.Component {
         st['currentBindingParse'] = be.getParseObjectToBinding();
         st['currentBindingSave'] = be.getSaveBindingToObject();
         st['openCustomise'] = false;
-        super.setState(st);
         st['openCustomise'] = true;
-        super.setState(st);
+        super.forceUpdate();
         if (this.customiseDialog != null) {
             this.customiseDialog.show();
         }
@@ -168,12 +183,34 @@ export default class Editor extends React.Component {
             var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
             var concept: structure.ConceptType = this.state.visual.getRegistry().findConcept(dim.getConceptIdentity());
             var b: bindings.BoundTo = this.state.visual.findBinding(concept.getId().toString());
-            html.push(this.customRow(concept));
-            if (this.state.currentBindingObject == null) {
-                this.customise(concept.getId().toString());
-            }
+            html.push(this.customRow(concept,bindings.DimensionBindingRegister.register));
+            //if (this.state.currentBindingObject == null) {
+            //    this.customise(concept.getId().toString());
+            //}
+        }
+        if( this.state.visual.getTime()!=null) {
+            var dim2: structure.TimeDimension = struct.findComponentString(this.state.visual.getTime().getConcept()) as TimeDimension;
+            var concept2 = this.state.visual.getRegistry().findConcept(dim2.getConceptIdentity());
+            html.push(this.customRow(concept2,bindings.TimeBindingRegister.register));
+        }/*
+        if(this.state.visual.getCrossSection()!=null){
+            var dim3: structure.Component = struct.findComponentString(this.state.visual.getCrossSection().getConcept());
+            var concept3 = this.state.visual.getRegistry().findConcept(dim3.getConceptIdentity());
+            html.push(this.customRow(concept3,bindings.CrossSectionBindingRegister.register));
+        }*/
+        for(var i:number=0;i<this.state.visual.getValues().length;i++) {
+            var dim4: structure.Component = struct.findComponentString(this.state.visual.getValues()[i].getConcept());
+            var concept4= this.state.visual.getRegistry().findConcept(dim4.getConceptIdentity());
+            html.push(this.customRow(concept4,bindings.MeasureBindingRegister.register));
         }
         html.push(<CustomiseDialog currentBindingObject={this.state.currentBindingObject} renderFunc={this.state.currentBindingRenderFunc} currentBindingConcept={this.state.currentBindingConcept} visual={this.state.visual} ref={(customiseDialog) => {this.customiseDialog = customiseDialog}} open={this.state.openCustomise} />);
+        var reg = new adapter.AdapterRegistry();
+        for(var i:number=0;i<reg.getList().length;i++) {
+            if(reg.getList()[i].canCreateModelFromVisual(this.state.visual)){
+                //
+                html.push(<Button onClick={()=>{reg.getList()[i].createModel(this.state.visual,this.state.visual.getCube()).render("render");}}>{reg.getList()[i].getName()}</Button>);
+            }
+        }
         return <div>{html}</div>;
     }
 }

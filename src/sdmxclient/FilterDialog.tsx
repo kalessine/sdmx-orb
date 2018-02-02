@@ -12,6 +12,7 @@ import * as collections from 'typescript-collections';
 import VirtualList from 'react-tiny-virtual-list';
 import * as Tree from 'react-simple-tree';
 import TreeView from 'react-treeview';
+console.log('6');
 export interface FilterDialogProps {
     open?: boolean,
     registry: interfaces.LocalRegistry,

@@ -1,5 +1,6 @@
 import * as React from 'preact-compat';
 import {h} from 'preact';
+console.log('11');
 export interface JSONResultState {
 
 }

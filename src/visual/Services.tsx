@@ -5,7 +5,7 @@ import Select from 'preact-material-components/Select';
 import * as structure from '../sdmx/structure';
 import * as sdmx from '../sdmx';
 import * as interfaces from '../sdmx/interfaces';
-
+console.log('3');
 export interface ServicesProps {
     onConnect: Function,
 }

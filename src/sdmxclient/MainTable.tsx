@@ -12,7 +12,7 @@ import Column from './Column';
 import ColumnDropTarget from './ColumnDropTarget';
 import {IntCartesianProduct} from './IntCartesianProduct';
 import * as collections from 'typescript-collections';
-
+console.log('5');
 export interface MainTableProps {
     fields: Array<structure.ConceptType>,
     data: Array<structure.ConceptType>,

@@ -1,14 +1,25 @@
-import * as structure from "../sdmx/structure";
-import * as sdmx from "../sdmx";
-import * as interfaces from "../sdmx/interfaces";
-import * as adapter from "../visual/adapter";
-import * as model from "../visual/model";
-import * as data from "../sdmx/data";
-import * as common from "../sdmx/common";
+console.log("0.1");
 import * as message from "../sdmx/message";
+console.log("0.2");
+import * as sdmx from "../sdmx";
+console.log("0.3");
+import * as interfaces from "../sdmx/interfaces";
+console.log("0.4");
+import * as adapter from "../visual/adapter";
+console.log("0.5");
+import * as model from "../visual/model";
+console.log("0.6");
+import * as data from "../sdmx/data";
+console.log("0.7");
+import * as common from "../sdmx/common";
+console.log("0.8");
+import * as structure from "../sdmx/structure";
+console.log("0.9");
 import * as commonreferences from "../sdmx/commonreferences";
+console.log("1.0");
 import * as bindings from "../visual/bindings";
-import * as bindingsX from './bindingsX';
+console.log("1.1");
+console.log('17');
 export class Visual {
 
     private bindings: Array<bindings.BoundTo> = [];
@@ -90,9 +101,7 @@ export class Visual {
         return this.queryable.getRemoteRegistry().getLocalRegistry().findDataStructure(this.df.getStructure());
     }
     public size(): number {
-        return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length +
-            (this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension() != null ? 1 : 0) +
-            (this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension() != null ? 1 : 0);
+        return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length;
     }
     public dimSize(): number {
         return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length;
@@ -106,7 +115,17 @@ export class Visual {
             this.bindingsColumnMapper.registerColumn(dim.getId().toString(), data.AttachmentLevel.OBSERVATION);
             this.bindings.push(b);
         }
-
+        var b2:bindings.BoundTo = new bindings.BoundToContinuousY(this, this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
+        this.values = [];
+        this.values.push(b2);
+        if (this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension() != null) {
+            var b3:bindings.BoundTo = new bindings.BoundToTimeX(this, this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString());
+            this.time=b3;
+        }
+        if (this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension()!=null) {
+            //var b4:bindings.BoundTo = new bindings.Bound
+            //this.crossSection=b4;
+        }
     }
     public setDirty(dirty: boolean) {
         this.dirty = dirty;
@@ -273,15 +292,8 @@ export class Visual {
     public getDimensionBinding(i: number): bindings.BoundTo {
         return this.bindings[i];
     }
-    public getBinding(c: string): bindings.BoundTo {
-        for (var i: number = 0; i < this.bindings.length; i++) {
-            if (this.bindings[i].getConcept() == c) return this.bindings[i];
-        }
-        if (this.time != null && this.time.getConcept() == c) return this.time;
-        if (this.crossSection != null && this.crossSection.getConcept() == c) {
-            return this.crossSection;
-        }
-        return null;
+    public getBinding(idx: number): bindings.BoundTo {
+        return this.bindings[idx];
     }
     public getDataService(): string {
         return this.dataservice;
@@ -289,4 +301,15 @@ export class Visual {
     public setDataService(s: string) {
         this.dataservice = s;
     }
+    public getTime() {
+        return this.time; 
+    }
+    public getValues():Array<bindings.BoundToContinuous> {
+        return this.values;
+    }
+    /*
+    public getCrossSection():bindings.BoundToCrossSection {
+        return this.crossSection;
+    }
+    */
 }

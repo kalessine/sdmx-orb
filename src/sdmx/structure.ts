@@ -801,19 +801,17 @@ export class DataStructure extends MaintainableType {
             }
         }
         var time: TimeDimension = this.components.getDimensionList().getTimeDimension();
-        if (time.getId().equalsID(col)) {
+        if (time!=null&&time.getId().equalsID(col)) {
             return time;
         }
         var dim2: PrimaryMeasure = this.components.getMeasureList().getPrimaryMeasure();
         if (dim2.getId().equalsID(col)) {
             return dim2;
         }
-        alert("Can't find concept:" + col.getString() + " pm dim:" + dim2.getId().getString());
-        alert(JSON.stringify(dim2));
         if ("OBS_VALUE" == col.getString()) {
             return dim2;
         }
-
+        alert("Can't find concept:" + col.getString() + " pm dim:" + dim2.getId().getString());
         return null;
     }
 

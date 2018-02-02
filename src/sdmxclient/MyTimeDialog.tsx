@@ -9,6 +9,7 @@ import * as structure from '../sdmx/structure';
 import * as data from '../sdmx/data';
 import * as collections from 'typescript-collections';
 import {DatePicker} from 'react-toolbox/lib/date_picker';
+console.log('7');
 export interface TimeDialogProps {
     open?: boolean,
     registry: interfaces.LocalRegistry,

@@ -3,6 +3,7 @@ import {h,Component} from 'preact';
 import _ from 'lodash';
 import Select from 'preact-material-components/Select';
 import * as structure from '../sdmx/structure';
+console.log('4');
 export interface DataflowsProps {
     dfs: Array<structure.Dataflow>,
     selectDataflow:Function

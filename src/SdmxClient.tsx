@@ -1,6 +1,5 @@
 import * as React from 'preact-compat';
 import {h} from 'preact';
-import * as visual from 'visual/visual';
 import {Component} from 'preact';
 import Services from './sdmxclient/Services';
 import Dataflows from './sdmxclient/Dataflows';
@@ -18,7 +17,7 @@ import * as message from './sdmx/message';
 import * as data from './sdmx/data';
 import * as _ from 'lodash';
 import * as collections from 'typescript-collections';
-
+console.log('2');
 export interface SdmxClientProps {
 
 }

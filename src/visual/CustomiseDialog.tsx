@@ -11,6 +11,7 @@ import 'preact-material-components/List/style.css';
 import 'preact-material-components/Menu/style.css';
 import 'preact-material-components/Select/style.css';
 //import {DropdownBindingCustomiser} from './bindings';
+console.log('9');
 export interface CustomiseDialogProps {
     open?: boolean,
     renderFunc: Function,

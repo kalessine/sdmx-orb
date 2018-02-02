@@ -1,6 +1,6 @@
 import * as React from 'preact-compat';
 import {h, Component} from 'preact';
-
+console.log('8');
 export interface TableToolbarProps {
     getState: Function,
     setState: Function
@@ -20,7 +20,7 @@ export default class TableToolbar extends Component<TableToolbarProps, any> {
             alert("beep" + action);
         }
     }
-    render(): React.ReactElement {
+    render() {
         var configButtons: Array<any> = //config.toolbar.buttons ?
             //defaultToolbarConfig.buttons.concat(config.toolbar.buttons) :
             defaultToolbarConfig.buttons;
@@ -54,9 +54,8 @@ var defaultToolbarConfig: any = {
         this.props.setState({empty_columns: !this.props.getState().empty_columns});
     }
 };
+
 defaultToolbarConfig['buttons'] = [];
 defaultToolbarConfig['buttons'].push({type: 'label', text: 'Rows:'});
 defaultToolbarConfig['buttons'].push({type: 'button', tooltip: 'Show Empty Rows', cssClass: 'empty-rows', action: defaultToolbarConfig.showEmptyRows});
 defaultToolbarConfig['buttons'].push({type: 'button', tooltip: 'Show Empty Columns', cssClass: 'empty-columns', action: defaultToolbarConfig.showEmptyColumns});
-
-

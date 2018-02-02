@@ -6,7 +6,7 @@ import * as visual from "../visual/visual";
 import * as data from "../sdmx/data";
 import Checkbox from 'preact-material-components/Checkbox';
 import Select from 'preact-material-components/Select';
-
+console.log('14');
 export class BoundTo {
 
     public static NOT_BOUND: number = -1;
@@ -34,11 +34,16 @@ export class BoundTo {
     public static BOUND_TIME_X: number = 18;
     public static BOUND_TIME_Y: number = 19;
     public static BOUND_TIME_DROPDOWN: number = 20;
+    public static BOUND_TIME_LIST: number = 27;
+    public static BOUND_TIME_SERIES: number = 27;
 
     public static BOUND_MEASURES_DROPDOWN: number = 21;
     public static BOUND_MEASURES_LIST: number = 22;
     public static BOUND_MEASURES_INDIVIDUAL: number = 23;
     public static BOUND_MEASURES_SERIES: number = 24;
+    
+    public static BOUND_DISCRETE_SINGLE: number = 25;
+    public static BOUND_DISCRETE_ALL: number = 26;
 
     private concept: string;
     private boundTo: number = BoundTo.NOT_BOUND;
@@ -51,7 +56,7 @@ export class BoundTo {
     private visual: visual.Visual = null;
 
     public static DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    public static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN];
+    public static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
     public static MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
     public static MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
 
@@ -408,12 +413,50 @@ export class BoundToDiscrete extends BoundTo {
         return "Discrete";
     }
 }
+export class BoundToSingleValue extends BoundToDiscrete {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_SINGLE;
+    }
+    public getBoundToString() {
+        return "SingleValue";
+    }
+}
+export class BoundToAllValues extends BoundToDiscrete {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_ALL;
+    }
+    public getBoundToString() {
+        return "All Values";
+    }
+}
 export class BoundToTime extends BoundTo {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
     }
     public getBoundTo(): number {
         return BoundTo.NOT_BOUND;
+    }
+}
+export class BoundToTimeX extends BoundTo {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_TIME_X;
+    }
+}
+export class BoundToTimeY extends BoundTo {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_TIME_Y;
     }
 }
 export class BoundToContinuous extends BoundTo {
@@ -472,6 +515,17 @@ export class BoundToContinuousY extends BoundToContinuous {
         return "BoundToContinuousY";
     }
 }
+export class BoundToContinuousColour extends BoundToContinuous {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_CONTINUOUS_COLOUR;
+    }
+    public getBoundToString() {
+        return "BoundToContinuousColour";
+    }
+}
 export class BoundToList extends BoundToDiscrete {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
@@ -483,6 +537,32 @@ export class BoundToList extends BoundToDiscrete {
     }
     public getBoundToString() {
         return "BoundToList";
+    }
+}
+export class BoundToTimeList extends BoundToTime {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(true);
+        super.setWalkAll(true);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_TIME_LIST;
+    }
+    public getBoundToString() {
+        return "BoundToTimeList";
+    }
+}
+export class BoundToTimeSeries extends BoundToTime {
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(true);
+        super.setWalkAll(true);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_TIME_SERIES;
+    }
+    public getBoundToString() {
+        return "BoundToTimeSeries";
     }
 }
 export class BoundToSeries extends BoundToDiscrete {
@@ -497,6 +577,20 @@ export class BoundToSeries extends BoundToDiscrete {
     }
     public getBoundToString() {
         return "Series";
+    }
+}
+export class BoundToSlider extends BoundToDiscrete {
+
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(true);
+        super.setWalkAll(true);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_SLIDER;
+    }
+    public getBoundToString() {
+        return "Slider";
     }
 }
 export class BoundToDropdown extends BoundToDiscrete {
@@ -524,6 +618,36 @@ export class BoundToDropdown extends BoundToDiscrete {
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_DISCRETE_DROPDOWN;
+    }
+    public getBoundToString() {
+        return "Dropdown";
+    }
+}
+export class BoundToTimeDropdown extends BoundToDiscrete {
+    public flat: boolean = true;
+    public perCentId: string = null;
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(true);
+        super.setWalkAll(true);
+    }
+    public expectValues(): number {
+        return 1;
+    }
+    public isFlat(): boolean {
+        return this.flat;
+    }
+    public setFlat(b: boolean) {
+        this.flat = b;
+    }
+    public getPercentOfId() {
+        return this.perCentId;
+    }
+    public setPercentOfId(s: string) {
+        this.perCentId = s;
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_TIME_DROPDOWN;
     }
     public getBoundToString() {
         return "Dropdown";
@@ -582,7 +706,7 @@ export class TimeBindingRegister extends BindingRegister {
         TimeBindingRegister.register.register(be);
     }
     public static getList(): Array<BindingEntry> {
-        return TimeBindingRegister.getList();
+        return TimeBindingRegister.register.getList();
     }
 }
 export class CrossSectionBindingRegister extends BindingRegister {
@@ -591,7 +715,7 @@ export class CrossSectionBindingRegister extends BindingRegister {
         CrossSectionBindingRegister.register.register(be);
     }
     public static getList(): Array<BindingEntry> {
-        return CrossSectionBindingRegister.getList();
+        return CrossSectionBindingRegister.register.getList();
     }
 }
 export class MeasureBindingRegister extends BindingRegister {
@@ -600,17 +724,32 @@ export class MeasureBindingRegister extends BindingRegister {
         MeasureBindingRegister.register.register(be);
     }
     public static getList(): Array<BindingEntry> {
-        return MeasureBindingRegister.getList();
+        return MeasureBindingRegister.register.getList();
     }
 }
 export class BindingRegisterUtil {
     public static findBindingEntry(i: number): BindingEntry {
         var list = DimensionBindingRegister.getList();
         for (var j: number = 0; j < list.length; j++) {
-            
             if (list[j].getId() == i) {
-                console.log("Found BindingEntry:"+i);
-                console.log(list[j]);
+                return list[j];
+            }
+        }
+        list = TimeBindingRegister.getList();
+        for (var j: number = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        list = CrossSectionBindingRegister.getList();
+        for (var j: number = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        list = MeasureBindingRegister.getList();
+        for (var j: number = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
                 return list[j];
             }
         }
@@ -708,6 +847,72 @@ function parseObjectToBindingBoundToDropdown(o: object, v: visual.Visual): Bound
     b.setPercentOfId(o['perCentOfId']);
     return b;
 }
+/*
+function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
+    var o:any = {}
+    o.concept = b.getConcept();
+    o.typeid = b.getBoundTo();
+    o.typename = "BoundToDropdown";
+    o.clientSide = b.isClientSide();
+    o.flat = b.isFlat();
+    o.perCentOfId = b.getPercentOfId();
+    return o;
+    }*/
+export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
+    var o:any = {};
+    o.concept = b.getConcept();
+    switch (b.getBoundTo()){
+        case BoundTo.BOUND_CONTINUOUS_X:
+        o.typeid = BoundTo.BOUND_CONTINUOUS_X;
+        break;
+        case BoundTo.BOUND_CONTINUOUS_Y:
+        o.typeid = BoundTo.BOUND_CONTINUOUS_Y;
+        break;
+        case BoundTo.BOUND_TIME_X:
+        o.typeid = BoundTo.BOUND_TIME_X;
+        break;
+        case BoundTo.BOUND_TIME_Y:
+        o.typeid = BoundTo.BOUND_TIME_Y
+        break;
+        case BoundTo.BOUND_DISCRETE_LIST:
+        o.typeid = BoundTo.BOUND_DISCRETE_LIST;
+        break;
+        case BoundTo.BOUND_DISCRETE_SERIES:
+        o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+        break;
+        case BoundTo.BOUND_DISCRETE_SLIDER:
+        o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+        break;
+    }
+    return b;
+}
+export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundToDiscreteX {
+    var b = null;
+    switch(o['typeid']){
+        case BoundTo.BOUND_CONTINUOUS_X:
+        b = new BoundToContinuousX(v,o['concept']);
+        break;
+        case BoundTo.BOUND_CONTINUOUS_Y:
+        b = new BoundToContinuousY(v,o['concept']);
+        break;
+        case BoundTo.BOUND_TIME_X:
+        b = new BoundToTimeX(v,o['concept']);
+        break;
+        case BoundTo.BOUND_TIME_Y:
+        b = new BoundToTimeY(v,o['concept']);
+        break;
+        case BoundTo.BOUND_DISCRETE_LIST:
+        b = new BoundToList(v,o['concept']);
+        break;
+        case BoundTo.BOUND_DISCRETE_SERIES:
+        b = new BoundToSeries(v,o['concept']);
+        break;
+        case BoundTo.BOUND_DISCRETE_SLIDER:
+        b = new BoundToSlider(v,o['concept']);
+        break;
+    }
+    return b;
+}
 function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
     var o:any = {}
     o.concept = b.getConcept();
@@ -730,7 +935,36 @@ export function parseObjectToBindingBoundToDiscreteX(o: object, v: visual.Visual
     return b;
 }
 
-var be1: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "BoundToDiscreteDropDown", parseObjectToBindingBoundToDropdown, saveBindingToObjectBoundToDropdown,BoundToDropdown);
-var be2: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "BoundToDiscreteX", parseObjectToBindingBoundToDiscreteX, saveBindingToObjectBoundToDiscreteX,BoundToDiscreteX);
+var be1: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "Dropdown", parseObjectToBindingBoundToDropdown, saveBindingToObjectBoundToDropdown,BoundToDropdown);
+var be2: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "DiscreteX", parseObjectToBindingBoundToDiscreteX, saveBindingToObjectBoundToDiscreteX,BoundToDiscreteX);
+var be3: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject,BoundToList);
+var be4: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject,BoundToSeries);
+var be5: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE, "Single Value", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleValue);
+var be6: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_ALL, "All Values", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToAllValues);
+var be7: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_X, "Time X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+var be8: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+var be9: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeDropdown);
+var be10: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeList);
+var be11: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeSeries);
+var be12: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_X, "X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousX);
+var be13: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_Y, "Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousY);
+var be14: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_COLOUR, "Colour", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousColour);
+
+
+
 DimensionBindingRegister.registerState(be1);
 DimensionBindingRegister.registerState(be2);
+DimensionBindingRegister.registerState(be3);
+DimensionBindingRegister.registerState(be4);
+DimensionBindingRegister.registerState(be5);
+DimensionBindingRegister.registerState(be6);
+
+TimeBindingRegister.registerState(be7);
+TimeBindingRegister.registerState(be8);
+TimeBindingRegister.registerState(be9);
+TimeBindingRegister.registerState(be10);
+TimeBindingRegister.registerState(be11);
+
+MeasureBindingRegister.registerState(be12);
+MeasureBindingRegister.registerState(be13);
+MeasureBindingRegister.registerState(be14);
