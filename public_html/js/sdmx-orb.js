@@ -6277,7 +6277,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var IdentifiableType = (function (_super) {
     __extends(IdentifiableType, _super);
@@ -6446,7 +6446,17 @@ var NameableType = (function (_super) {
         return sdmx.SdmxIO.truncateName(name.getText());
     };
     NameableType.toIDString = function (named) {
-        return named.getId().toString();
+        if (named instanceof NameableType) {
+            return named.getId().toString();
+        }
+        else {
+            if (named != null) {
+                return named.toString();
+            }
+            else {
+                return "";
+            }
+        }
     };
     NameableType.sanitise = function (s) {
         if (s.indexOf("'") != -1) {
@@ -7898,7 +7908,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
     Copyright (C) 2016 James Gardner
 */
 var commonreferences = __webpack_require__(13);
-var sdmx20 = __webpack_require__(274);
+var message = __webpack_require__(40);
+var sdmx20 = __webpack_require__(281);
 var sdmx21 = __webpack_require__(282);
 var abs = __webpack_require__(283);
 var oecd = __webpack_require__(286);
@@ -7995,6 +8006,21 @@ var SdmxIO = (function () {
         }
         var reference = new commonreferences.Reference(ref, null);
         return reference;
+    };
+    SdmxIO.getBaseHeader = function () {
+        var header = new message.Header();
+        header.setId("none");
+        header.setTest(false);
+        var sender = new message.Sender();
+        sender.setId(new commonreferences.ID("Sdmx-Sax"));
+        header.setSender(sender);
+        var receiver = new message.PartyType();
+        receiver.setId(new commonreferences.ID("You"));
+        header.setReceivers([receiver]);
+        //var htt:message.HeaderTimeType = new message.HeaderTimeType();
+        //htt.setDate(DateTime.now());
+        //header.setPrepared(htt);
+        return header;
     };
     SdmxIO.SANITISE_NAMES = false;
     SdmxIO.PARSER = [];
@@ -8143,153 +8169,6 @@ var TIME_PICKER = exports.TIME_PICKER = 'RTTimePicker';
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
-exports.has = function (obj, prop) {
-    return _hasOwnProperty.call(obj, prop);
-};
-/**
- * Default function to compare element order.
- * @function
- */
-function defaultCompare(a, b) {
-    if (a < b) {
-        return -1;
-    }
-    else if (a === b) {
-        return 0;
-    }
-    else {
-        return 1;
-    }
-}
-exports.defaultCompare = defaultCompare;
-/**
- * Default function to test equality.
- * @function
- */
-function defaultEquals(a, b) {
-    return a === b;
-}
-exports.defaultEquals = defaultEquals;
-/**
- * Default function to convert an object to a string.
- * @function
- */
-function defaultToString(item) {
-    if (item === null) {
-        return 'COLLECTION_NULL';
-    }
-    else if (isUndefined(item)) {
-        return 'COLLECTION_UNDEFINED';
-    }
-    else if (isString(item)) {
-        return '$s' + item;
-    }
-    else {
-        return '$o' + item.toString();
-    }
-}
-exports.defaultToString = defaultToString;
-/**
-* Joins all the properies of the object using the provided join string
-*/
-function makeString(item, join) {
-    if (join === void 0) { join = ','; }
-    if (item === null) {
-        return 'COLLECTION_NULL';
-    }
-    else if (isUndefined(item)) {
-        return 'COLLECTION_UNDEFINED';
-    }
-    else if (isString(item)) {
-        return item.toString();
-    }
-    else {
-        var toret = '{';
-        var first = true;
-        for (var prop in item) {
-            if (exports.has(item, prop)) {
-                if (first) {
-                    first = false;
-                }
-                else {
-                    toret = toret + join;
-                }
-                toret = toret + prop + ':' + item[prop];
-            }
-        }
-        return toret + '}';
-    }
-}
-exports.makeString = makeString;
-/**
- * Checks if the given argument is a function.
- * @function
- */
-function isFunction(func) {
-    return (typeof func) === 'function';
-}
-exports.isFunction = isFunction;
-/**
- * Checks if the given argument is undefined.
- * @function
- */
-function isUndefined(obj) {
-    return (typeof obj) === 'undefined';
-}
-exports.isUndefined = isUndefined;
-/**
- * Checks if the given argument is a string.
- * @function
- */
-function isString(obj) {
-    return Object.prototype.toString.call(obj) === '[object String]';
-}
-exports.isString = isString;
-/**
- * Reverses a compare function.
- * @function
- */
-function reverseCompareFunction(compareFunction) {
-    if (!isFunction(compareFunction)) {
-        return function (a, b) {
-            if (a < b) {
-                return 1;
-            }
-            else if (a === b) {
-                return 0;
-            }
-            else {
-                return -1;
-            }
-        };
-    }
-    else {
-        return function (d, v) {
-            return compareFunction(d, v) * -1;
-        };
-    }
-}
-exports.reverseCompareFunction = reverseCompareFunction;
-/**
- * Returns an equal function given a compare function.
- * @function
- */
-function compareToEquals(compareFunction) {
-    return function (a, b) {
-        return compareFunction(a, b) === 0;
-    };
-}
-exports.compareToEquals = compareToEquals;
-//# sourceMappingURL=util.js.map
-
-/***/ }),
-/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8716,6 +8595,153 @@ exports.StandardTimePeriodType = StandardTimePeriodType;
 
 
 /***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var _hasOwnProperty = Object.prototype.hasOwnProperty;
+exports.has = function (obj, prop) {
+    return _hasOwnProperty.call(obj, prop);
+};
+/**
+ * Default function to compare element order.
+ * @function
+ */
+function defaultCompare(a, b) {
+    if (a < b) {
+        return -1;
+    }
+    else if (a === b) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+exports.defaultCompare = defaultCompare;
+/**
+ * Default function to test equality.
+ * @function
+ */
+function defaultEquals(a, b) {
+    return a === b;
+}
+exports.defaultEquals = defaultEquals;
+/**
+ * Default function to convert an object to a string.
+ * @function
+ */
+function defaultToString(item) {
+    if (item === null) {
+        return 'COLLECTION_NULL';
+    }
+    else if (isUndefined(item)) {
+        return 'COLLECTION_UNDEFINED';
+    }
+    else if (isString(item)) {
+        return '$s' + item;
+    }
+    else {
+        return '$o' + item.toString();
+    }
+}
+exports.defaultToString = defaultToString;
+/**
+* Joins all the properies of the object using the provided join string
+*/
+function makeString(item, join) {
+    if (join === void 0) { join = ','; }
+    if (item === null) {
+        return 'COLLECTION_NULL';
+    }
+    else if (isUndefined(item)) {
+        return 'COLLECTION_UNDEFINED';
+    }
+    else if (isString(item)) {
+        return item.toString();
+    }
+    else {
+        var toret = '{';
+        var first = true;
+        for (var prop in item) {
+            if (exports.has(item, prop)) {
+                if (first) {
+                    first = false;
+                }
+                else {
+                    toret = toret + join;
+                }
+                toret = toret + prop + ':' + item[prop];
+            }
+        }
+        return toret + '}';
+    }
+}
+exports.makeString = makeString;
+/**
+ * Checks if the given argument is a function.
+ * @function
+ */
+function isFunction(func) {
+    return (typeof func) === 'function';
+}
+exports.isFunction = isFunction;
+/**
+ * Checks if the given argument is undefined.
+ * @function
+ */
+function isUndefined(obj) {
+    return (typeof obj) === 'undefined';
+}
+exports.isUndefined = isUndefined;
+/**
+ * Checks if the given argument is a string.
+ * @function
+ */
+function isString(obj) {
+    return Object.prototype.toString.call(obj) === '[object String]';
+}
+exports.isString = isString;
+/**
+ * Reverses a compare function.
+ * @function
+ */
+function reverseCompareFunction(compareFunction) {
+    if (!isFunction(compareFunction)) {
+        return function (a, b) {
+            if (a < b) {
+                return 1;
+            }
+            else if (a === b) {
+                return 0;
+            }
+            else {
+                return -1;
+            }
+        };
+    }
+    else {
+        return function (d, v) {
+            return compareFunction(d, v) * -1;
+        };
+    }
+}
+exports.reverseCompareFunction = reverseCompareFunction;
+/**
+ * Returns an equal function given a compare function.
+ * @function
+ */
+function compareToEquals(compareFunction) {
+    return function (a, b) {
+        return compareFunction(a, b) === 0;
+    };
+}
+exports.compareToEquals = compareToEquals;
+//# sourceMappingURL=util.js.map
+
+/***/ }),
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -8806,7 +8832,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var xml = __webpack_require__(59);
+var xml = __webpack_require__(60);
 var Version = (function (_super) {
     __extends(Version, _super);
     function Version(s) {
@@ -10247,48 +10273,1746 @@ Object.defineProperty(exports, "__esModule", { value: true });
 //
 var _arrays = __webpack_require__(31);
 exports.arrays = _arrays;
-var Bag_1 = __webpack_require__(275);
+var Bag_1 = __webpack_require__(274);
 exports.Bag = Bag_1.default;
-var BSTree_1 = __webpack_require__(276);
+var BSTree_1 = __webpack_require__(275);
 exports.BSTree = BSTree_1.default;
-var Dictionary_1 = __webpack_require__(24);
+var Dictionary_1 = __webpack_require__(25);
 exports.Dictionary = Dictionary_1.default;
-var Heap_1 = __webpack_require__(204);
+var Heap_1 = __webpack_require__(205);
 exports.Heap = Heap_1.default;
-var LinkedDictionary_1 = __webpack_require__(277);
+var LinkedDictionary_1 = __webpack_require__(276);
 exports.LinkedDictionary = LinkedDictionary_1.default;
-var LinkedList_1 = __webpack_require__(60);
+var LinkedList_1 = __webpack_require__(61);
 exports.LinkedList = LinkedList_1.default;
-var MultiDictionary_1 = __webpack_require__(278);
+var MultiDictionary_1 = __webpack_require__(277);
 exports.MultiDictionary = MultiDictionary_1.default;
-var FactoryDictionary_1 = __webpack_require__(205);
+var FactoryDictionary_1 = __webpack_require__(206);
 exports.FactoryDictionary = FactoryDictionary_1.default;
-var FactoryDictionary_2 = __webpack_require__(205);
+var FactoryDictionary_2 = __webpack_require__(206);
 exports.DefaultDictionary = FactoryDictionary_2.default;
-var Queue_1 = __webpack_require__(203);
+var Queue_1 = __webpack_require__(204);
 exports.Queue = Queue_1.default;
-var PriorityQueue_1 = __webpack_require__(279);
+var PriorityQueue_1 = __webpack_require__(278);
 exports.PriorityQueue = PriorityQueue_1.default;
-var Set_1 = __webpack_require__(202);
+var Set_1 = __webpack_require__(203);
 exports.Set = Set_1.default;
-var Stack_1 = __webpack_require__(280);
+var Stack_1 = __webpack_require__(279);
 exports.Stack = Stack_1.default;
-var MultiRootTree_1 = __webpack_require__(281);
+var MultiRootTree_1 = __webpack_require__(280);
 exports.MultiRootTree = MultiRootTree_1.default;
-var _util = __webpack_require__(10);
+var _util = __webpack_require__(11);
 exports.util = _util;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 /* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b)
+            if (b.hasOwnProperty(p))
+                d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var collections = __webpack_require__(17);
+var structure = __webpack_require__(4);
+var commonreferences = __webpack_require__(13);
+var common = __webpack_require__(10);
+var sdmx = __webpack_require__(6);
+var timepack = __webpack_require__(62);
+var Query = (function () {
+    function Query(flow, registry) {
+        this.flow = null;
+        this.structRef = null;
+        this.registry = null;
+        this.query = [];
+        this.startDate = new Date();
+        this.endDate = new Date();
+        this.timeQueryKey = null;
+        this.updatedAfter = null;
+        this.firstNObservations = null;
+        this.lastNObservations = null;
+        this.dimensionAtObservation = null;
+        this.detail = null;
+        this.includeHistory = null;
+        this.providerRef = null;
+        this.flow = flow;
+        this.structRef = flow.getStructure();
+        this.registry = registry;
+        var kns = this.getKeyNames();
+        for (var i = 0; i < kns.length; i++) {
+            this.query.push(new QueryKey(this.structRef, registry, kns[i]));
+        }
+        this.startDate.setFullYear(2000);
+        this.endDate.setFullYear(2016);
+        if (this.getTimeKeyName() != null) {
+            this.timeQueryKey = new QueryKey(flow.getStructure(), registry, this.getTimeKeyName());
+        }
+    }
+    Query.prototype.getQueryKey = function (id) {
+        for (var i = 0; i < this.query.length; i++) {
+            if (this.query[i].getName() == id)
+                return this.query[i];
+        }
+        if (this.timeQueryKey.getName() == id) {
+            return this.timeQueryKey;
+        }
+        return null;
+    };
+    Query.prototype.getKeyNames = function () {
+        var struct = this.registry.findDataStructure(this.structRef);
+        var keynames = [];
+        for (var i = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+            var dim1 = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
+            keynames.push(dim1.getId().toString());
+        }
+        if (struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+            var dim2 = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
+            keynames.push(dim2.getId().toString());
+        }
+        return keynames;
+    };
+    Query.prototype.getTimeKeyName = function () {
+        var struct = this.registry.findDataStructure(this.structRef);
+        if (struct.getDataStructureComponents().getDimensionList().getTimeDimension() == null) {
+            return null;
+        }
+        return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
+    };
+    Query.prototype.getTimeQueryKey = function () {
+        return this.timeQueryKey;
+    };
+    Query.prototype.getDataflow = function () {
+        return this.flow;
+    };
+    Query.prototype.getRegistry = function () {
+        return this.registry;
+    };
+    Query.prototype.getStartDate = function () {
+        return this.startDate;
+    };
+    Query.prototype.getEndDate = function () {
+        return this.endDate;
+    };
+    Query.prototype.setStartDate = function (d) {
+        this.startDate = d;
+    };
+    Query.prototype.setEndDate = function (d) {
+        this.endDate = d;
+    };
+    Query.prototype.getQueryString = function () {
+        var qString = "";
+        var keyNames = this.getKeyNames();
+        for (var i = 0; i < keyNames.length; i++) {
+            qString += this.getQueryKey(keyNames[i]).getQueryString();
+            if (i < (keyNames.length - 1)) {
+                qString += ".";
+            }
+        }
+        return qString;
+    };
+    Query.prototype.getUpdatedAfter = function () { return this.updatedAfter; };
+    Query.prototype.setUpdatedAfter = function (d) { this.updatedAfter = d; };
+    Query.prototype.getFirstNObservations = function () {
+        return this.firstNObservations;
+    };
+    Query.prototype.setFirstNObservations = function (n) {
+        this.firstNObservations = n;
+    };
+    Query.prototype.getLastNObservations = function () {
+        return this.lastNObservations;
+    };
+    Query.prototype.setLastNObservations = function (n) {
+        this.lastNObservations = n;
+    };
+    Query.prototype.getDimensionAtObservation = function () {
+        return this.dimensionAtObservation;
+    };
+    Query.prototype.setDimensionAtObservation = function (s) {
+        this.dimensionAtObservation = s;
+    };
+    Query.prototype.setDetail = function (s) { this.detail = s; };
+    Query.prototype.getDetail = function () { return this.detail; };
+    Query.prototype.getIncludeHistory = function () { return this.includeHistory; };
+    Query.prototype.setIncludeHistory = function (b) { this.includeHistory = b; };
+    Query.prototype.setProviderRef = function (s) { this.providerRef = s; };
+    Query.prototype.getProviderRef = function () {
+        return this.providerRef;
+    };
+    Query.prototype.size = function () {
+        return this.query.length;
+    };
+    return Query;
+}());
+exports.Query = Query;
+var QueryKey = (function () {
+    function QueryKey(structRef, registry, s) {
+        this.all = false;
+        this.structRef = null;
+        this.registry = null;
+        this.name = null;
+        this.values = [];
+        this.structRef = structRef;
+        this.registry = registry;
+        this.name = s;
+    }
+    QueryKey.prototype.getName = function () { return this.name; };
+    QueryKey.prototype.getValues = function () {
+        return this.values;
+    };
+    QueryKey.prototype.setName = function (s) { this.name = s; };
+    QueryKey.prototype.setValue = function (a) {
+        this.values = a;
+    };
+    QueryKey.prototype.addValue = function (s) {
+        for (var i = 0; i < this.values.length; i++) {
+            // already in here
+            if (this.values[i] == s)
+                return;
+        }
+        this.values.push(s);
+    };
+    QueryKey.prototype.removeValue = function (s) {
+        collections.arrays.remove(this.values, s);
+    };
+    QueryKey.prototype.getItemScheme = function () {
+        var comp = this.registry.findDataStructure(this.structRef).findComponentString(this.name);
+        var lr = comp.getLocalRepresentation();
+        if (lr == null || lr.getEnumeration() == null) {
+            var conceptScheme = this.registry.findConceptScheme(comp.getConceptIdentity());
+            return conceptScheme;
+        }
+        else {
+            if (lr != null) {
+                var codelist = this.registry.findCodelist(lr.getEnumeration());
+                return codelist;
+            }
+            // lr == null
+            return null;
+        }
+    };
+    QueryKey.prototype.isAll = function () {
+        return this.all;
+    };
+    QueryKey.prototype.setAll = function (b) {
+        this.all = b;
+    };
+    QueryKey.prototype.possibleValues = function () {
+        var result = [];
+        var itemScheme = this.getItemScheme();
+        if (itemScheme == null) {
+            alert(this.name + " has null itemscheme");
+        }
+        for (var i = 0; i < itemScheme.size(); i++) {
+            var itm = itemScheme.getItem(i);
+            result.push(itm.getId().toString());
+        }
+        return result;
+        ;
+    };
+    QueryKey.prototype.possibleValuesItems = function () {
+        var result = [];
+        var itemScheme = this.getItemScheme();
+        if (itemScheme == null) {
+            return [];
+        }
+        for (var i = 0; i < itemScheme.size(); i++) {
+            var itm = itemScheme.getItem(i);
+            result.push(itm);
+        }
+        return result;
+        ;
+    };
+    QueryKey.prototype.getQueryString = function () {
+        if (this.isAll()) {
+            return "";
+        }
+        else {
+            var s = "";
+            for (var i = 0; i < this.values.length; i++) {
+                s += this.values[i];
+                if (i < (this.values.length - 1)) {
+                    s += "+";
+                }
+            }
+            return s;
+        }
+    };
+    QueryKey.prototype.containsValue = function (s) {
+        for (var i = 0; i < this.values.length; i++) {
+            if (this.values[i] == s)
+                return true;
+        }
+        return false;
+    };
+    QueryKey.prototype.clear = function () {
+        this.values = [];
+    };
+    return QueryKey;
+}());
+exports.QueryKey = QueryKey;
+var FlatObs = (function () {
+    function FlatObs(vals) {
+        this.values = [];
+        this.values = vals;
+        if (vals == null) {
+            this.values = [];
+        }
+    }
+    FlatObs.prototype.setValue = function (i, o) {
+        if (this.values.length <= i) {
+            for (var j = this.values.length; (j - 1) < i; j++) {
+                this.values.push(null);
+            }
+        }
+        this.values[i] = o;
+    };
+    FlatObs.prototype.getValue = function (i) {
+        if (i >= this.values.length) {
+            return null;
+        }
+        return this.values[i];
+    };
+    FlatObs.prototype.dump = function () {
+        var s = "";
+        for (var i = 0; i < this.values.length; i++) {
+            s += this.values[i];
+            if (i < this.values.length)
+                s += " ";
+        }
+        console.log(s);
+    };
+    FlatObs.prototype.size = function () {
+        return this.values.length;
+    };
+    return FlatObs;
+}());
+exports.FlatObs = FlatObs;
+var AttachmentLevel = (function () {
+    function AttachmentLevel(s, id) {
+        this.name = null;
+        this.id = 0;
+        this.name = s;
+        this.id = id;
+        AttachmentLevel.LIST.push(this);
+    }
+    AttachmentLevel.prototype.getName = function () { return this.name; };
+    AttachmentLevel.prototype.getId = function () { return this.id; };
+    AttachmentLevel.fromString = function (s) {
+        for (var i = 0; i < AttachmentLevel.LIST.length; i++) {
+            if (AttachmentLevel.LIST[i].getName() == s)
+                return AttachmentLevel.LIST[i];
+        }
+        return null;
+    };
+    AttachmentLevel.fromId = function (id) {
+        for (var i = 0; i < AttachmentLevel.LIST.length; i++) {
+            if (AttachmentLevel.LIST[i].getId() == id)
+                return AttachmentLevel.LIST[i];
+        }
+        return null;
+    };
+    AttachmentLevel.LIST = [];
+    AttachmentLevel.ATTACHMENT_DATASET = 0;
+    AttachmentLevel.ATTACHMENT_SERIES = 1;
+    AttachmentLevel.ATTACHMENT_OBSERVATION = 2;
+    AttachmentLevel.ATTACHMENT_GROUP = 3;
+    AttachmentLevel.ATTACHMENT_DATASET_STRING = "DataSet";
+    AttachmentLevel.ATTACHMENT_SERIES_STRING = "Series";
+    AttachmentLevel.ATTACHMENT_OBSERVATION_STRING = "Observation";
+    AttachmentLevel.ATTACHMENT_GROUP_STRING = "Group";
+    AttachmentLevel.DATASET = new AttachmentLevel(AttachmentLevel.ATTACHMENT_DATASET_STRING, AttachmentLevel.ATTACHMENT_DATASET);
+    AttachmentLevel.SERIES = new AttachmentLevel(AttachmentLevel.ATTACHMENT_SERIES_STRING, AttachmentLevel.ATTACHMENT_SERIES);
+    AttachmentLevel.OBSERVATION = new AttachmentLevel(AttachmentLevel.ATTACHMENT_OBSERVATION_STRING, AttachmentLevel.ATTACHMENT_OBSERVATION);
+    AttachmentLevel.GROUP = new AttachmentLevel(AttachmentLevel.ATTACHMENT_GROUP_STRING, AttachmentLevel.ATTACHMENT_GROUP);
+    return AttachmentLevel;
+}());
+exports.AttachmentLevel = AttachmentLevel;
+var AbstractKey = (function () {
+    function AbstractKey() {
+        this.dict = new collections.Dictionary();
+        this.attributes = new collections.Dictionary();
+    }
+    AbstractKey.prototype.getComponent = function (s) {
+        return this.dict.getValue(s);
+    };
+    AbstractKey.prototype.setComponent = function (s, v) {
+        this.dict.setValue(s, v);
+    };
+    AbstractKey.prototype.getAttribute = function (s) {
+        return this.attributes.getValue(s);
+    };
+    AbstractKey.prototype.setAttribute = function (s, v) {
+        this.attributes.setValue(s, v);
+    };
+    AbstractKey.prototype.clearAttributes = function () {
+        this.attributes.clear();
+    };
+    AbstractKey.prototype.toString = function () {
+        return this.dict.values().join(":");
+    };
+    AbstractKey.prototype.getDict = function () { return this.dict; };
+    return AbstractKey;
+}());
+exports.AbstractKey = AbstractKey;
+var PartialKey = (function (_super) {
+    __extends(PartialKey, _super);
+    function PartialKey() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return PartialKey;
+}(AbstractKey));
+exports.PartialKey = PartialKey;
+var FullKey = (function (_super) {
+    __extends(FullKey, _super);
+    function FullKey() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return FullKey;
+}(AbstractKey));
+exports.FullKey = FullKey;
+var Group = (function () {
+    function Group() {
+        this.groupName = null;
+        this.groupKey = new collections.Dictionary();
+        this.groupAttributes = new collections.Dictionary();
+        this.map = new collections.Dictionary();
+    }
+    Group.Group = function (groupValues) {
+        var g = new Group();
+        g.map = groupValues;
+        return g;
+    };
+    Group.prototype.putGroupValue = function (concept, value) {
+        this.map.setValue(concept, value);
+    };
+    Group.prototype.getGroupValue = function (concept) {
+        return this.groupAttributes.getValue(concept);
+    };
+    Group.prototype.processGroupValues = function (ds) {
+        this.groupAttributes = new collections.Dictionary();
+        var keys = this.map.keys();
+        for (var i = 0; i < keys.length; i++) {
+            var s = keys[i];
+            if (ds.getColumnMapper().getColumnIndex(s) == -1 || ds.getColumnMapper().isAttachedToGroupString(s)) {
+                this.groupAttributes.setValue(s, this.map.getValue(s));
+                if (!ds.getColumnMapper().isAttachedToGroupString(s)) {
+                    ds.getColumnMapper().registerColumn(s, AttachmentLevel.GROUP);
+                }
+            }
+            else {
+                this.groupKey.setValue(s, this.map.getValue(s));
+                collections.arrays.remove(keys, s);
+            }
+        }
+        this.map = null;
+    };
+    Group.prototype.getGroupKey = function () {
+        return this.groupKey;
+    };
+    Group.prototype.matches = function (key) {
+        var keys = this.getGroupKey().keys();
+        for (var i = 0; i < keys.length; i++) {
+            var s = keys[i];
+            var gv = this.getGroupKey().getValue(s);
+            if (gv != null) {
+                if (!(key.getComponent(s) == gv)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+    Group.prototype.getGroupAttributes = function () {
+        return this.groupAttributes;
+    };
+    Group.prototype.getGroupName = function () {
+        return this.groupName;
+    };
+    Group.prototype.setGroupName = function (groupName) {
+        this.groupName = groupName;
+    };
+    Group.prototype.setGroupValue = function (columnName, val) {
+        this.groupAttributes.setValue(columnName, val);
+    };
+    return Group;
+}());
+exports.Group = Group;
+var FlatColumnMapper = (function () {
+    function FlatColumnMapper() {
+        this.columns = [];
+        this.groupColumns = [];
+    }
+    FlatColumnMapper.prototype.registerColumn = function (s, attach) {
+        if (collections.arrays.contains(this.columns, s) || collections.arrays.contains(this.groupColumns, s)) {
+            throw new Error("Attempt to Register already registered Column!!");
+        }
+        if (attach == AttachmentLevel.GROUP) {
+            this.groupColumns.push(s);
+            this.columns.push(s);
+            return this.columns.indexOf(s);
+        }
+        else {
+            this.columns.push(s);
+            return this.columns.indexOf(s);
+        }
+    };
+    FlatColumnMapper.prototype.getColumnIndex = function (s) {
+        return this.columns.indexOf(s);
+    };
+    FlatColumnMapper.prototype.getColumnName = function (i) {
+        return this.columns[i];
+    };
+    FlatColumnMapper.prototype.size = function () {
+        return this.columns.length;
+    };
+    FlatColumnMapper.prototype.containsColumn = function (name) {
+        for (var i = 0; i < this.columns.length; i++) {
+            if (this.columns[i] == name) {
+                return true;
+            }
+        }
+        return false;
+    };
+    FlatColumnMapper.prototype.getAllColumns = function () {
+        var result = [];
+        for (var i = 0; i < this.columns.length; i++) {
+            result.push(this.columns[i]);
+        }
+        return result;
+    };
+    FlatColumnMapper.prototype.getObservationColumns = function () {
+        var result = [];
+        for (var i = 0; i < this.columns.length; i++) {
+            result.push(this.columns[i]);
+        }
+        return result;
+    };
+    FlatColumnMapper.prototype.getSeriesColumns = function () {
+        return [];
+    };
+    FlatColumnMapper.prototype.getDataSetColumns = function () {
+        return [];
+    };
+    FlatColumnMapper.prototype.getGroupColumns = function () {
+        return [];
+    };
+    FlatColumnMapper.prototype.isAttachedToDataSetString = function (s) {
+        return false;
+    };
+    FlatColumnMapper.prototype.isAttachedToDataSetInt = function (i) {
+        return false;
+    };
+    FlatColumnMapper.prototype.isAttachedToSeriesString = function (s) {
+        return false;
+    };
+    FlatColumnMapper.prototype.isAttachedToSeriesInt = function (i) {
+        return false;
+    };
+    FlatColumnMapper.prototype.isAttachedToObservationString = function (s) {
+        return collections.arrays.contains(this.columns, s);
+    };
+    FlatColumnMapper.prototype.isAttachedToObservationInt = function (i) {
+        return true;
+    };
+    FlatColumnMapper.prototype.isAttachedToGroupString = function (s) {
+        return collections.arrays.contains(this.groupColumns, s);
+    };
+    FlatColumnMapper.prototype.isAttachedToGroupInt = function (i) {
+        return this.isAttachedToGroupString(this.getColumnName(i));
+    };
+    FlatColumnMapper.prototype.dump = function () {
+        console.log("Column Mapper");
+        for (var i = 0; i < this.size(); i++) {
+            console.log(i + " = " + this.getColumnName(i));
+        }
+    };
+    return FlatColumnMapper;
+}());
+exports.FlatColumnMapper = FlatColumnMapper;
+var FlatDataSet = (function () {
+    function FlatDataSet() {
+        this.groups = [];
+        this.mapper = new FlatColumnMapper();
+        this.observations = [];
+        this.dimensionAtObservation = "AllDimensions";
+    }
+    FlatDataSet.prototype.FlatDataSet = function () {
+    };
+    FlatDataSet.prototype.getColumnIndex = function (name) {
+        return this.mapper.getColumnIndex(name);
+    };
+    FlatDataSet.prototype.getValue = function (row, col) {
+        if (this.observations[row] == null) {
+            console.log("null obs!");
+        }
+        return this.observations[row].getValue(col);
+    };
+    FlatDataSet.prototype.setValueStringCol = function (row, col, val) {
+        this.setValue(row, this.mapper.getColumnIndex(col), val);
+    };
+    FlatDataSet.prototype.setValue = function (row, col, val) {
+        this.observations[row].setValue(col, val);
+    };
+    FlatDataSet.prototype.addObservation = function (o) {
+        this.observations.push(o);
+    };
+    FlatDataSet.prototype.removeObservation = function (o) {
+        collections.arrays.remove(this.observations, o);
+    };
+    FlatDataSet.prototype.getObservations = function () {
+        return this.observations;
+    };
+    FlatDataSet.prototype.size = function () {
+        return this.observations.length;
+    };
+    FlatDataSet.prototype.getColumnMapper = function () {
+        return this.mapper;
+    };
+    FlatDataSet.prototype.dump = function () {
+        var s = "";
+        for (var i = 0; i < this.mapper.size(); i++) {
+            s += this.getColumnMapper().getColumnName(i);
+            s += "\t";
+        }
+        console.log(s);
+        for (var i = 0; i < this.observations.length; i++) {
+            var o = this.getFlatObs(i);
+            var s = "";
+            for (var j = 0; j < this.mapper.size(); j++) {
+                s = s + o.getValue(j);
+                if (j < this.mapper.size())
+                    s = s + "\t";
+            }
+            console.log(s);
+        }
+    };
+    FlatDataSet.prototype.getFlatObs = function (i) {
+        return this.observations[i];
+    };
+    FlatDataSet.prototype.registerColumn = function (s) {
+        var col = this.mapper.registerColumn(s, AttachmentLevel.OBSERVATION);
+        for (var i = 0; i < this.observations.length; i++) {
+            this.observations[i].setValue(col, null);
+        }
+        return col;
+    };
+    FlatDataSet.prototype.getColumnName = function (i) {
+        return this.mapper.getColumnName(i);
+    };
+    FlatDataSet.prototype.getColumnSize = function () {
+        return this.mapper.size();
+    };
+    FlatDataSet.prototype.getGroups = function () {
+        return [];
+    };
+    FlatDataSet.prototype.groupSize = function () {
+        return 0;
+    };
+    FlatDataSet.prototype.applyGroupKey = function (key, column, value) {
+    };
+    FlatDataSet.prototype.setGroups = function (groups) {
+    };
+    FlatDataSet.prototype.query = function (cube, order) {
+        var time = new Date().getTime();
+        for (var i = 0; i < this.size(); i++) {
+            cube.putObservation(order, this.mapper, this.getFlatObs(i));
+        }
+        return cube;
+    };
+    FlatDataSet.prototype.find = function (key) {
+        var found = true;
+        for (var i = 0; i < this.size(); i++) {
+            var obs = this.getFlatObs(i);
+            found = true;
+            for (var j = 0; j < this.mapper.size() && !found; j++) {
+                if (!(key.getComponent(this.mapper.getColumnName(j)) == obs.getValue(j))) {
+                    found = false;
+                }
+            }
+            if (found) {
+                return obs;
+            }
+        }
+        return null;
+    };
+    FlatDataSet.prototype.getDimensionAtObservation = function (reg, dsref) {
+        return "AllDimensions";
+    };
+    FlatDataSet.prototype.setDimensionAtObservationString = function (s) {
+        this.dimensionAtObservation = s;
+    };
+    FlatDataSet.prototype.getDimensionAtObservationString = function () {
+        return this.dimensionAtObservation;
+    };
+    return FlatDataSet;
+}());
+exports.FlatDataSet = FlatDataSet;
+var FlatDataSetWriter = (function () {
+    function FlatDataSetWriter() {
+        this.mapper = new FlatColumnMapper();
+        this.dataSet = null;
+        this.dataSetValues = null;
+        this.seriesValues = null;
+        this.obsValues = null;
+        this.groups = null;
+    }
+    FlatDataSetWriter.prototype.newDataSet = function () {
+        this.dataSet = new FlatDataSet();
+        this.dataSetValues = [];
+        this.mapper = this.dataSet.getColumnMapper();
+    };
+    FlatDataSetWriter.prototype.newSeries = function () {
+        this.seriesValues = [];
+        for (var i = 0; i < this.dataSetValues.length; i++) {
+            this.seriesValues.push(this.dataSetValues[i]);
+        }
+    };
+    FlatDataSetWriter.prototype.newObservation = function () {
+        this.obsValues = [];
+        if (this.seriesValues != null) {
+            for (var i = 0; i < this.seriesValues.length; i++) {
+                this.obsValues.push(this.seriesValues[i]);
+            }
+        }
+    };
+    FlatDataSetWriter.prototype.writeDataSetComponent = function (name, val) {
+        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
+            this.dataSet.registerColumn(name);
+        }
+        this.dataSetValues.push(val);
+    };
+    FlatDataSetWriter.prototype.writeSeriesComponent = function (name, val) {
+        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
+            this.dataSet.registerColumn(name);
+        }
+        this.seriesValues.push(val);
+    };
+    FlatDataSetWriter.prototype.writeObservationComponent = function (name, val) {
+        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
+            this.dataSet.registerColumn(name);
+        }
+        if (this.obsValues.length <= this.dataSet.getColumnMapper().getColumnIndex(name)) {
+            for (var j = this.obsValues.length; (j - 1) < this.dataSet.getColumnIndex(name); j++) {
+                this.obsValues.push(null);
+            }
+        }
+        this.obsValues[this.dataSet.getColumnIndex(name)] = val;
+    };
+    FlatDataSetWriter.prototype.finishSeries = function () {
+    };
+    FlatDataSetWriter.prototype.finishObservation = function () {
+        this.dataSet.addObservation(new FlatObs(this.obsValues));
+    };
+    FlatDataSetWriter.prototype.finishDataSet = function () {
+        var ds = this.dataSet;
+        ds.setGroups(this.groups);
+        this.dataSet = null;
+        return ds;
+    };
+    FlatDataSetWriter.prototype.getColumnMapper = function () {
+        return this.mapper;
+    };
+    FlatDataSetWriter.prototype.writeGroupValues = function (name, groupValues) {
+        var group = Group.Group(groupValues);
+        group.setGroupName(name);
+        if (this.groups == null) {
+            this.groups = [];
+        }
+        this.groups.push(group);
+    };
+    return FlatDataSetWriter;
+}());
+exports.FlatDataSetWriter = FlatDataSetWriter;
+var StructuredDataMessage = (function () {
+    function StructuredDataMessage(dm, reg) {
+        this.dataMessage = null;
+        this.registry = null;
+        this.dataflow = null;
+        this.list = [];
+        this.dataMessage = dm;
+        this.registry = reg;
+        for (var i = 0; i < this.dataMessage.size(); i++) {
+            this.list.push(this.buildStructuredDataSet(i));
+        }
+    }
+    StructuredDataMessage.prototype.size = function () {
+        return this.getDataMessage().size();
+    };
+    StructuredDataMessage.prototype.getStructuredDataSet = function (i) {
+        return this.list[i];
+    };
+    StructuredDataMessage.prototype.buildStructuredDataSet = function (i) {
+        //dataMessage.getHeader().getStructures().get(0).getStructure().dump();
+        //NestedNCNameID agency = dataMessage.getHeader().getStructures().get(0).getStructure().getAgencyId();
+        //IDType id = dataMessage.getHeader().getStructures().get(0).getStructure().getMaintainableParentId();
+        //Version vers = dataMessage.getHeader().getStructures().get(0).getStructure().getMaintainedParentVersion();
+        //System.out.println("Ref="+agency+":"+id+":"+vers);
+        var structure = this.getRegistry().findDataStructure(this.getDataMessage().getHeader().getStructures()[0].getStructure());
+        //System.out.println("Structure="+structure);
+        if (this.dataflow == null) {
+            this.setDataflow(structure.asDataflow());
+        }
+        return new StructuredDataSet(this.getDataMessage().getDataSet(i), this.getRegistry(), structure);
+    };
+    /**
+     * @return the dataMessage
+     */
+    StructuredDataMessage.prototype.getDataMessage = function () {
+        return this.dataMessage;
+    };
+    /**
+     * @return the registry
+     */
+    StructuredDataMessage.prototype.getRegistry = function () {
+        return this.registry;
+    };
+    /**
+     * @return the dataflow
+     */
+    StructuredDataMessage.prototype.getDataflow = function () {
+        return this.dataflow;
+    };
+    /**
+     * @param dataflow the dataflow to set
+     */
+    StructuredDataMessage.prototype.setDataflow = function (dataflow) {
+        this.dataflow = dataflow;
+    };
+    return StructuredDataMessage;
+}());
+exports.StructuredDataMessage = StructuredDataMessage;
+var StructuredDataSet = (function () {
+    function StructuredDataSet(ds, reg, struct) {
+        this.dataSet = null;
+        this.registry = null;
+        this.structure = null;
+        this.dataSet = ds;
+        this.registry = reg;
+        this.structure = struct;
+    }
+    StructuredDataSet.prototype.getStructuredValue = function (row, column) {
+        return new StructuredValue(this.getDataSet().getColumnName(column), this.getDataSet().getValue(row, column), this.registry, this.getStructure());
+    };
+    StructuredDataSet.prototype.getColumnName = function (i) {
+        var conceptString = this.getDataSet().getColumnName(i);
+        //System.out.println("Concept="+conceptString);
+        //System.out.println("ds="+getStructure());
+        var c = this.getStructure().findComponentString(conceptString);
+        if (c == null && conceptString == "type") {
+            // "type" represents sdmx 2.0 cross sectional document 
+            c = this.getStructure().getDataStructureComponents().getDimensionList().getMeasureDimension();
+        }
+        if (c == null) {
+            console.log("Component is null conceptRef:" + conceptString);
+            return conceptString;
+        }
+        var conceptRef = c.getConceptIdentity();
+        var concept = null;
+        if (conceptRef != null) {
+            concept = this.registry.findConcept(conceptRef);
+            return structure.NameableType.toString(concept);
+        }
+        else {
+            return conceptString;
+        }
+    };
+    StructuredDataSet.prototype.size = function () {
+        return this.getDataSet().size();
+    };
+    StructuredDataSet.prototype.getColumnCount = function () {
+        return this.getDataSet().getColumnSize();
+    };
+    /**
+     * @return the dataSet
+     */
+    StructuredDataSet.prototype.getDataSet = function () {
+        return this.dataSet;
+    };
+    /**
+     * @return the structure
+     */
+    StructuredDataSet.prototype.getStructure = function () {
+        return this.structure;
+    };
+    StructuredDataSet.prototype.getColumnIndexes = function () {
+        var result = [];
+        for (var i = 0; i < this.getColumnCount(); i++) {
+            result.push(i);
+        }
+        return result;
+    };
+    return StructuredDataSet;
+}());
+exports.StructuredDataSet = StructuredDataSet;
+var StructuredValue = (function () {
+    function StructuredValue(concept, value, registry, struct) {
+        this.concept = null;
+        this.value = null;
+        this.registry = null;
+        this.structure = null;
+        this.concept = concept;
+        this.value = value;
+        this.registry = registry;
+        this.structure = struct;
+    }
+    StructuredValue.prototype.getRepresentation = function (reg, c) {
+        var rep = c.getLocalRepresentation();
+        if (rep == null) {
+            var concept = reg.findConcept(c.getConceptIdentity());
+            //return concept.getCoreRepresentation();
+        }
+        return c.getLocalRepresentation();
+    };
+    StructuredValue.prototype.getLocalRepresentation = function (c) {
+        if (c == null)
+            return null;
+        return c.getLocalRepresentation();
+    };
+    StructuredValue.prototype.isCoded = function () {
+        var comp = this.structure.findComponentString(this.concept);
+        if ("type" == this.concept) {
+            comp = this.structure.getDataStructureComponents().getDimensionList().getMeasureDimension();
+        }
+        if (comp == null) {
+            console.log("Comp is NUll!" + this.concept);
+            return false;
+        }
+        var localRep = this.getRepresentation(this.registry, comp);
+        if (localRep.getEnumeration() != null) {
+            return true;
+        }
+        else
+            return false;
+    };
+    StructuredValue.prototype.getCode = function () {
+        //System.out.println("Concept:"+ concept+" Value:" + value);
+        //Locale loc = Locale.getDefault();
+        //ItemType item = ValueTypeResolver.resolveCode(registry, structure, concept, value);
+        //System.out.println("Item=" + item.toString());
+        //System.out.println("Item=" + item.findName(loc.getLanguage()));
+        return ValueTypeResolver.resolveCode(this.registry, this.structure, this.concept, this.getValue());
+    };
+    StructuredValue.prototype.getCodelist = function () {
+        return ValueTypeResolver.getPossibleCodes(this.registry, this.structure, this.concept);
+    };
+    StructuredValue.prototype.toString = function () {
+        if (this.isCoded()) {
+            var code = this.getCode();
+            if (code == null) {
+                return this.getValue();
+            }
+            return structure.NameableType.toString(code);
+        }
+        return this.getValue();
+    };
+    /**
+     * @return the concept
+     */
+    StructuredValue.prototype.getConcept = function () {
+        return this.registry.findConcept(this.structure.findComponentString(this.concept).getConceptIdentity());
+    };
+    /**
+     * @return the value
+     */
+    StructuredValue.prototype.getValue = function () {
+        return this.value;
+    };
+    return StructuredValue;
+}());
+exports.StructuredValue = StructuredValue;
+var ValueTypeResolver = (function () {
+    function ValueTypeResolver() {
+    }
+    ValueTypeResolver.resolveCode = function (registry, struct, column, value) {
+        if (value == null) {
+            return null;
+        }
+        var dim = struct.findComponentString(column);
+        // Cross Sectional Measures somtimes come in a a 'type' column..
+        // see SDMX 2.0 example cross sectional file
+        if ("type" == column) {
+            dim = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
+        }
+        if (dim == null) {
+            var itm = new structure.CodeType();
+            var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
+            var names = [name];
+            itm.setNames(names);
+            return itm;
+        }
+        var conceptRef = dim.getConceptIdentity();
+        var rep = null;
+        var concept = null;
+        if (conceptRef != null) {
+            concept = registry.findConcept(conceptRef);
+            if (concept == null) {
+                console.log("Cant find concept:" + dim.getConceptIdentity().getId());
+                console.log(conceptRef.getAgencyId() + ":" + conceptRef.getMaintainableParentId() + ":" + conceptRef.getId() + ":" + conceptRef.getVersion());
+                var ct = new structure.CodeType();
+                ct.setId(new commonreferences.ID(value));
+                var name = new common.Name("en", value);
+                ct.setNames([name]);
+                return ct;
+            }
+            rep = dim.getLocalRepresentation();
+        }
+        if (rep != null) {
+            if (rep.getEnumeration() != null) {
+                if (rep.getEnumeration().getRefClass().toInt() == commonreferences.ObjectTypeCodelistType.CODELIST.toInt()) {
+                    var codelist = registry.findCodelist(rep.getEnumeration());
+                    var id = null;
+                    try {
+                        id = new commonreferences.ID(value);
+                    }
+                    catch (err) {
+                        // Ignore
+                    }
+                    if (codelist == null) {
+                        throw new Error("Codelist is null Representation=" + rep.getEnumeration().toString());
+                    }
+                    var ct = null;
+                    if (id != null) {
+                        ct = codelist.findItemId(id);
+                    }
+                    if (ct == null) {
+                        var ct2 = new structure.CodeType();
+                        ct2.setId(id);
+                        var name = new common.Name("en", "Missing Code:" + value);
+                        var names = [];
+                        names.push(name);
+                        ct2.setNames(names);
+                        return ct2;
+                    }
+                    else {
+                        return ct;
+                    }
+                }
+                else {
+                    var cs = registry.findConceptScheme(rep.getEnumeration());
+                    var conceptMeasure = null;
+                    for (var i = 0; i < cs.size() && conceptMeasure == null; i++) {
+                        var tempConcept = cs.getItem(i);
+                        if (tempConcept.getId() != null && tempConcept.getId().toString() == value) {
+                            conceptMeasure = cs.getItem(i);
+                        }
+                        else if (tempConcept.getId().toString() == value) {
+                            conceptMeasure = tempConcept;
+                        }
+                    }
+                    if (conceptMeasure != null) {
+                        //System.out.println("ConceptMeasure:"+conceptMeasure);
+                        return conceptMeasure;
+                    }
+                    return null;
+                }
+            }
+            else {
+                var itm = new structure.CodeType();
+                var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
+                var names = [name];
+                itm.setNames(names);
+                return itm;
+            }
+        }
+        var itm = new structure.CodeType();
+        var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
+        var names = [name];
+        itm.setNames(names);
+        return itm;
+    };
+    ValueTypeResolver.getPossibleCodes = function (registry, struct, column) {
+        var dim = struct.findComponentString(column);
+        if (dim == null || "type" == column) {
+            dim = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
+        }
+        var conceptRef = dim.getConceptIdentity();
+        var rep = null;
+        var concept = null;
+        if (conceptRef != null) {
+            concept = registry.findConcept(conceptRef);
+            rep = dim.getLocalRepresentation();
+        }
+        if (rep != null) {
+            if (rep.getEnumeration() != null) {
+                if (rep.getEnumeration().getRefClass().toInt() == commonreferences.ObjectTypeCodelistType.CODELIST.toInt()) {
+                    var codelist = registry.findCodelist(rep.getEnumeration());
+                    return codelist;
+                }
+                else {
+                    var cs = registry.findConceptScheme(rep.getEnumeration());
+                    return cs;
+                }
+            }
+        }
+        return null;
+    };
+    return ValueTypeResolver;
+}());
+exports.ValueTypeResolver = ValueTypeResolver;
+var Cube = (function () {
+    function Cube(struct, reg) {
+        this.size = 0;
+        this.order = [];
+        this.struct = null;
+        this.reg = null;
+        this.mapper = new FlatColumnMapper();
+        this.cubeObsMapper = new FlatColumnMapper();
+        this.flatObsMapper = new FlatColumnMapper();
+        this.validCodes = new collections.Dictionary();
+        this.root = new RootCubeDimension();
+        this.struct = struct;
+        this.reg = reg;
+    }
+    Cube.prototype.getStructure = function () {
+        return this.struct;
+    };
+    Cube.prototype.getStructureReference = function () {
+        return this.struct.asReference();
+    };
+    Cube.prototype.getRootCubeDimension = function () {
+        return this.root;
+    };
+    Cube.prototype.putObservation = function (order, mapper, obs) {
+        var dim = this.getRootCubeDimension();
+        this.order = order;
+        var time = null;
+        var cubeobs = null;
+        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+            //if( struct.getDataStructureComponents().getDimensionList().getDimension(i).)
+            // This line goes through the components in their datastructure order
+            //IDType dimId = struct.getDataStructureComponents().getDimensionList().getDimension(i).getId();
+            // This line goes through the components in their specified order
+            var dimId = null;
+            if (order != null) {
+                dimId = new commonreferences.ID(order[i]);
+            }
+            else {
+                dimId = this.struct.getDataStructureComponents().getDimensionList().getDimensions()[i].getId();
+            }
+            if (this.validCodes[dimId.toString()] == null) {
+                this.validCodes[dimId.toString()] = [];
+                if (this.mapper.getColumnIndex(dimId.toString()) == -1) {
+                    this.mapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+                    this.cubeObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+                    this.flatObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+                }
+            }
+            /*
+                If the data you are trying to make a cube from does not have a complete key
+                with values for all dimensions, mapper.getColumnIndex(dimId.toString()) returns -1
+                here (because there is no dimension of that name in the FlatObservation)
+                this filters down into FlatObservation.getValue(-1) which causes an array index
+                out of bounds exception!
+             */
+            if (mapper.getColumnIndex(dimId.toString()) == -1) {
+                this.mapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+                this.cubeObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+                this.flatObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
+            }
+            var myDim = dim.getSubCubeDimension(obs.getValue(mapper.getColumnIndex(dimId.toString())));
+            if (myDim == null) {
+                myDim = new ListCubeDimension(dimId.toString(), obs.getValue(mapper.getColumnIndex(dimId.toString())));
+                dim.putSubCubeDimension(myDim);
+                if (!collections.arrays.contains(this.validCodes[dimId.toString()], myDim.getValue())) {
+                    this.validCodes[dimId.toString()].push(myDim.getValue());
+                }
+            }
+            dim = myDim;
+        }
+        var myDim = null;
+        var dimId = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId();
+        if (this.validCodes[dimId.toString()] == null) {
+            this.validCodes[dimId.toString()] = [];
+        }
+        var i = this.mapper.getColumnIndex(dimId.toString());
+        var s = obs.getValue(i);
+        myDim = dim.getSubCubeDimension(obs.getValue(mapper.getColumnIndex(dimId.toString())));
+        if (myDim == null) {
+            myDim = new TimeCubeDimension(dimId.toString(), obs.getValue(mapper.getColumnIndex(dimId.toString())));
+            dim.putSubCubeDimension(myDim);
+            if (!collections.arrays.contains(this.validCodes[dimId.toString()], myDim.getValue())) {
+                this.validCodes[dimId.toString()].push(myDim.getValue());
+            }
+        }
+        time = myDim;
+        var cross = null;
+        var dimId2 = null;
+        if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+            dimId2 = this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId();
+            if (this.validCodes[dimId2.toString()] == null) {
+                this.validCodes[dimId2.toString()] = [];
+                if (this.mapper.getColumnIndex(dimId2.toString()) == -1) {
+                    this.mapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
+                    this.cubeObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
+                    this.flatObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
+                }
+            }
+            cross = obs.getValue(mapper.getColumnIndex(dimId2.toString()));
+            if (!collections.arrays.contains(this.validCodes[dimId2.toString()], cross)) {
+                this.validCodes[dimId2.toString()].push(cross);
+            }
+        }
+        var dimId3 = this.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId();
+        if (dimId2 != null) {
+            cubeobs = new CubeObservation(dimId2.toString(), cross, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));
+            if (this.mapper.getColumnIndex(dimId2.toString()) == -1) {
+                this.mapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
+                this.cubeObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
+            }
+        }
+        else {
+            cubeobs = new CubeObservation(null, null, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));
+            if (this.mapper.getColumnIndex(dimId3.toString()) == -1) {
+                this.mapper.registerColumn(dimId3.toString(), AttachmentLevel.OBSERVATION);
+                this.flatObsMapper.registerColumn(dimId3.toString(), AttachmentLevel.OBSERVATION);
+            }
+        }
+        time.putObservation(cubeobs);
+        for (var k = 0; k < this.struct.getDataStructureComponents().getAttributeList().getAttributes().length; k++) {
+            var name = this.struct.getDataStructureComponents().getAttributeList().getAttributes()[k].getId().toString();
+            var value = null;
+            if (mapper.getColumnIndex(name) != -1) {
+                value = obs.getValue(mapper.getColumnIndex(name));
+                cubeobs.putAttribute(new CubeAttribute(name, value));
+            }
+        }
+        // Increment Size counter
+        this.size++;
+    };
+    Cube.prototype.getColumnMapper = function () {
+        return this.mapper;
+    };
+    Cube.prototype.getFlatColumnMapper = function () {
+        return this.flatObsMapper;
+    };
+    Cube.prototype.getCubeObsColumnMapper = function () {
+        return this.cubeObsMapper;
+    };
+    Cube.prototype.findCubeObs = function (key) {
+        return this.findLatestCubeObs(key, false);
+    };
+    Cube.prototype.findFlatObs = function (key) {
+        return this.findLatestFlatObs(key, false);
+    };
+    Cube.prototype.findLatestCubeObs = function (key, latest) {
+        var dim = this.getRootCubeDimension();
+        var oldDim = dim;
+        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
+            if (dim == null) {
+                //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
+                return null;
+            }
+            oldDim = dim;
+        }
+        var time = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension();
+        if (time == null) {
+            throw new Error("Time Dimension Is Null");
+        }
+        else if (latest) {
+            var timesList = dim.listDimensionValues();
+            for (var i = 0; i < timesList.length; i++) {
+                for (var j = 0; j < timesList.length - i; j++) {
+                    var t1 = timepack.TimeUtil.parseTime(timesList[i], null);
+                    var t2 = timepack.TimeUtil.parseTime(timesList[j], null);
+                    if (t1.getStart() > t2.getStart()) {
+                        collections.arrays.swap(timesList, i, j);
+                    }
+                }
+            }
+            var timeValue = timesList[timesList.length - 1];
+            var tcd = dim.getSubCubeDimension(timeValue);
+            if (tcd == null) {
+                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
+                //dim.dump();
+                return null;
+            }
+            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                //tcd.dump();
+                //System.out.println("Measure="+measure);
+                return tcd.getObservation(measure).toCubeObs(key, this.mapper);
+            }
+            else {
+                var co = tcd.getObservation(null);
+                return co.toCubeObs(key, this.mapper);
+                ;
+            }
+        }
+        else {
+            var timeValue = key.getComponent(time.getId().toString());
+            var tcd = dim.getSubCubeDimension(timeValue);
+            if (tcd == null) {
+                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
+                //dim.dump();
+                return null;
+            }
+            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                //tcd.dump();
+                //System.out.println("Measure="+measure);
+                return tcd.getObservation(measure).toCubeObs(key, this.cubeObsMapper);
+            }
+            else {
+                var co = tcd.getObservation(null);
+                return co.toCubeObs(key, this.cubeObsMapper);
+            }
+        }
+    };
+    Cube.prototype.findLatestFlatObs = function (key, latest) {
+        var dim = this.getRootCubeDimension();
+        var oldDim = dim;
+        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
+            if (dim == null) {
+                //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
+                return null;
+            }
+            oldDim = dim;
+        }
+        var time = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension();
+        if (time == null) {
+            throw new Error("Time Dimension Is Null");
+        }
+        else if (latest) {
+            var timesList = dim.listDimensionValues();
+            for (var i = 0; i < timesList.length; i++) {
+                for (var j = 0; j < timesList.length - i; j++) {
+                    var t1 = timepack.TimeUtil.parseTime(timesList[i], null);
+                    var t2 = timepack.TimeUtil.parseTime(timesList[j], null);
+                    if (t1.getStart() > t2.getStart()) {
+                        collections.arrays.swap(timesList, i, j);
+                    }
+                }
+            }
+            var timeValue = timesList[timesList.length - 1];
+            var tcd = dim.getSubCubeDimension(timeValue);
+            if (tcd == null) {
+                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
+                //dim.dump();
+                return null;
+            }
+            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
+            }
+            else {
+                var co = tcd.getObservation(null);
+                return co.toFlatObs(key, this.flatObsMapper);
+                ;
+            }
+        }
+        else {
+            var timeValue = key.getComponent(time.getId().toString());
+            var tcd = dim.getSubCubeDimension(timeValue);
+            if (tcd == null) {
+                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
+                //dim.dump();
+                return null;
+            }
+            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                //tcd.dump();
+                //console.log("Measure=" + measure);
+                var co = tcd.getObservation(measure);
+                if (co == null)
+                    return null;
+                return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
+            }
+            else {
+                var co = tcd.getObservation(null);
+                return co.toFlatObs(key, this.flatObsMapper);
+            }
+        }
+    };
+    Cube.prototype.getValues = function (col) {
+        var list = this.validCodes[col];
+        if (list == null) {
+            return [];
+        }
+        return list;
+    };
+    /**
+     * @return the size
+     */
+    Cube.prototype.getSize = function () {
+        return this.size;
+    };
+    Cube.prototype.getObservationCount = function () {
+        return this.size;
+    };
+    Cube.prototype.getAllItems = function (col) {
+        var com = this.getStructure().findComponentString(col);
+        return this.reg.findItemType(com.getLocalRepresentation().getEnumeration()).getItems();
+    };
+    Cube.prototype.getAllValues = function (col) {
+        var items = this.getAllItems(col);
+        var result = [];
+        for (var i = 0; i < items.length; i++) {
+            result.push(items[i].getId().toString());
+        }
+        return result;
+    };
+    Cube.prototype.getSparsity = function () {
+        return (this.getObservationCount() / this.getCellCount()) * 100;
+    };
+    Cube.prototype.getItems = function (col) {
+        var com = this.getStructure().findComponentString(col);
+        var result = [];
+        var items = this.reg.findItemType(com.getLocalRepresentation().getEnumeration()).getItems();
+        var codes = this.getValues(col);
+        for (var i = 0; i < items.length; i++) {
+            for (var j = 0; j < codes.length; j++) {
+                if (codes[j] == items[i].getId().getString()) {
+                    result.push(items[i]);
+                }
+            }
+        }
+        return result;
+    };
+    Cube.prototype.getCellCount = function () {
+        var c = this.getValues(this.mapper.getColumnName(0)).length;
+        for (var i = 1; i < this.mapper.size(); i++) {
+            c *= this.getValues(this.mapper.getColumnName(i)).length;
+        }
+        return c;
+    };
+    Cube.prototype.dump = function () {
+        this.recurse(this.root, 0);
+    };
+    Cube.prototype.recurse = function (dim, n) {
+        for (var i = 0; i < dim.listSubDimensions().length; i++) {
+            this.recurse(dim.listSubDimensions()[i], n + 1);
+        }
+        console.log(n + ":" + dim.getConcept() + ":" + dim.getValue());
+    };
+    return Cube;
+}());
+exports.Cube = Cube;
+var CubeDimension = (function () {
+    function CubeDimension(concept, value) {
+        this.concept = null;
+        this.value = null;
+        this.subDimension = null;
+        this.subDimensions = [];
+        this.concept = concept;
+        this.value = value;
+    }
+    /**
+     * @return the concept
+     */
+    CubeDimension.prototype.getConcept = function () {
+        return this.concept;
+    };
+    /**
+     * @param concept the concept to set
+     */
+    CubeDimension.prototype.setConcept = function (concept) {
+        this.concept = concept;
+    };
+    CubeDimension.prototype.getSubCubeDimension = function (id) {
+        for (var i = 0; i < this.subDimensions.length; i++) {
+            if (this.subDimensions[i].getValue() == id) {
+                return this.subDimensions[i];
+            }
+        }
+        return null;
+    };
+    CubeDimension.prototype.putSubCubeDimension = function (sub) {
+        var sub2 = this.getSubCubeDimension(sub.getValue());
+        if (sub2 != null) {
+            // Remove Old Dimension
+            this.subDimensions = this.subDimensions.splice(this.subDimensions.indexOf(sub2), 1);
+        }
+        this.subDimensions.push(sub);
+    };
+    CubeDimension.prototype.listSubDimensions = function () { return this.subDimensions; };
+    CubeDimension.prototype.listDimensionValues = function () {
+        var result = [];
+        for (var i = 0; i < this.subDimensions.length; i++) {
+            result.push(this.subDimensions[i].getValue());
+        }
+        return result;
+    };
+    /**
+     * @return the value
+     */
+    CubeDimension.prototype.getValue = function () {
+        return this.value;
+    };
+    /**
+     * @param value the value to set
+     */
+    CubeDimension.prototype.setValue = function (value) {
+        this.value = value;
+    };
+    CubeDimension.prototype.dump = function () {
+    };
+    /**
+     * @return the subDimension
+     */
+    CubeDimension.prototype.getSubDimension = function () {
+        return this.subDimension;
+    };
+    /**
+     * @param subDimension the subDimension to set
+     */
+    CubeDimension.prototype.setSubDimension = function (subDimension) {
+        this.subDimension = subDimension;
+    };
+    return CubeDimension;
+}());
+exports.CubeDimension = CubeDimension;
+var ListCubeDimension = (function (_super) {
+    __extends(ListCubeDimension, _super);
+    function ListCubeDimension(concept, value) {
+        var _this = _super.call(this, concept, value) || this;
+        _this.list = [];
+        if (concept == null) {
+            console.log("concept is null:ListCubeDimension");
+        }
+        return _this;
+    }
+    ListCubeDimension.prototype.getSubCubeDimension = function (id) {
+        for (var i = 0; i < this.list.length; i++) {
+            var cd = this.list[i];
+            if (cd.getValue() == id) {
+                return cd;
+            }
+        }
+        return null;
+    };
+    ListCubeDimension.prototype.putSubCubeDimension = function (sub) {
+        //console.log("ListCubeDimension.putSubCubeDimension()");
+        var old = this.getSubCubeDimension(sub.getValue());
+        if (old != null) {
+            this.list.splice(this.list.indexOf(old), 1);
+        }
+        this.list.push(sub);
+        this.setSubDimension(sub.getConcept());
+    };
+    ListCubeDimension.prototype.listSubDimensions = function () {
+        return this.list;
+    };
+    ListCubeDimension.prototype.listDimensionValues = function () {
+        var set = [];
+        for (var i = 0; i < this.list.length; i++) {
+            set.push(this.list[i].getValue());
+        }
+        return set;
+    };
+    return ListCubeDimension;
+}(CubeDimension));
+exports.ListCubeDimension = ListCubeDimension;
+var RootCubeDimension = (function (_super) {
+    __extends(RootCubeDimension, _super);
+    function RootCubeDimension() {
+        return _super.call(this, null, null) || this;
+    }
+    return RootCubeDimension;
+}(ListCubeDimension));
+exports.RootCubeDimension = RootCubeDimension;
+var TimeCubeDimension = (function (_super) {
+    __extends(TimeCubeDimension, _super);
+    function TimeCubeDimension(concept, value) {
+        var _this = _super.call(this, concept, value) || this;
+        _this.obs = [];
+        return _this;
+    }
+    TimeCubeDimension.prototype.listObservations = function () {
+        return this.obs;
+    };
+    TimeCubeDimension.prototype.putObservation = function (sub) {
+        this.obs.push(sub);
+    };
+    TimeCubeDimension.prototype.getObservation = function (id) {
+        for (var i = 0; i < this.obs.length; i++) {
+            var c = this.obs[i];
+            if (c.getCrossSection() == null) {
+                return c;
+            }
+            if (c.getCrossSection() == id) {
+                return c;
+            }
+        }
+        return null;
+    };
+    TimeCubeDimension.prototype.listObservationValues = function () {
+        // TO DO
+        return [];
+    };
+    TimeCubeDimension.prototype.listSubDimensions = function () {
+        return [];
+    };
+    TimeCubeDimension.prototype.listDimensionValues = function () {
+        return [];
+    };
+    return TimeCubeDimension;
+}(CubeDimension));
+exports.TimeCubeDimension = TimeCubeDimension;
+var CubeObservation = (function () {
+    function CubeObservation(crossSectionalMeasureConcept, crossSection, primaryMeasureConcept, value) {
+        this.map = new collections.Dictionary();
+        this.concept = null;
+        this.cross = null;
+        this.observationConcept = null;
+        this.value = null;
+        this.concept = crossSectionalMeasureConcept;
+        this.cross = crossSection;
+        this.observationConcept = primaryMeasureConcept;
+        this.value = value;
+    }
+    CubeObservation.prototype.getAttribute = function (id) {
+        return this.map.getValue(id);
+    };
+    CubeObservation.prototype.putAttribute = function (sub) {
+        this.map.setValue(sub.getConcept(), sub);
+    };
+    CubeObservation.prototype.listAttributes = function () {
+        return this.map.values();
+    };
+    CubeObservation.prototype.listAttributeNames = function () {
+        return this.map.keys();
+    };
+    /**
+     * @return the concept
+     */
+    CubeObservation.prototype.getCrossSection = function () {
+        return this.cross;
+    };
+    /**
+     * @param concept the concept to set
+     */
+    CubeObservation.prototype.setCrossSection = function (concept) {
+        this.cross = concept;
+    };
+    /**
+     * @return the value
+     */
+    CubeObservation.prototype.getValue = function () {
+        return this.value;
+    };
+    /**
+     * @param value the value to set
+     */
+    CubeObservation.prototype.setValue = function (value) {
+        this.value = value;
+    };
+    /**
+     * @return the concept
+     */
+    CubeObservation.prototype.getConcept = function () {
+        return this.concept;
+    };
+    /**
+     * @param concept the concept to set
+     */
+    CubeObservation.prototype.setConcept = function (concept) {
+        this.concept = concept;
+    };
+    /**
+     * @return the observationConcept
+     */
+    CubeObservation.prototype.getObservationConcept = function () {
+        return this.observationConcept;
+    };
+    /**
+     * @param observationConcept the observationConcept to set
+     */
+    CubeObservation.prototype.setObservationConcept = function (observationConcept) {
+        this.observationConcept = observationConcept;
+    };
+    CubeObservation.prototype.toCubeObs = function (key, mapper) {
+        var f = new CubeObs();
+        for (var i = 0; i < mapper.size(); i++) {
+            var s = mapper.getColumnName(i);
+            var v = key.getComponent(s);
+            f.addValue(s, v);
+        }
+        // Cross Sectional Data
+        if (this.concept != null) {
+            f.addValue(this.concept, this.cross);
+        }
+        f.addValue(this.observationConcept, this.value);
+        for (var i = 0; i < this.map.keys().length; i++) {
+            var s = this.map.keys()[i];
+            var v2 = this.map.getValue(s);
+            f.addValue(s, v2.getValue());
+        }
+        return f;
+    };
+    CubeObservation.prototype.toFlatObs = function (key, mapper) {
+        var f = new FlatObs([]);
+        mapper.getObservationColumns().forEach(function (s) {
+            var v = key.getComponent(s);
+            f.setValue(mapper.getColumnIndex(s), v);
+        });
+        // Cross Sectional Data
+        if (this.concept != null) {
+            f.setValue(mapper.getColumnIndex(this.concept), this.cross);
+        }
+        // OBS_VALUE
+        if (!mapper.containsColumn(this.observationConcept)) {
+            mapper.registerColumn(this.observationConcept, AttachmentLevel.OBSERVATION);
+        }
+        f.setValue(mapper.getColumnIndex(this.observationConcept), this.value);
+        this.map.forEach(function (at) {
+            var ca = this.getAttribute(at);
+            // Attributes
+            f.setValue(mapper.getColumnIndex(ca.getConcept()), ca.getValue());
+        }.bind(this));
+        return f;
+    };
+    return CubeObservation;
+}());
+exports.CubeObservation = CubeObservation;
+var CubeAttribute = (function () {
+    function CubeAttribute(concept, value) {
+        this.concept = null;
+        this.value = null;
+        this.concept = concept;
+        this.value = value;
+    }
+    CubeAttribute.prototype.getConcept = function () {
+        return this.concept;
+    };
+    CubeAttribute.prototype.getValue = function () {
+        return this.value;
+    };
+    return CubeAttribute;
+}());
+exports.CubeAttribute = CubeAttribute;
+var CubeObs = (function () {
+    function CubeObs() {
+    }
+    CubeObs.prototype.addValue = function (c, v) {
+    };
+    return CubeObs;
+}());
+exports.CubeObs = CubeObs;
+
+
+/***/ }),
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_select___ = __webpack_require__(266);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__List__ = __webpack_require__(83);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__List__ = __webpack_require__(84);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 
@@ -10379,7 +12103,7 @@ Select.Item = __WEBPACK_IMPORTED_MODULE_3__List__["default"].Item;
 /* harmony default export */ __webpack_exports__["default"] = (Select);
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process, global, setImmediate) {/* @preserve
@@ -16005,10 +17729,10 @@ module.exports = ret;
 
 },{"./es5":13}]},{},[4])(4)
 });                    ;if (typeof window !== 'undefined' && window !== null) {                               window.P = window.Promise;                                                     } else if (typeof self !== 'undefined' && self !== null) {                             self.P = self.Promise;                                                         }
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(20), __webpack_require__(284).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5), __webpack_require__(21), __webpack_require__(284).setImmediate))
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 var g;
@@ -16035,10 +17759,10 @@ module.exports = g;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetTag = __webpack_require__(40),
+var baseGetTag = __webpack_require__(42),
     getPrototype = __webpack_require__(300),
     isObjectLike = __webpack_require__(33);
 
@@ -16103,7 +17827,7 @@ module.exports = isPlainObject;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 /**
@@ -16135,12 +17859,12 @@ module.exports = isArray;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_ripple__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_ripple__ = __webpack_require__(37);
 
 
 
@@ -16225,13 +17949,13 @@ class MaterialComponent extends __WEBPACK_IMPORTED_MODULE_0_preact__["Component"
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
+var util = __webpack_require__(11);
 var Dictionary = /** @class */ (function () {
     /**
      * Creates an empty dictionary.
@@ -16408,1693 +18132,6 @@ exports.default = Dictionary;
 //# sourceMappingURL=Dictionary.js.map
 
 /***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b)
-            if (b.hasOwnProperty(p))
-                d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var collections = __webpack_require__(17);
-var structure = __webpack_require__(4);
-var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
-var sdmx = __webpack_require__(6);
-var timepack = __webpack_require__(61);
-var Query = (function () {
-    function Query(flow, registry) {
-        this.flow = null;
-        this.structRef = null;
-        this.registry = null;
-        this.query = [];
-        this.startDate = new Date();
-        this.endDate = new Date();
-        this.timeQueryKey = null;
-        this.updatedAfter = null;
-        this.firstNObservations = null;
-        this.lastNObservations = null;
-        this.dimensionAtObservation = null;
-        this.detail = null;
-        this.includeHistory = null;
-        this.providerRef = null;
-        this.flow = flow;
-        this.structRef = flow.getStructure();
-        this.registry = registry;
-        var kns = this.getKeyNames();
-        for (var i = 0; i < kns.length; i++) {
-            this.query.push(new QueryKey(this.structRef, registry, kns[i]));
-        }
-        this.startDate.setFullYear(2000);
-        this.endDate.setFullYear(2016);
-        if (this.getTimeKeyName() != null) {
-            this.timeQueryKey = new QueryKey(flow.getStructure(), registry, this.getTimeKeyName());
-        }
-    }
-    Query.prototype.getQueryKey = function (id) {
-        for (var i = 0; i < this.query.length; i++) {
-            if (this.query[i].getName() == id)
-                return this.query[i];
-        }
-        if (this.timeQueryKey.getName() == id) {
-            return this.timeQueryKey;
-        }
-        return null;
-    };
-    Query.prototype.getKeyNames = function () {
-        var struct = this.registry.findDataStructure(this.structRef);
-        var keynames = [];
-        for (var i = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            var dim1 = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
-            keynames.push(dim1.getId().toString());
-        }
-        if (struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-            var dim2 = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
-            keynames.push(dim2.getId().toString());
-        }
-        return keynames;
-    };
-    Query.prototype.getTimeKeyName = function () {
-        var struct = this.registry.findDataStructure(this.structRef);
-        if (struct.getDataStructureComponents().getDimensionList().getTimeDimension() == null) {
-            return null;
-        }
-        return struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString();
-    };
-    Query.prototype.getTimeQueryKey = function () {
-        return this.timeQueryKey;
-    };
-    Query.prototype.getDataflow = function () {
-        return this.flow;
-    };
-    Query.prototype.getRegistry = function () {
-        return this.registry;
-    };
-    Query.prototype.getStartDate = function () {
-        return this.startDate;
-    };
-    Query.prototype.getEndDate = function () {
-        return this.endDate;
-    };
-    Query.prototype.setStartDate = function (d) {
-        this.startDate = d;
-    };
-    Query.prototype.setEndDate = function (d) {
-        this.endDate = d;
-    };
-    Query.prototype.getQueryString = function () {
-        var qString = "";
-        var keyNames = this.getKeyNames();
-        for (var i = 0; i < keyNames.length; i++) {
-            qString += this.getQueryKey(keyNames[i]).getQueryString();
-            if (i < (keyNames.length - 1)) {
-                qString += ".";
-            }
-        }
-        return qString;
-    };
-    Query.prototype.getUpdatedAfter = function () { return this.updatedAfter; };
-    Query.prototype.setUpdatedAfter = function (d) { this.updatedAfter = d; };
-    Query.prototype.getFirstNObservations = function () {
-        return this.firstNObservations;
-    };
-    Query.prototype.setFirstNObservations = function (n) {
-        this.firstNObservations = n;
-    };
-    Query.prototype.getLastNObservations = function () {
-        return this.lastNObservations;
-    };
-    Query.prototype.setLastNObservations = function (n) {
-        this.lastNObservations = n;
-    };
-    Query.prototype.getDimensionAtObservation = function () {
-        return this.dimensionAtObservation;
-    };
-    Query.prototype.setDimensionAtObservation = function (s) {
-        this.dimensionAtObservation = s;
-    };
-    Query.prototype.setDetail = function (s) { this.detail = s; };
-    Query.prototype.getDetail = function () { return this.detail; };
-    Query.prototype.getIncludeHistory = function () { return this.includeHistory; };
-    Query.prototype.setIncludeHistory = function (b) { this.includeHistory = b; };
-    Query.prototype.setProviderRef = function (s) { this.providerRef = s; };
-    Query.prototype.getProviderRef = function () {
-        return this.providerRef;
-    };
-    Query.prototype.size = function () {
-        return this.query.length;
-    };
-    return Query;
-}());
-exports.Query = Query;
-var QueryKey = (function () {
-    function QueryKey(structRef, registry, s) {
-        this.all = false;
-        this.structRef = null;
-        this.registry = null;
-        this.name = null;
-        this.values = [];
-        this.structRef = structRef;
-        this.registry = registry;
-        this.name = s;
-    }
-    QueryKey.prototype.getName = function () { return this.name; };
-    QueryKey.prototype.getValues = function () {
-        return this.values;
-    };
-    QueryKey.prototype.setName = function (s) { this.name = s; };
-    QueryKey.prototype.setValue = function (a) {
-        this.values = a;
-    };
-    QueryKey.prototype.addValue = function (s) {
-        for (var i = 0; i < this.values.length; i++) {
-            // already in here
-            if (this.values[i] == s)
-                return;
-        }
-        this.values.push(s);
-    };
-    QueryKey.prototype.removeValue = function (s) {
-        collections.arrays.remove(this.values, s);
-    };
-    QueryKey.prototype.getItemScheme = function () {
-        var comp = this.registry.findDataStructure(this.structRef).findComponentString(this.name);
-        var lr = comp.getLocalRepresentation();
-        if (lr == null || lr.getEnumeration() == null) {
-            var conceptScheme = this.registry.findConceptScheme(comp.getConceptIdentity());
-            return conceptScheme;
-        }
-        else {
-            if (lr != null) {
-                var codelist = this.registry.findCodelist(lr.getEnumeration());
-                return codelist;
-            }
-            // lr == null
-            return null;
-        }
-    };
-    QueryKey.prototype.isAll = function () {
-        return this.all;
-    };
-    QueryKey.prototype.setAll = function (b) {
-        this.all = b;
-    };
-    QueryKey.prototype.possibleValues = function () {
-        var result = [];
-        var itemScheme = this.getItemScheme();
-        if (itemScheme == null) {
-            alert(this.name + " has null itemscheme");
-        }
-        for (var i = 0; i < itemScheme.size(); i++) {
-            var itm = itemScheme.getItem(i);
-            result.push(itm.getId().toString());
-        }
-        return result;
-        ;
-    };
-    QueryKey.prototype.possibleValuesItems = function () {
-        var result = [];
-        var itemScheme = this.getItemScheme();
-        if (itemScheme == null) {
-            return [];
-        }
-        for (var i = 0; i < itemScheme.size(); i++) {
-            var itm = itemScheme.getItem(i);
-            result.push(itm);
-        }
-        return result;
-        ;
-    };
-    QueryKey.prototype.getQueryString = function () {
-        if (this.isAll()) {
-            return "";
-        }
-        else {
-            var s = "";
-            for (var i = 0; i < this.values.length; i++) {
-                s += this.values[i];
-                if (i < (this.values.length - 1)) {
-                    s += "+";
-                }
-            }
-            return s;
-        }
-    };
-    QueryKey.prototype.containsValue = function (s) {
-        for (var i = 0; i < this.values.length; i++) {
-            if (this.values[i] == s)
-                return true;
-        }
-        return false;
-    };
-    QueryKey.prototype.clear = function () {
-        this.values = [];
-    };
-    return QueryKey;
-}());
-exports.QueryKey = QueryKey;
-var FlatObs = (function () {
-    function FlatObs(vals) {
-        this.values = [];
-        this.values = vals;
-        if (vals == null) {
-            this.values = [];
-        }
-    }
-    FlatObs.prototype.setValue = function (i, o) {
-        if (this.values.length <= i) {
-            for (var j = this.values.length; (j - 1) < i; j++) {
-                this.values.push(null);
-            }
-        }
-        this.values[i] = o;
-    };
-    FlatObs.prototype.getValue = function (i) {
-        if (i >= this.values.length) {
-            return null;
-        }
-        return this.values[i];
-    };
-    FlatObs.prototype.dump = function () {
-        var s = "";
-        for (var i = 0; i < this.values.length; i++) {
-            s += this.values[i];
-            if (i < this.values.length)
-                s += " ";
-        }
-        console.log(s);
-    };
-    FlatObs.prototype.size = function () {
-        return this.values.length;
-    };
-    return FlatObs;
-}());
-exports.FlatObs = FlatObs;
-var AttachmentLevel = (function () {
-    function AttachmentLevel(s, id) {
-        this.name = null;
-        this.id = 0;
-        this.name = s;
-        this.id = id;
-        AttachmentLevel.LIST.push(this);
-    }
-    AttachmentLevel.prototype.getName = function () { return this.name; };
-    AttachmentLevel.prototype.getId = function () { return this.id; };
-    AttachmentLevel.fromString = function (s) {
-        for (var i = 0; i < AttachmentLevel.LIST.length; i++) {
-            if (AttachmentLevel.LIST[i].getName() == s)
-                return AttachmentLevel.LIST[i];
-        }
-        return null;
-    };
-    AttachmentLevel.fromId = function (id) {
-        for (var i = 0; i < AttachmentLevel.LIST.length; i++) {
-            if (AttachmentLevel.LIST[i].getId() == id)
-                return AttachmentLevel.LIST[i];
-        }
-        return null;
-    };
-    AttachmentLevel.LIST = [];
-    AttachmentLevel.ATTACHMENT_DATASET = 0;
-    AttachmentLevel.ATTACHMENT_SERIES = 1;
-    AttachmentLevel.ATTACHMENT_OBSERVATION = 2;
-    AttachmentLevel.ATTACHMENT_GROUP = 3;
-    AttachmentLevel.ATTACHMENT_DATASET_STRING = "DataSet";
-    AttachmentLevel.ATTACHMENT_SERIES_STRING = "Series";
-    AttachmentLevel.ATTACHMENT_OBSERVATION_STRING = "Observation";
-    AttachmentLevel.ATTACHMENT_GROUP_STRING = "Group";
-    AttachmentLevel.DATASET = new AttachmentLevel(AttachmentLevel.ATTACHMENT_DATASET_STRING, AttachmentLevel.ATTACHMENT_DATASET);
-    AttachmentLevel.SERIES = new AttachmentLevel(AttachmentLevel.ATTACHMENT_SERIES_STRING, AttachmentLevel.ATTACHMENT_SERIES);
-    AttachmentLevel.OBSERVATION = new AttachmentLevel(AttachmentLevel.ATTACHMENT_OBSERVATION_STRING, AttachmentLevel.ATTACHMENT_OBSERVATION);
-    AttachmentLevel.GROUP = new AttachmentLevel(AttachmentLevel.ATTACHMENT_GROUP_STRING, AttachmentLevel.ATTACHMENT_GROUP);
-    return AttachmentLevel;
-}());
-exports.AttachmentLevel = AttachmentLevel;
-var AbstractKey = (function () {
-    function AbstractKey() {
-        this.dict = new collections.Dictionary();
-    }
-    AbstractKey.prototype.getComponent = function (s) {
-        return this.dict.getValue(s);
-    };
-    AbstractKey.prototype.setComponent = function (s, v) {
-        this.dict.setValue(s, v);
-    };
-    AbstractKey.prototype.toString = function () {
-        return this.dict.values().join(":");
-    };
-    return AbstractKey;
-}());
-exports.AbstractKey = AbstractKey;
-var PartialKey = (function (_super) {
-    __extends(PartialKey, _super);
-    function PartialKey() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return PartialKey;
-}(AbstractKey));
-exports.PartialKey = PartialKey;
-var FullKey = (function (_super) {
-    __extends(FullKey, _super);
-    function FullKey() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return FullKey;
-}(AbstractKey));
-exports.FullKey = FullKey;
-var Group = (function () {
-    function Group() {
-        this.groupName = null;
-        this.groupKey = new collections.Dictionary();
-        this.groupAttributes = new collections.Dictionary();
-        this.map = new collections.Dictionary();
-    }
-    Group.Group = function (groupValues) {
-        var g = new Group();
-        g.map = groupValues;
-        return g;
-    };
-    Group.prototype.putGroupValue = function (concept, value) {
-        this.map.setValue(concept, value);
-    };
-    Group.prototype.getGroupValue = function (concept) {
-        return this.groupAttributes.getValue(concept);
-    };
-    Group.prototype.processGroupValues = function (ds) {
-        this.groupAttributes = new collections.Dictionary();
-        var keys = this.map.keys();
-        for (var i = 0; i < keys.length; i++) {
-            var s = keys[i];
-            if (ds.getColumnMapper().getColumnIndex(s) == -1 || ds.getColumnMapper().isAttachedToGroupString(s)) {
-                this.groupAttributes.setValue(s, this.map.getValue(s));
-                if (!ds.getColumnMapper().isAttachedToGroupString(s)) {
-                    ds.getColumnMapper().registerColumn(s, AttachmentLevel.GROUP);
-                }
-            }
-            else {
-                this.groupKey.setValue(s, this.map.getValue(s));
-                collections.arrays.remove(keys, s);
-            }
-        }
-        this.map = null;
-    };
-    Group.prototype.getGroupKey = function () {
-        return this.groupKey;
-    };
-    Group.prototype.matches = function (key) {
-        var keys = this.getGroupKey().keys();
-        for (var i = 0; i < keys.length; i++) {
-            var s = keys[i];
-            var gv = this.getGroupKey().getValue(s);
-            if (gv != null) {
-                if (!(key.getComponent(s) == gv)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    };
-    Group.prototype.getGroupAttributes = function () {
-        return this.groupAttributes;
-    };
-    Group.prototype.getGroupName = function () {
-        return this.groupName;
-    };
-    Group.prototype.setGroupName = function (groupName) {
-        this.groupName = groupName;
-    };
-    Group.prototype.setGroupValue = function (columnName, val) {
-        this.groupAttributes.setValue(columnName, val);
-    };
-    return Group;
-}());
-exports.Group = Group;
-var FlatColumnMapper = (function () {
-    function FlatColumnMapper() {
-        this.columns = [];
-        this.groupColumns = [];
-    }
-    FlatColumnMapper.prototype.registerColumn = function (s, attach) {
-        if (collections.arrays.contains(this.columns, s) || collections.arrays.contains(this.groupColumns, s)) {
-            throw new Error("Attempt to Register already registered Column!!");
-        }
-        if (attach == AttachmentLevel.GROUP) {
-            this.groupColumns.push(s);
-            this.columns.push(s);
-            return this.columns.indexOf(s);
-        }
-        else {
-            this.columns.push(s);
-            return this.columns.indexOf(s);
-        }
-    };
-    FlatColumnMapper.prototype.getColumnIndex = function (s) {
-        return this.columns.indexOf(s);
-    };
-    FlatColumnMapper.prototype.getColumnName = function (i) {
-        return this.columns[i];
-    };
-    FlatColumnMapper.prototype.size = function () {
-        return this.columns.length;
-    };
-    FlatColumnMapper.prototype.containsColumn = function (name) {
-        for (var i = 0; i < this.columns.length; i++) {
-            if (this.columns[i] == name) {
-                return true;
-            }
-        }
-        return false;
-    };
-    FlatColumnMapper.prototype.getAllColumns = function () {
-        var result = [];
-        for (var i = 0; i < this.columns.length; i++) {
-            result.push(this.columns[i]);
-        }
-        return result;
-    };
-    FlatColumnMapper.prototype.getObservationColumns = function () {
-        var result = [];
-        for (var i = 0; i < this.columns.length; i++) {
-            result.push(this.columns[i]);
-        }
-        return result;
-    };
-    FlatColumnMapper.prototype.getSeriesColumns = function () {
-        return [];
-    };
-    FlatColumnMapper.prototype.getDataSetColumns = function () {
-        return [];
-    };
-    FlatColumnMapper.prototype.getGroupColumns = function () {
-        return [];
-    };
-    FlatColumnMapper.prototype.isAttachedToDataSetString = function (s) {
-        return false;
-    };
-    FlatColumnMapper.prototype.isAttachedToDataSetInt = function (i) {
-        return false;
-    };
-    FlatColumnMapper.prototype.isAttachedToSeriesString = function (s) {
-        return false;
-    };
-    FlatColumnMapper.prototype.isAttachedToSeriesInt = function (i) {
-        return false;
-    };
-    FlatColumnMapper.prototype.isAttachedToObservationString = function (s) {
-        return collections.arrays.contains(this.columns, s);
-    };
-    FlatColumnMapper.prototype.isAttachedToObservationInt = function (i) {
-        return true;
-    };
-    FlatColumnMapper.prototype.isAttachedToGroupString = function (s) {
-        return collections.arrays.contains(this.groupColumns, s);
-    };
-    FlatColumnMapper.prototype.isAttachedToGroupInt = function (i) {
-        return this.isAttachedToGroupString(this.getColumnName(i));
-    };
-    FlatColumnMapper.prototype.dump = function () {
-        console.log("Column Mapper");
-        for (var i = 0; i < this.size(); i++) {
-            console.log(i + " = " + this.getColumnName(i));
-        }
-    };
-    return FlatColumnMapper;
-}());
-exports.FlatColumnMapper = FlatColumnMapper;
-var FlatDataSet = (function () {
-    function FlatDataSet() {
-        this.groups = [];
-        this.mapper = new FlatColumnMapper();
-        this.observations = [];
-        this.dimensionAtObservation = "AllDimensions";
-    }
-    FlatDataSet.prototype.FlatDataSet = function () {
-    };
-    FlatDataSet.prototype.getColumnIndex = function (name) {
-        return this.mapper.getColumnIndex(name);
-    };
-    FlatDataSet.prototype.getValue = function (row, col) {
-        if (this.observations[row] == null) {
-            console.log("null obs!");
-        }
-        return this.observations[row].getValue(col);
-    };
-    FlatDataSet.prototype.setValueStringCol = function (row, col, val) {
-        this.setValue(row, this.mapper.getColumnIndex(col), val);
-    };
-    FlatDataSet.prototype.setValue = function (row, col, val) {
-        this.observations[row].setValue(col, val);
-    };
-    FlatDataSet.prototype.addObservation = function (o) {
-        this.observations.push(o);
-    };
-    FlatDataSet.prototype.removeObservation = function (o) {
-        collections.arrays.remove(this.observations, o);
-    };
-    FlatDataSet.prototype.getObservations = function () {
-        return this.observations;
-    };
-    FlatDataSet.prototype.size = function () {
-        return this.observations.length;
-    };
-    FlatDataSet.prototype.getColumnMapper = function () {
-        return this.mapper;
-    };
-    FlatDataSet.prototype.dump = function () {
-        var s = "";
-        for (var i = 0; i < this.mapper.size(); i++) {
-            s += this.getColumnMapper().getColumnName(i);
-            s += "\t";
-        }
-        console.log(s);
-        for (var i = 0; i < this.observations.length; i++) {
-            var o = this.getFlatObs(i);
-            var s = "";
-            for (var j = 0; j < this.mapper.size(); j++) {
-                s = s + o.getValue(j);
-                if (j < this.mapper.size())
-                    s = s + "\t";
-            }
-            console.log(s);
-        }
-    };
-    FlatDataSet.prototype.getFlatObs = function (i) {
-        return this.observations[i];
-    };
-    FlatDataSet.prototype.registerColumn = function (s) {
-        var col = this.mapper.registerColumn(s, AttachmentLevel.OBSERVATION);
-        for (var i = 0; i < this.observations.length; i++) {
-            this.observations[i].setValue(col, null);
-        }
-        return col;
-    };
-    FlatDataSet.prototype.getColumnName = function (i) {
-        return this.mapper.getColumnName(i);
-    };
-    FlatDataSet.prototype.getColumnSize = function () {
-        return this.mapper.size();
-    };
-    FlatDataSet.prototype.getGroups = function () {
-        return [];
-    };
-    FlatDataSet.prototype.groupSize = function () {
-        return 0;
-    };
-    FlatDataSet.prototype.applyGroupKey = function (key, column, value) {
-    };
-    FlatDataSet.prototype.setGroups = function (groups) {
-    };
-    FlatDataSet.prototype.query = function (cube, order) {
-        var time = new Date().getTime();
-        for (var i = 0; i < this.size(); i++) {
-            cube.putObservation(order, this.mapper, this.getFlatObs(i));
-        }
-        return cube;
-    };
-    FlatDataSet.prototype.find = function (key) {
-        var found = true;
-        for (var i = 0; i < this.size(); i++) {
-            var obs = this.getFlatObs(i);
-            found = true;
-            for (var j = 0; j < this.mapper.size() && !found; j++) {
-                if (!(key.getComponent(this.mapper.getColumnName(j)) == obs.getValue(j))) {
-                    found = false;
-                }
-            }
-            if (found) {
-                return obs;
-            }
-        }
-        return null;
-    };
-    FlatDataSet.prototype.getDimensionAtObservation = function (reg, dsref) {
-        return "AllDimensions";
-    };
-    FlatDataSet.prototype.setDimensionAtObservationString = function (s) {
-        this.dimensionAtObservation = s;
-    };
-    FlatDataSet.prototype.getDimensionAtObservationString = function () {
-        return this.dimensionAtObservation;
-    };
-    return FlatDataSet;
-}());
-exports.FlatDataSet = FlatDataSet;
-var FlatDataSetWriter = (function () {
-    function FlatDataSetWriter() {
-        this.mapper = new FlatColumnMapper();
-        this.dataSet = null;
-        this.dataSetValues = null;
-        this.seriesValues = null;
-        this.obsValues = null;
-        this.groups = null;
-    }
-    FlatDataSetWriter.prototype.newDataSet = function () {
-        this.dataSet = new FlatDataSet();
-        this.dataSetValues = [];
-        this.mapper = this.dataSet.getColumnMapper();
-    };
-    FlatDataSetWriter.prototype.newSeries = function () {
-        this.seriesValues = [];
-        for (var i = 0; i < this.dataSetValues.length; i++) {
-            this.seriesValues.push(this.dataSetValues[i]);
-        }
-    };
-    FlatDataSetWriter.prototype.newObservation = function () {
-        this.obsValues = [];
-        if (this.seriesValues != null) {
-            for (var i = 0; i < this.seriesValues.length; i++) {
-                this.obsValues.push(this.seriesValues[i]);
-            }
-        }
-    };
-    FlatDataSetWriter.prototype.writeDataSetComponent = function (name, val) {
-        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
-            this.dataSet.registerColumn(name);
-        }
-        this.dataSetValues.push(val);
-    };
-    FlatDataSetWriter.prototype.writeSeriesComponent = function (name, val) {
-        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
-            this.dataSet.registerColumn(name);
-        }
-        this.seriesValues.push(val);
-    };
-    FlatDataSetWriter.prototype.writeObservationComponent = function (name, val) {
-        if (!this.dataSet.getColumnMapper().containsColumn(name)) {
-            this.dataSet.registerColumn(name);
-        }
-        if (this.obsValues.length <= this.dataSet.getColumnMapper().getColumnIndex(name)) {
-            for (var j = this.obsValues.length; (j - 1) < this.dataSet.getColumnIndex(name); j++) {
-                this.obsValues.push(null);
-            }
-        }
-        this.obsValues[this.dataSet.getColumnIndex(name)] = val;
-    };
-    FlatDataSetWriter.prototype.finishSeries = function () {
-    };
-    FlatDataSetWriter.prototype.finishObservation = function () {
-        this.dataSet.addObservation(new FlatObs(this.obsValues));
-    };
-    FlatDataSetWriter.prototype.finishDataSet = function () {
-        var ds = this.dataSet;
-        ds.setGroups(this.groups);
-        this.dataSet = null;
-        return ds;
-    };
-    FlatDataSetWriter.prototype.getColumnMapper = function () {
-        return this.mapper;
-    };
-    FlatDataSetWriter.prototype.writeGroupValues = function (name, groupValues) {
-        var group = Group.Group(groupValues);
-        group.setGroupName(name);
-        if (this.groups == null) {
-            this.groups = [];
-        }
-        this.groups.push(group);
-    };
-    return FlatDataSetWriter;
-}());
-exports.FlatDataSetWriter = FlatDataSetWriter;
-var StructuredDataMessage = (function () {
-    function StructuredDataMessage(dm, reg) {
-        this.dataMessage = null;
-        this.registry = null;
-        this.dataflow = null;
-        this.list = [];
-        this.dataMessage = dm;
-        this.registry = reg;
-        for (var i = 0; i < this.dataMessage.size(); i++) {
-            this.list.push(this.buildStructuredDataSet(i));
-        }
-    }
-    StructuredDataMessage.prototype.size = function () {
-        return this.getDataMessage().size();
-    };
-    StructuredDataMessage.prototype.getStructuredDataSet = function (i) {
-        return this.list[i];
-    };
-    StructuredDataMessage.prototype.buildStructuredDataSet = function (i) {
-        //dataMessage.getHeader().getStructures().get(0).getStructure().dump();
-        //NestedNCNameID agency = dataMessage.getHeader().getStructures().get(0).getStructure().getAgencyId();
-        //IDType id = dataMessage.getHeader().getStructures().get(0).getStructure().getMaintainableParentId();
-        //Version vers = dataMessage.getHeader().getStructures().get(0).getStructure().getMaintainedParentVersion();
-        //System.out.println("Ref="+agency+":"+id+":"+vers);
-        var structure = this.getRegistry().findDataStructure(this.getDataMessage().getHeader().getStructures()[0].getStructure());
-        //System.out.println("Structure="+structure);
-        if (this.dataflow == null) {
-            this.setDataflow(structure.asDataflow());
-        }
-        return new StructuredDataSet(this.getDataMessage().getDataSet(i), this.getRegistry(), structure);
-    };
-    /**
-     * @return the dataMessage
-     */
-    StructuredDataMessage.prototype.getDataMessage = function () {
-        return this.dataMessage;
-    };
-    /**
-     * @return the registry
-     */
-    StructuredDataMessage.prototype.getRegistry = function () {
-        return this.registry;
-    };
-    /**
-     * @return the dataflow
-     */
-    StructuredDataMessage.prototype.getDataflow = function () {
-        return this.dataflow;
-    };
-    /**
-     * @param dataflow the dataflow to set
-     */
-    StructuredDataMessage.prototype.setDataflow = function (dataflow) {
-        this.dataflow = dataflow;
-    };
-    return StructuredDataMessage;
-}());
-exports.StructuredDataMessage = StructuredDataMessage;
-var StructuredDataSet = (function () {
-    function StructuredDataSet(ds, reg, struct) {
-        this.dataSet = null;
-        this.registry = null;
-        this.structure = null;
-        this.dataSet = ds;
-        this.registry = reg;
-        this.structure = struct;
-    }
-    StructuredDataSet.prototype.getStructuredValue = function (row, column) {
-        return new StructuredValue(this.getDataSet().getColumnName(column), this.getDataSet().getValue(row, column), this.registry, this.getStructure());
-    };
-    StructuredDataSet.prototype.getColumnName = function (i) {
-        var conceptString = this.getDataSet().getColumnName(i);
-        //System.out.println("Concept="+conceptString);
-        //System.out.println("ds="+getStructure());
-        var c = this.getStructure().findComponentString(conceptString);
-        if (c == null && conceptString == "type") {
-            // "type" represents sdmx 2.0 cross sectional document 
-            c = this.getStructure().getDataStructureComponents().getDimensionList().getMeasureDimension();
-        }
-        if (c == null) {
-            console.log("Component is null conceptRef:" + conceptString);
-            return conceptString;
-        }
-        var conceptRef = c.getConceptIdentity();
-        var concept = null;
-        if (conceptRef != null) {
-            concept = this.registry.findConcept(conceptRef);
-            return structure.NameableType.toString(concept);
-        }
-        else {
-            return conceptString;
-        }
-    };
-    StructuredDataSet.prototype.size = function () {
-        return this.getDataSet().size();
-    };
-    StructuredDataSet.prototype.getColumnCount = function () {
-        return this.getDataSet().getColumnSize();
-    };
-    /**
-     * @return the dataSet
-     */
-    StructuredDataSet.prototype.getDataSet = function () {
-        return this.dataSet;
-    };
-    /**
-     * @return the structure
-     */
-    StructuredDataSet.prototype.getStructure = function () {
-        return this.structure;
-    };
-    StructuredDataSet.prototype.getColumnIndexes = function () {
-        var result = [];
-        for (var i = 0; i < this.getColumnCount(); i++) {
-            result.push(i);
-        }
-        return result;
-    };
-    return StructuredDataSet;
-}());
-exports.StructuredDataSet = StructuredDataSet;
-var StructuredValue = (function () {
-    function StructuredValue(concept, value, registry, struct) {
-        this.concept = null;
-        this.value = null;
-        this.registry = null;
-        this.structure = null;
-        this.concept = concept;
-        this.value = value;
-        this.registry = registry;
-        this.structure = struct;
-    }
-    StructuredValue.prototype.getRepresentation = function (reg, c) {
-        var rep = c.getLocalRepresentation();
-        if (rep == null) {
-            var concept = reg.findConcept(c.getConceptIdentity());
-            //return concept.getCoreRepresentation();
-        }
-        return c.getLocalRepresentation();
-    };
-    StructuredValue.prototype.getLocalRepresentation = function (c) {
-        if (c == null)
-            return null;
-        return c.getLocalRepresentation();
-    };
-    StructuredValue.prototype.isCoded = function () {
-        var comp = this.structure.findComponentString(this.concept);
-        if ("type" == this.concept) {
-            comp = this.structure.getDataStructureComponents().getDimensionList().getMeasureDimension();
-        }
-        if (comp == null) {
-            console.log("Comp is NUll!" + this.concept);
-            return false;
-        }
-        var localRep = this.getRepresentation(this.registry, comp);
-        if (localRep.getEnumeration() != null) {
-            return true;
-        }
-        else
-            return false;
-    };
-    StructuredValue.prototype.getCode = function () {
-        //System.out.println("Concept:"+ concept+" Value:" + value);
-        //Locale loc = Locale.getDefault();
-        //ItemType item = ValueTypeResolver.resolveCode(registry, structure, concept, value);
-        //System.out.println("Item=" + item.toString());
-        //System.out.println("Item=" + item.findName(loc.getLanguage()));
-        return ValueTypeResolver.resolveCode(this.registry, this.structure, this.concept, this.getValue());
-    };
-    StructuredValue.prototype.getCodelist = function () {
-        return ValueTypeResolver.getPossibleCodes(this.registry, this.structure, this.concept);
-    };
-    StructuredValue.prototype.toString = function () {
-        if (this.isCoded()) {
-            var code = this.getCode();
-            if (code == null) {
-                return this.getValue();
-            }
-            return structure.NameableType.toString(code);
-        }
-        return this.getValue();
-    };
-    /**
-     * @return the concept
-     */
-    StructuredValue.prototype.getConcept = function () {
-        return this.registry.findConcept(this.structure.findComponentString(this.concept).getConceptIdentity());
-    };
-    /**
-     * @return the value
-     */
-    StructuredValue.prototype.getValue = function () {
-        return this.value;
-    };
-    return StructuredValue;
-}());
-exports.StructuredValue = StructuredValue;
-var ValueTypeResolver = (function () {
-    function ValueTypeResolver() {
-    }
-    ValueTypeResolver.resolveCode = function (registry, struct, column, value) {
-        if (value == null) {
-            return null;
-        }
-        var dim = struct.findComponentString(column);
-        // Cross Sectional Measures somtimes come in a a 'type' column..
-        // see SDMX 2.0 example cross sectional file
-        if ("type" == column) {
-            dim = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
-        }
-        if (dim == null) {
-            var itm = new structure.CodeType();
-            var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
-            var names = [name];
-            itm.setNames(names);
-            return itm;
-        }
-        var conceptRef = dim.getConceptIdentity();
-        var rep = null;
-        var concept = null;
-        if (conceptRef != null) {
-            concept = registry.findConcept(conceptRef);
-            if (concept == null) {
-                console.log("Cant find concept:" + dim.getConceptIdentity().getId());
-                console.log(conceptRef.getAgencyId() + ":" + conceptRef.getMaintainableParentId() + ":" + conceptRef.getId() + ":" + conceptRef.getVersion());
-                var ct = new structure.CodeType();
-                ct.setId(new commonreferences.ID(value));
-                var name = new common.Name("en", value);
-                ct.setNames([name]);
-                return ct;
-            }
-            rep = dim.getLocalRepresentation();
-        }
-        if (rep != null) {
-            if (rep.getEnumeration() != null) {
-                if (rep.getEnumeration().getRefClass().toInt() == commonreferences.ObjectTypeCodelistType.CODELIST.toInt()) {
-                    var codelist = registry.findCodelist(rep.getEnumeration());
-                    var id = null;
-                    try {
-                        id = new commonreferences.ID(value);
-                    }
-                    catch (err) {
-                        // Ignore
-                    }
-                    if (codelist == null) {
-                        throw new Error("Codelist is null Representation=" + rep.getEnumeration().toString());
-                    }
-                    var ct = null;
-                    if (id != null) {
-                        ct = codelist.findItemId(id);
-                    }
-                    if (ct == null) {
-                        var ct2 = new structure.CodeType();
-                        ct2.setId(id);
-                        var name = new common.Name("en", "Missing Code:" + value);
-                        var names = [];
-                        names.push(name);
-                        ct2.setNames(names);
-                        return ct2;
-                    }
-                    else {
-                        return ct;
-                    }
-                }
-                else {
-                    var cs = registry.findConceptScheme(rep.getEnumeration());
-                    var conceptMeasure = null;
-                    for (var i = 0; i < cs.size() && conceptMeasure == null; i++) {
-                        var tempConcept = cs.getItem(i);
-                        if (tempConcept.getId() != null && tempConcept.getId().toString() == value) {
-                            conceptMeasure = cs.getItem(i);
-                        }
-                        else if (tempConcept.getId().toString() == value) {
-                            conceptMeasure = tempConcept;
-                        }
-                    }
-                    if (conceptMeasure != null) {
-                        //System.out.println("ConceptMeasure:"+conceptMeasure);
-                        return conceptMeasure;
-                    }
-                    return null;
-                }
-            }
-            else {
-                var itm = new structure.CodeType();
-                var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
-                var names = [name];
-                itm.setNames(names);
-                return itm;
-            }
-        }
-        var itm = new structure.CodeType();
-        var name = new common.Name(sdmx.SdmxIO.getLocale(), value);
-        var names = [name];
-        itm.setNames(names);
-        return itm;
-    };
-    ValueTypeResolver.getPossibleCodes = function (registry, struct, column) {
-        var dim = struct.findComponentString(column);
-        if (dim == null || "type" == column) {
-            dim = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
-        }
-        var conceptRef = dim.getConceptIdentity();
-        var rep = null;
-        var concept = null;
-        if (conceptRef != null) {
-            concept = registry.findConcept(conceptRef);
-            rep = dim.getLocalRepresentation();
-        }
-        if (rep != null) {
-            if (rep.getEnumeration() != null) {
-                if (rep.getEnumeration().getRefClass().toInt() == commonreferences.ObjectTypeCodelistType.CODELIST.toInt()) {
-                    var codelist = registry.findCodelist(rep.getEnumeration());
-                    return codelist;
-                }
-                else {
-                    var cs = registry.findConceptScheme(rep.getEnumeration());
-                    return cs;
-                }
-            }
-        }
-        return null;
-    };
-    return ValueTypeResolver;
-}());
-exports.ValueTypeResolver = ValueTypeResolver;
-var Cube = (function () {
-    function Cube(struct, reg) {
-        this.size = 0;
-        this.order = [];
-        this.struct = null;
-        this.reg = null;
-        this.mapper = new FlatColumnMapper();
-        this.cubeObsMapper = new FlatColumnMapper();
-        this.flatObsMapper = new FlatColumnMapper();
-        this.validCodes = new collections.Dictionary();
-        this.root = new RootCubeDimension();
-        this.struct = struct;
-        this.reg = reg;
-    }
-    Cube.prototype.getStructure = function () {
-        return this.struct;
-    };
-    Cube.prototype.getStructureReference = function () {
-        return this.struct.asReference();
-    };
-    Cube.prototype.getRootCubeDimension = function () {
-        return this.root;
-    };
-    Cube.prototype.putObservation = function (order, mapper, obs) {
-        var dim = this.getRootCubeDimension();
-        this.order = order;
-        var time = null;
-        var cubeobs = null;
-        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            //if( struct.getDataStructureComponents().getDimensionList().getDimension(i).)
-            // This line goes through the components in their datastructure order
-            //IDType dimId = struct.getDataStructureComponents().getDimensionList().getDimension(i).getId();
-            // This line goes through the components in their specified order
-            var dimId = null;
-            if (order != null) {
-                dimId = new commonreferences.ID(order[i]);
-            }
-            else {
-                dimId = this.struct.getDataStructureComponents().getDimensionList().getDimensions()[i].getId();
-            }
-            if (this.validCodes[dimId.toString()] == null) {
-                this.validCodes[dimId.toString()] = [];
-                if (this.mapper.getColumnIndex(dimId.toString()) == -1) {
-                    this.mapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-                    this.cubeObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-                    this.flatObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-                }
-            }
-            /*
-                If the data you are trying to make a cube from does not have a complete key
-                with values for all dimensions, mapper.getColumnIndex(dimId.toString()) returns -1
-                here (because there is no dimension of that name in the FlatObservation)
-                this filters down into FlatObservation.getValue(-1) which causes an array index
-                out of bounds exception!
-             */
-            if (mapper.getColumnIndex(dimId.toString()) == -1) {
-                this.mapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-                this.cubeObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-                this.flatObsMapper.registerColumn(dimId.toString(), AttachmentLevel.OBSERVATION);
-            }
-            var myDim = dim.getSubCubeDimension(obs.getValue(mapper.getColumnIndex(dimId.toString())));
-            if (myDim == null) {
-                myDim = new ListCubeDimension(dimId.toString(), obs.getValue(mapper.getColumnIndex(dimId.toString())));
-                dim.putSubCubeDimension(myDim);
-                if (!collections.arrays.contains(this.validCodes[dimId.toString()], myDim.getValue())) {
-                    this.validCodes[dimId.toString()].push(myDim.getValue());
-                }
-            }
-            dim = myDim;
-        }
-        var myDim = null;
-        var dimId = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension().getId();
-        if (this.validCodes[dimId.toString()] == null) {
-            this.validCodes[dimId.toString()] = [];
-        }
-        var i = this.mapper.getColumnIndex(dimId.toString());
-        var s = obs.getValue(i);
-        myDim = dim.getSubCubeDimension(obs.getValue(mapper.getColumnIndex(dimId.toString())));
-        if (myDim == null) {
-            myDim = new TimeCubeDimension(dimId.toString(), obs.getValue(mapper.getColumnIndex(dimId.toString())));
-            dim.putSubCubeDimension(myDim);
-            if (!collections.arrays.contains(this.validCodes[dimId.toString()], myDim.getValue())) {
-                this.validCodes[dimId.toString()].push(myDim.getValue());
-            }
-        }
-        time = myDim;
-        var cross = null;
-        var dimId2 = null;
-        if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-            dimId2 = this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId();
-            if (this.validCodes[dimId2.toString()] == null) {
-                this.validCodes[dimId2.toString()] = [];
-                if (this.mapper.getColumnIndex(dimId2.toString()) == -1) {
-                    this.mapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
-                    this.cubeObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
-                    this.flatObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
-                }
-            }
-            cross = obs.getValue(mapper.getColumnIndex(dimId2.toString()));
-            if (!collections.arrays.contains(this.validCodes[dimId2.toString()], cross)) {
-                this.validCodes[dimId2.toString()].push(cross);
-            }
-        }
-        var dimId3 = this.struct.getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId();
-        if (dimId2 != null) {
-            cubeobs = new CubeObservation(dimId2.toString(), cross, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));
-            if (this.mapper.getColumnIndex(dimId2.toString()) == -1) {
-                this.mapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
-                this.cubeObsMapper.registerColumn(dimId2.toString(), AttachmentLevel.OBSERVATION);
-            }
-        }
-        else {
-            cubeobs = new CubeObservation(null, null, dimId3.toString(), obs.getValue(mapper.getColumnIndex(dimId3.toString())));
-            if (this.mapper.getColumnIndex(dimId3.toString()) == -1) {
-                this.mapper.registerColumn(dimId3.toString(), AttachmentLevel.OBSERVATION);
-                this.flatObsMapper.registerColumn(dimId3.toString(), AttachmentLevel.OBSERVATION);
-            }
-        }
-        time.putObservation(cubeobs);
-        for (var k = 0; k < this.struct.getDataStructureComponents().getAttributeList().getAttributes().length; k++) {
-            var name = this.struct.getDataStructureComponents().getAttributeList().getAttributes()[k].getId().toString();
-            var value = null;
-            if (mapper.getColumnIndex(name) != -1) {
-                value = obs.getValue(mapper.getColumnIndex(name));
-                cubeobs.putAttribute(new CubeAttribute(name, value));
-            }
-        }
-        // Increment Size counter
-        this.size++;
-    };
-    Cube.prototype.getColumnMapper = function () {
-        return this.mapper;
-    };
-    Cube.prototype.getFlatColumnMapper = function () {
-        return this.flatObsMapper;
-    };
-    Cube.prototype.getCubeObsColumnMapper = function () {
-        return this.cubeObsMapper;
-    };
-    Cube.prototype.findCubeObs = function (key) {
-        return this.findLatestCubeObs(key, false);
-    };
-    Cube.prototype.findFlatObs = function (key) {
-        return this.findLatestFlatObs(key, false);
-    };
-    Cube.prototype.findLatestCubeObs = function (key, latest) {
-        var dim = this.getRootCubeDimension();
-        var oldDim = dim;
-        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
-            if (dim == null) {
-                //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
-                return null;
-            }
-            oldDim = dim;
-        }
-        var time = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension();
-        if (time == null) {
-            throw new Error("Time Dimension Is Null");
-        }
-        else if (latest) {
-            var timesList = dim.listDimensionValues();
-            for (var i = 0; i < timesList.length; i++) {
-                for (var j = 0; j < timesList.length - i; j++) {
-                    var t1 = timepack.TimeUtil.parseTime(timesList[i], null);
-                    var t2 = timepack.TimeUtil.parseTime(timesList[j], null);
-                    if (t1.getStart() > t2.getStart()) {
-                        collections.arrays.swap(timesList, i, j);
-                    }
-                }
-            }
-            var timeValue = timesList[timesList.length - 1];
-            var tcd = dim.getSubCubeDimension(timeValue);
-            if (tcd == null) {
-                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
-                //dim.dump();
-                return null;
-            }
-            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
-                //tcd.dump();
-                //System.out.println("Measure="+measure);
-                return tcd.getObservation(measure).toCubeObs(key, this.mapper);
-            }
-            else {
-                var co = tcd.getObservation(null);
-                return co.toCubeObs(key, this.mapper);
-                ;
-            }
-        }
-        else {
-            var timeValue = key.getComponent(time.getId().toString());
-            var tcd = dim.getSubCubeDimension(timeValue);
-            if (tcd == null) {
-                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
-                //dim.dump();
-                return null;
-            }
-            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
-                //tcd.dump();
-                //System.out.println("Measure="+measure);
-                return tcd.getObservation(measure).toCubeObs(key, this.cubeObsMapper);
-            }
-            else {
-                var co = tcd.getObservation(null);
-                return co.toCubeObs(key, this.cubeObsMapper);
-            }
-        }
-    };
-    Cube.prototype.findLatestFlatObs = function (key, latest) {
-        var dim = this.getRootCubeDimension();
-        var oldDim = dim;
-        for (var i = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
-            if (dim == null) {
-                //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
-                return null;
-            }
-            oldDim = dim;
-        }
-        var time = this.struct.getDataStructureComponents().getDimensionList().getTimeDimension();
-        if (time == null) {
-            throw new Error("Time Dimension Is Null");
-        }
-        else if (latest) {
-            var timesList = dim.listDimensionValues();
-            for (var i = 0; i < timesList.length; i++) {
-                for (var j = 0; j < timesList.length - i; j++) {
-                    var t1 = timepack.TimeUtil.parseTime(timesList[i], null);
-                    var t2 = timepack.TimeUtil.parseTime(timesList[j], null);
-                    if (t1.getStart() > t2.getStart()) {
-                        collections.arrays.swap(timesList, i, j);
-                    }
-                }
-            }
-            var timeValue = timesList[timesList.length - 1];
-            var tcd = dim.getSubCubeDimension(timeValue);
-            if (tcd == null) {
-                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
-                //dim.dump();
-                return null;
-            }
-            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
-                return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
-            }
-            else {
-                var co = tcd.getObservation(null);
-                return co.toFlatObs(key, this.flatObsMapper);
-                ;
-            }
-        }
-        else {
-            var timeValue = key.getComponent(time.getId().toString());
-            var tcd = dim.getSubCubeDimension(timeValue);
-            if (tcd == null) {
-                //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
-                //dim.dump();
-                return null;
-            }
-            if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
-                //tcd.dump();
-                //console.log("Measure=" + measure);
-                var co = tcd.getObservation(measure);
-                if (co == null)
-                    return null;
-                return tcd.getObservation(measure).toFlatObs(key, this.flatObsMapper);
-            }
-            else {
-                var co = tcd.getObservation(null);
-                return co.toFlatObs(key, this.flatObsMapper);
-            }
-        }
-    };
-    Cube.prototype.getValues = function (col) {
-        var list = this.validCodes[col];
-        if (list == null) {
-            return [];
-        }
-        return list;
-    };
-    /**
-     * @return the size
-     */
-    Cube.prototype.getSize = function () {
-        return this.size;
-    };
-    Cube.prototype.getObservationCount = function () {
-        return this.size;
-    };
-    Cube.prototype.getAllItems = function (col) {
-        var com = this.getStructure().findComponentString(col);
-        return this.reg.findItemType(com.getLocalRepresentation().getEnumeration()).getItems();
-    };
-    Cube.prototype.getAllValues = function (col) {
-        var items = this.getAllItems(col);
-        var result = [];
-        for (var i = 0; i < items.length; i++) {
-            result.push(items[i].getId().toString());
-        }
-        return result;
-    };
-    Cube.prototype.getSparsity = function () {
-        return (this.getObservationCount() / this.getCellCount()) * 100;
-    };
-    Cube.prototype.getItems = function (col) {
-        var com = this.getStructure().findComponentString(col);
-        var result = [];
-        var items = this.reg.findItemType(com.getLocalRepresentation().getEnumeration()).getItems();
-        var codes = this.getValues(col);
-        for (var i = 0; i < items.length; i++) {
-            for (var j = 0; j < codes.length; j++) {
-                if (codes[j] == items[i].getId().getString()) {
-                    result.push(items[i]);
-                }
-            }
-        }
-        return result;
-    };
-    Cube.prototype.getCellCount = function () {
-        var c = this.getValues(this.mapper.getColumnName(0)).length;
-        for (var i = 1; i < this.mapper.size(); i++) {
-            c *= this.getValues(this.mapper.getColumnName(i)).length;
-        }
-        return c;
-    };
-    Cube.prototype.dump = function () {
-        this.recurse(this.root, 0);
-    };
-    Cube.prototype.recurse = function (dim, n) {
-        for (var i = 0; i < dim.listSubDimensions().length; i++) {
-            this.recurse(dim.listSubDimensions()[i], n + 1);
-        }
-        console.log(n + ":" + dim.getConcept() + ":" + dim.getValue());
-    };
-    return Cube;
-}());
-exports.Cube = Cube;
-var CubeDimension = (function () {
-    function CubeDimension(concept, value) {
-        this.concept = null;
-        this.value = null;
-        this.subDimension = null;
-        this.subDimensions = [];
-        this.concept = concept;
-        this.value = value;
-    }
-    /**
-     * @return the concept
-     */
-    CubeDimension.prototype.getConcept = function () {
-        return this.concept;
-    };
-    /**
-     * @param concept the concept to set
-     */
-    CubeDimension.prototype.setConcept = function (concept) {
-        this.concept = concept;
-    };
-    CubeDimension.prototype.getSubCubeDimension = function (id) {
-        for (var i = 0; i < this.subDimensions.length; i++) {
-            if (this.subDimensions[i].getValue() == id) {
-                return this.subDimensions[i];
-            }
-        }
-        return null;
-    };
-    CubeDimension.prototype.putSubCubeDimension = function (sub) {
-        var sub2 = this.getSubCubeDimension(sub.getValue());
-        if (sub2 != null) {
-            // Remove Old Dimension
-            this.subDimensions = this.subDimensions.splice(this.subDimensions.indexOf(sub2), 1);
-        }
-        this.subDimensions.push(sub);
-    };
-    CubeDimension.prototype.listSubDimensions = function () { return this.subDimensions; };
-    CubeDimension.prototype.listDimensionValues = function () {
-        var result = [];
-        for (var i = 0; i < this.subDimensions.length; i++) {
-            result.push(this.subDimensions[i].getValue());
-        }
-        return result;
-    };
-    /**
-     * @return the value
-     */
-    CubeDimension.prototype.getValue = function () {
-        return this.value;
-    };
-    /**
-     * @param value the value to set
-     */
-    CubeDimension.prototype.setValue = function (value) {
-        this.value = value;
-    };
-    CubeDimension.prototype.dump = function () {
-    };
-    /**
-     * @return the subDimension
-     */
-    CubeDimension.prototype.getSubDimension = function () {
-        return this.subDimension;
-    };
-    /**
-     * @param subDimension the subDimension to set
-     */
-    CubeDimension.prototype.setSubDimension = function (subDimension) {
-        this.subDimension = subDimension;
-    };
-    return CubeDimension;
-}());
-exports.CubeDimension = CubeDimension;
-var ListCubeDimension = (function (_super) {
-    __extends(ListCubeDimension, _super);
-    function ListCubeDimension(concept, value) {
-        var _this = _super.call(this, concept, value) || this;
-        _this.list = [];
-        if (concept == null) {
-            console.log("concept is null:ListCubeDimension");
-        }
-        return _this;
-    }
-    ListCubeDimension.prototype.getSubCubeDimension = function (id) {
-        for (var i = 0; i < this.list.length; i++) {
-            var cd = this.list[i];
-            if (cd.getValue() == id) {
-                return cd;
-            }
-        }
-        return null;
-    };
-    ListCubeDimension.prototype.putSubCubeDimension = function (sub) {
-        //console.log("ListCubeDimension.putSubCubeDimension()");
-        var old = this.getSubCubeDimension(sub.getValue());
-        if (old != null) {
-            this.list.splice(this.list.indexOf(old), 1);
-        }
-        this.list.push(sub);
-        this.setSubDimension(sub.getConcept());
-    };
-    ListCubeDimension.prototype.listSubDimensions = function () {
-        return this.list;
-    };
-    ListCubeDimension.prototype.listDimensionValues = function () {
-        var set = [];
-        for (var i = 0; i < this.list.length; i++) {
-            set.push(this.list[i].getValue());
-        }
-        return set;
-    };
-    return ListCubeDimension;
-}(CubeDimension));
-exports.ListCubeDimension = ListCubeDimension;
-var RootCubeDimension = (function (_super) {
-    __extends(RootCubeDimension, _super);
-    function RootCubeDimension() {
-        return _super.call(this, null, null) || this;
-    }
-    return RootCubeDimension;
-}(ListCubeDimension));
-exports.RootCubeDimension = RootCubeDimension;
-var TimeCubeDimension = (function (_super) {
-    __extends(TimeCubeDimension, _super);
-    function TimeCubeDimension(concept, value) {
-        var _this = _super.call(this, concept, value) || this;
-        _this.obs = [];
-        return _this;
-    }
-    TimeCubeDimension.prototype.listObservations = function () {
-        return this.obs;
-    };
-    TimeCubeDimension.prototype.putObservation = function (sub) {
-        this.obs.push(sub);
-    };
-    TimeCubeDimension.prototype.getObservation = function (id) {
-        for (var i = 0; i < this.obs.length; i++) {
-            var c = this.obs[i];
-            if (c.getCrossSection() == null) {
-                return c;
-            }
-            if (c.getCrossSection() == id) {
-                return c;
-            }
-        }
-        return null;
-    };
-    TimeCubeDimension.prototype.listObservationValues = function () {
-        // TO DO
-        return [];
-    };
-    TimeCubeDimension.prototype.listSubDimensions = function () {
-        return [];
-    };
-    TimeCubeDimension.prototype.listDimensionValues = function () {
-        return [];
-    };
-    return TimeCubeDimension;
-}(CubeDimension));
-exports.TimeCubeDimension = TimeCubeDimension;
-var CubeObservation = (function () {
-    function CubeObservation(crossSectionalMeasureConcept, crossSection, primaryMeasureConcept, value) {
-        this.map = new collections.Dictionary();
-        this.concept = null;
-        this.cross = null;
-        this.observationConcept = null;
-        this.value = null;
-        this.concept = crossSectionalMeasureConcept;
-        this.cross = crossSection;
-        this.observationConcept = primaryMeasureConcept;
-        this.value = value;
-    }
-    CubeObservation.prototype.getAttribute = function (id) {
-        return this.map.getValue(id);
-    };
-    CubeObservation.prototype.putAttribute = function (sub) {
-        this.map.setValue(sub.getConcept(), sub);
-    };
-    CubeObservation.prototype.listAttributes = function () {
-        return this.map.values();
-    };
-    CubeObservation.prototype.listAttributeNames = function () {
-        return this.map.keys();
-    };
-    /**
-     * @return the concept
-     */
-    CubeObservation.prototype.getCrossSection = function () {
-        return this.cross;
-    };
-    /**
-     * @param concept the concept to set
-     */
-    CubeObservation.prototype.setCrossSection = function (concept) {
-        this.cross = concept;
-    };
-    /**
-     * @return the value
-     */
-    CubeObservation.prototype.getValue = function () {
-        return this.value;
-    };
-    /**
-     * @param value the value to set
-     */
-    CubeObservation.prototype.setValue = function (value) {
-        this.value = value;
-    };
-    /**
-     * @return the concept
-     */
-    CubeObservation.prototype.getConcept = function () {
-        return this.concept;
-    };
-    /**
-     * @param concept the concept to set
-     */
-    CubeObservation.prototype.setConcept = function (concept) {
-        this.concept = concept;
-    };
-    /**
-     * @return the observationConcept
-     */
-    CubeObservation.prototype.getObservationConcept = function () {
-        return this.observationConcept;
-    };
-    /**
-     * @param observationConcept the observationConcept to set
-     */
-    CubeObservation.prototype.setObservationConcept = function (observationConcept) {
-        this.observationConcept = observationConcept;
-    };
-    CubeObservation.prototype.toCubeObs = function (key, mapper) {
-        var f = new CubeObs();
-        for (var i = 0; i < mapper.size(); i++) {
-            var s = mapper.getColumnName(i);
-            var v = key.getComponent(s);
-            f.addValue(s, v);
-        }
-        // Cross Sectional Data
-        if (this.concept != null) {
-            f.addValue(this.concept, this.cross);
-        }
-        f.addValue(this.observationConcept, this.value);
-        for (var i = 0; i < this.map.keys().length; i++) {
-            var s = this.map.keys()[i];
-            var v2 = this.map.getValue(s);
-            f.addValue(s, v2.getValue());
-        }
-        return f;
-    };
-    CubeObservation.prototype.toFlatObs = function (key, mapper) {
-        var f = new FlatObs([]);
-        mapper.getObservationColumns().forEach(function (s) {
-            var v = key.getComponent(s);
-            f.setValue(mapper.getColumnIndex(s), v);
-        });
-        // Cross Sectional Data
-        if (this.concept != null) {
-            f.setValue(mapper.getColumnIndex(this.concept), this.cross);
-        }
-        // OBS_VALUE
-        if (!mapper.containsColumn(this.observationConcept)) {
-            mapper.registerColumn(this.observationConcept, AttachmentLevel.OBSERVATION);
-        }
-        f.setValue(mapper.getColumnIndex(this.observationConcept), this.value);
-        this.map.forEach(function (at) {
-            var ca = this.getAttribute(at);
-            // Attributes
-            f.setValue(mapper.getColumnIndex(ca.getConcept()), ca.getValue());
-        }.bind(this));
-        return f;
-    };
-    return CubeObservation;
-}());
-exports.CubeObservation = CubeObservation;
-var CubeAttribute = (function () {
-    function CubeAttribute(concept, value) {
-        this.concept = null;
-        this.value = null;
-        this.concept = concept;
-        this.value = value;
-    }
-    CubeAttribute.prototype.getConcept = function () {
-        return this.concept;
-    };
-    CubeAttribute.prototype.getValue = function () {
-        return this.value;
-    };
-    return CubeAttribute;
-}());
-exports.CubeAttribute = CubeAttribute;
-var CubeObs = (function () {
-    function CubeObs() {
-    }
-    CubeObs.prototype.addValue = function (c, v) {
-    };
-    return CubeObs;
-}());
-exports.CubeObs = CubeObs;
-
-
-/***/ }),
 /* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18121,7 +18158,7 @@ module.exports = baseRest;
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _isPlaceholder = __webpack_require__(78);
+var _isPlaceholder = __webpack_require__(79);
 
 
 /**
@@ -18322,7 +18359,7 @@ module.exports = function(module) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
+var util = __webpack_require__(11);
 /**
  * Returns the position of the first occurrence of the specified item
  * within the specified array.4
@@ -18909,14 +18946,1069 @@ exports.default = time;
 
 /***/ }),
 /* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b)
+            if (b.hasOwnProperty(p))
+                d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(1);
+var preact_1 = __webpack_require__(2);
+var structure = __webpack_require__(4);
+var sdmx = __webpack_require__(6);
+var data = __webpack_require__(18);
+var Checkbox_1 = __webpack_require__(77);
+var Select_1 = __webpack_require__(19);
+console.log('14');
+var BoundTo = (function () {
+    function BoundTo(visual, concept) {
+        this.boundTo = BoundTo.NOT_BOUND;
+        this.continuous = false;
+        this.queryAll = false;
+        this.walkAll = false;
+        this.clientSide = false;
+        this.possibleValues = null;
+        this.measureDescriptor = false;
+        this.visual = null;
+        this.concept = concept;
+        this.visual = visual;
+    }
+    BoundTo.escape = function (s) {
+        if (s.indexOf("'") != -1) {
+            s = s.replace("'", "\\'");
+        }
+        return s;
+    };
+    BoundTo.stripCRLFs = function (s) {
+        if (s.indexOf("\r") != -1) {
+            s = s.replace("\r", "");
+        }
+        if (s.indexOf("\n") != -1) {
+            s = s.replace("\n", "");
+        }
+        return s;
+    };
+    /**
+     * @return the concept
+     */
+    BoundTo.prototype.getConcept = function () {
+        return this.concept;
+    };
+    /**
+     * @param concept the concept to set
+     */
+    BoundTo.prototype.setConcept = function (concept) {
+        this.concept = concept;
+    };
+    /**
+     * @return the boundTo
+     */
+    BoundTo.prototype.getBoundTo = function () {
+        return BoundTo.NOT_BOUND;
+    };
+    BoundTo.prototype.getBoundToString = function () {
+        return "BoundTo";
+    };
+    /**
+     * @return the continuous
+     */
+    BoundTo.prototype.isContinuous = function () {
+        return this.continuous;
+    };
+    /**
+     * @param continuous the continuous to set
+     */
+    BoundTo.prototype.setContinuous = function (continuous) {
+        this.continuous = continuous;
+    };
+    BoundTo.prototype.isDiscrete = function () {
+        return !this.continuous;
+    };
+    BoundTo.prototype.expectValues = function () {
+        return this.queryAll ? 2 : 1;
+    };
+    BoundTo.prototype.isMeasureDescriptor = function () {
+        return this.measureDescriptor;
+    };
+    BoundTo.prototype.setMeasureDescriptor = function (measureDescriptor) {
+        this.measureDescriptor = measureDescriptor;
+    };
+    BoundTo.prototype.getConceptName = function () {
+        var loc = sdmx.SdmxIO.getLocale();
+        var comp = this.visual.getDataStructure().findComponentString(this.concept);
+        var concept = this.visual.getRegistry().findConcept(comp.getConceptIdentity());
+        return BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(concept)));
+    };
+    BoundTo.prototype.getCodelist = function () {
+        var is = data.ValueTypeResolver.getPossibleCodes(this.visual.getRegistry(), this.visual.getDataStructure(), this.concept);
+        return is;
+    };
+    BoundTo.prototype.getValue = function () {
+        var itm = this.visual.getBindingCurrentValue(this.concept);
+        if (itm != null) {
+            var s = BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itm)));
+            return s;
+        }
+        return "";
+    };
+    BoundTo.prototype.findValue = function (s) {
+        for (var i = 0; i < this.getPossibleValues().length; i++) {
+            var itm = this.getPossibleValues()[i];
+            if (BoundTo.escape(structure.NameableType.toString(itm)) == s) {
+                return itm;
+            }
+        }
+        return null;
+    };
+    BoundTo.prototype.setValue = function (s) {
+        if (s == null) {
+            this.setCurrentValue(null);
+            return;
+        }
+        for (var i = 0; i < this.getPossibleValues().length; i++) {
+            var itm = this.getPossibleValues()[i];
+            if (BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itm))) == s) {
+                this.setCurrentValue(itm);
+                return;
+            }
+        }
+        this.setCurrentValue(null);
+    };
+    BoundTo.prototype.getValues = function () {
+        var itms = this.getCurrentValues();
+        var result = [];
+        for (var i = 0; i < itms.length; i++) {
+            result[i] = BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itms[i])));
+        }
+        return result;
+    };
+    BoundTo.prototype.setValues = function (s) {
+        var result = [];
+        for (var i = 0; i < s.length; i++) {
+            result.push(this.findValue(s[i]));
+        }
+        this.setCurrentValues(result);
+    };
+    BoundTo.prototype.setCurrentValue = function (itm) {
+        var vals = [];
+        if (itm != null) {
+            vals.push(itm);
+        }
+        this.setCurrentValues(vals);
+    };
+    BoundTo.prototype.getCurrentValue = function () {
+        var result = this.visual.getBindingCurrentValues(this.concept);
+        if (result.length > 0) {
+            return result[0];
+        }
+        else
+            return null;
+    };
+    /**
+     * @return the currentValues
+     */
+    BoundTo.prototype.getCurrentValues = function () {
+        return this.visual.getBindingCurrentValues(this.concept);
+    };
+    /**
+     * @return the currentValues
+     */
+    BoundTo.prototype.getCurrentValuesString = function () {
+        return this.visual.getBindingCurrentValuesString(this.concept);
+    };
+    /**
+     * @return the currentValues
+     */
+    BoundTo.prototype.getPossibleValuesString = function () {
+        var list = this.getPossibleValues();
+        var result = [];
+        for (var i = 0; i < list.length; i++) {
+            result.push(BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(list[i]))));
+        }
+        return result;
+    };
+    BoundTo.prototype.getAllValuesString = function () {
+        var list = this.getAllValues();
+        var result = [];
+        for (var i = 0; i < list.length; i++) {
+            result.push(BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(list[i]))));
+        }
+        return result;
+    };
+    /**
+     * @param currentValues the currentValues to set
+     */
+    BoundTo.prototype.setCurrentValues = function (currentValues) {
+        if (currentValues.length == 0) {
+            throw new Error("Error");
+        }
+        var currentValues = this.removeDuplicates(currentValues);
+        this.visual.setBindingCurrentValues(this.concept, currentValues);
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+        }
+        else {
+            this.visual.setRequery(true);
+        }
+    };
+    BoundTo.prototype.removeDuplicates = function (list) {
+        var result = [];
+        for (var i = 0; i < list.length; i++) {
+            var b = false;
+            for (var j = i + 1; j < list.length; j++) {
+                if (list[i].getId().equalsID(list[j].getId())) {
+                    b = true;
+                }
+            }
+            if (!b) {
+                result.push(list[i]);
+            }
+        }
+        return result;
+    };
+    BoundTo.prototype.isClientSide = function () {
+        return this.clientSide;
+    };
+    /**
+     * @return the possibleValues
+     */
+    BoundTo.prototype.getPossibleValues = function () {
+        if (this.possibleValues == null) {
+            this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
+        }
+        return this.possibleValues;
+    };
+    /**
+     * @return the possibleValues
+     */
+    BoundTo.prototype.setPossibleValues = function (list) {
+        this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
+    };
+    BoundTo.prototype.getAllValues = function () {
+        var isc = data.ValueTypeResolver.getPossibleCodes(this.getVisual().getRegistry(), this.getVisual().getDataStructure(), this.concept);
+        if (isc == null) {
+            return [];
+        }
+        var list = [];
+        for (var i = 0; i < isc.size(); i++) {
+            list.push(isc.getItem(i));
+        }
+        return list;
+    };
+    BoundTo.prototype.isInCurrentValues = function (s) {
+        if (this.walkAll) {
+            return true;
+        }
+        for (var i = 0; i < this.visual.getBindingCurrentValues(this.concept).length; i++) {
+            var item = this.visual.getBindingCurrentValues(this.concept)[i];
+            if (item.getId().equalsString(s)) {
+                return true;
+            }
+        }
+        return false;
+    };
+    BoundTo.prototype.isQueryAll = function () {
+        return this.queryAll;
+    };
+    BoundTo.prototype.setQueryAll = function (b) {
+        this.queryAll = b;
+    };
+    /**
+     * @param clientSide the clientSide to set
+     */
+    BoundTo.prototype.setClientSide = function (cs) {
+        this.clientSide = cs;
+        if (this.clientSide) {
+            this.setQueryAll(true);
+        }
+        else {
+            this.setQueryAll(false);
+            var current = this.getCurrentValues();
+            current.push(this.getPossibleValues()[0]);
+            this.setCurrentValues(current);
+        }
+    };
+    BoundTo.prototype.isTimeDimension = function () {
+        var comp = this.getVisual().getDataStructure().findComponentString(this.concept);
+        return comp instanceof structure.TimeDimension;
+    };
+    /**
+     * @return the bindings
+     */
+    BoundTo.prototype.getVisual = function () {
+        return this.visual;
+    };
+    /**
+     * @return the walkAll
+     */
+    BoundTo.prototype.isWalkAll = function () {
+        return this.walkAll;
+    };
+    /**
+     * @param walkAll the walkAll to set
+     */
+    BoundTo.prototype.setWalkAll = function (walkAll) {
+        this.walkAll = walkAll;
+    };
+    /**
+     * @param bindings the bindings to set
+     */
+    BoundTo.prototype.setVisual = function (cc) {
+        this.visual = cc;
+    };
+    BoundTo.prototype.findItemFromId = function (s) {
+        for (var i = 0; i < this.getAllValues().length; i++) {
+            if (this.getAllValues()[i].getId().toString() == s) {
+                return this.getAllValues()[i];
+            }
+        }
+        return null;
+    };
+    BoundTo.prototype.findItemFromName = function (s) {
+        for (var i = 0; i < this.getAllValues().length; i++) {
+            if (structure.NameableType.toString(this.getAllValues()[i]) == s) {
+                return this.getAllValues()[i];
+            }
+        }
+        return null;
+    };
+    BoundTo.NOT_BOUND = -1;
+    BoundTo.BOUND_CONTINUOUS_X = 0;
+    BoundTo.BOUND_DISCRETE_X = 1;
+    BoundTo.BOUND_CONTINUOUS_Y = 2;
+    BoundTo.BOUND_DISCRETE_Y = 3;
+    BoundTo.BOUND_AREA = 4;
+    BoundTo.BOUND_CONTINUOUS_COLOUR = 5;
+    BoundTo.BOUND_DISCRETE_COLOUR = 6;
+    BoundTo.BOUND_CONTINUOUS_SIZE = 7;
+    BoundTo.BOUND_DISCRETE_SIZE = 8;
+    BoundTo.BOUND_TOOLTIP = 9;
+    BoundTo.BOUND_DISCRETE_DROPDOWN = 10;
+    BoundTo.BOUND_DISCRETE_LIST = 11;
+    BoundTo.BOUND_DISCRETE_SLIDER = 12;
+    BoundTo.BOUND_DISCRETE_STATIC = 13;
+    BoundTo.BOUND_DISCRETE_SERIES = 14;
+    BoundTo.BOUND_CONTINUOUS_BETWEEN = 15;
+    BoundTo.BOUND_CONTINUOUS_GREATERTHAN = 16;
+    BoundTo.BOUND_CONTINUOUS_LESSTHAN = 17;
+    BoundTo.BOUND_TIME_X = 18;
+    BoundTo.BOUND_TIME_Y = 19;
+    BoundTo.BOUND_TIME_DROPDOWN = 20;
+    BoundTo.BOUND_TIME_LIST = 27;
+    BoundTo.BOUND_TIME_SERIES = 27;
+    BoundTo.BOUND_MEASURES_DROPDOWN = 21;
+    BoundTo.BOUND_MEASURES_LIST = 22;
+    BoundTo.BOUND_MEASURES_INDIVIDUAL = 23;
+    BoundTo.BOUND_MEASURES_SERIES = 24;
+    BoundTo.BOUND_DISCRETE_SINGLE = 25;
+    BoundTo.BOUND_DISCRETE_ALL = 26;
+    BoundTo.DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    BoundTo.TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    BoundTo.MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
+    BoundTo.MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
+    return BoundTo;
+}());
+exports.BoundTo = BoundTo;
+var BoundToDiscrete = (function (_super) {
+    __extends(BoundToDiscrete, _super);
+    function BoundToDiscrete(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToDiscrete.prototype.getBoundTo = function () {
+        return BoundTo.NOT_BOUND;
+    };
+    BoundToDiscrete.prototype.getBoundToString = function () {
+        return "Discrete";
+    };
+    return BoundToDiscrete;
+}(BoundTo));
+exports.BoundToDiscrete = BoundToDiscrete;
+var BoundToSingleValue = (function (_super) {
+    __extends(BoundToSingleValue, _super);
+    function BoundToSingleValue(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToSingleValue.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_SINGLE;
+    };
+    BoundToSingleValue.prototype.getBoundToString = function () {
+        return "SingleValue";
+    };
+    return BoundToSingleValue;
+}(BoundToDiscrete));
+exports.BoundToSingleValue = BoundToSingleValue;
+var BoundToAllValues = (function (_super) {
+    __extends(BoundToAllValues, _super);
+    function BoundToAllValues(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToAllValues.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_ALL;
+    };
+    BoundToAllValues.prototype.getBoundToString = function () {
+        return "All Values";
+    };
+    return BoundToAllValues;
+}(BoundToDiscrete));
+exports.BoundToAllValues = BoundToAllValues;
+var BoundToTime = (function (_super) {
+    __extends(BoundToTime, _super);
+    function BoundToTime(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _this.singleLatesTime = false;
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTime.prototype.getBoundTo = function () {
+        return BoundTo.NOT_BOUND;
+    };
+    BoundToTime.prototype.isSingleLatestTime = function () { return this.singleLatestTime; };
+    BoundToTime.prototype.setSingleLatestTime = function (b) { this.singleLatestTime = b; };
+    BoundToTime.prototype.addTime = function (c) {
+        _super.prototype.getPossibleValues.call(this).push(c);
+    };
+    BoundToTime.prototype.expectValues = function () { return 2; };
+    return BoundToTime;
+}(BoundTo));
+exports.BoundToTime = BoundToTime;
+var BoundToTimeX = (function (_super) {
+    __extends(BoundToTimeX, _super);
+    function BoundToTimeX(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTimeX.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_TIME_X;
+    };
+    BoundToTimeX.prototype.expectValues = function () { return 2; };
+    return BoundToTimeX;
+}(BoundToTime));
+exports.BoundToTimeX = BoundToTimeX;
+var BoundToTimeY = (function (_super) {
+    __extends(BoundToTimeY, _super);
+    function BoundToTimeY(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTimeY.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_TIME_Y;
+    };
+    BoundToTimeY.prototype.expectValues = function () { return 2; };
+    return BoundToTimeY;
+}(BoundTo));
+exports.BoundToTimeY = BoundToTimeY;
+var BoundToContinuous = (function (_super) {
+    __extends(BoundToContinuous, _super);
+    function BoundToContinuous(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _this.zeroOrigin = true;
+        _this.sharedMaximum = true;
+        _super.prototype.setContinuous.call(_this, true);
+        return _this;
+    }
+    BoundToContinuous.prototype.getBoundTo = function () {
+        return BoundTo.NOT_BOUND;
+    };
+    BoundToContinuous.prototype.getBoundToString = function () {
+        return "Continuous";
+    };
+    BoundToContinuous.prototype.getZeroOrigin = function () { return this.zeroOrigin; };
+    BoundToContinuous.prototype.setZeroOrigin = function (b) { this.zeroOrigin = b; };
+    BoundToContinuous.prototype.setSharedMaximum = function (b) { this.sharedMaximum = b; };
+    BoundToContinuous.prototype.getSharedMaximum = function () { return this.sharedMaximum; };
+    return BoundToContinuous;
+}(BoundTo));
+exports.BoundToContinuous = BoundToContinuous;
+var BoundToDiscreteX = (function (_super) {
+    __extends(BoundToDiscreteX, _super);
+    function BoundToDiscreteX(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToDiscreteX.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_X;
+    };
+    BoundToDiscreteX.prototype.getBoundToString = function () {
+        return "DiscreteX";
+    };
+    return BoundToDiscreteX;
+}(BoundToDiscrete));
+exports.BoundToDiscreteX = BoundToDiscreteX;
+var BoundToDiscreteY = (function (_super) {
+    __extends(BoundToDiscreteY, _super);
+    function BoundToDiscreteY(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToDiscreteY.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_Y;
+    };
+    BoundToDiscreteY.prototype.getBoundToString = function () {
+        return "DiscreteY";
+    };
+    return BoundToDiscreteY;
+}(BoundToDiscrete));
+exports.BoundToDiscreteY = BoundToDiscreteY;
+var BoundToContinuousX = (function (_super) {
+    __extends(BoundToContinuousX, _super);
+    function BoundToContinuousX(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToContinuousX.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_CONTINUOUS_X;
+    };
+    BoundToContinuousX.prototype.getBoundToString = function () {
+        return "BoundToContinuousX";
+    };
+    return BoundToContinuousX;
+}(BoundToContinuous));
+exports.BoundToContinuousX = BoundToContinuousX;
+var BoundToContinuousY = (function (_super) {
+    __extends(BoundToContinuousY, _super);
+    function BoundToContinuousY(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToContinuousY.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_CONTINUOUS_Y;
+    };
+    BoundToContinuousY.prototype.getBoundToString = function () {
+        return "BoundToContinuousY";
+    };
+    return BoundToContinuousY;
+}(BoundToContinuous));
+exports.BoundToContinuousY = BoundToContinuousY;
+var BoundToContinuousColour = (function (_super) {
+    __extends(BoundToContinuousColour, _super);
+    function BoundToContinuousColour(visual, concept) {
+        return _super.call(this, visual, concept) || this;
+    }
+    BoundToContinuousColour.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_CONTINUOUS_COLOUR;
+    };
+    BoundToContinuousColour.prototype.getBoundToString = function () {
+        return "BoundToContinuousColour";
+    };
+    return BoundToContinuousColour;
+}(BoundToContinuous));
+exports.BoundToContinuousColour = BoundToContinuousColour;
+var BoundToList = (function (_super) {
+    __extends(BoundToList, _super);
+    function BoundToList(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToList.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_LIST;
+    };
+    BoundToList.prototype.getBoundToString = function () {
+        return "BoundToList";
+    };
+    return BoundToList;
+}(BoundToDiscrete));
+exports.BoundToList = BoundToList;
+var BoundToTimeList = (function (_super) {
+    __extends(BoundToTimeList, _super);
+    function BoundToTimeList(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTimeList.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_TIME_LIST;
+    };
+    BoundToTimeList.prototype.getBoundToString = function () {
+        return "BoundToTimeList";
+    };
+    return BoundToTimeList;
+}(BoundToTime));
+exports.BoundToTimeList = BoundToTimeList;
+var BoundToTimeSeries = (function (_super) {
+    __extends(BoundToTimeSeries, _super);
+    function BoundToTimeSeries(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTimeSeries.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_TIME_SERIES;
+    };
+    BoundToTimeSeries.prototype.getBoundToString = function () {
+        return "BoundToTimeSeries";
+    };
+    return BoundToTimeSeries;
+}(BoundToTime));
+exports.BoundToTimeSeries = BoundToTimeSeries;
+var BoundToSeries = (function (_super) {
+    __extends(BoundToSeries, _super);
+    function BoundToSeries(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToSeries.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_SERIES;
+    };
+    BoundToSeries.prototype.getBoundToString = function () {
+        return "Series";
+    };
+    return BoundToSeries;
+}(BoundToDiscrete));
+exports.BoundToSeries = BoundToSeries;
+var BoundToSlider = (function (_super) {
+    __extends(BoundToSlider, _super);
+    function BoundToSlider(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToSlider.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_SLIDER;
+    };
+    BoundToSlider.prototype.getBoundToString = function () {
+        return "Slider";
+    };
+    return BoundToSlider;
+}(BoundToDiscrete));
+exports.BoundToSlider = BoundToSlider;
+var BoundToDropdown = (function (_super) {
+    __extends(BoundToDropdown, _super);
+    function BoundToDropdown(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _this.flat = true;
+        _this.perCentId = null;
+        _super.prototype.setQueryAll.call(_this, false);
+        _super.prototype.setWalkAll.call(_this, true);
+        _super.prototype.setCurrentValue.call(_this, _super.prototype.getAllValues.call(_this)[0]);
+        return _this;
+    }
+    BoundToDropdown.prototype.expectValues = function () {
+        return 1;
+    };
+    BoundToDropdown.prototype.isFlat = function () {
+        return this.flat;
+    };
+    BoundToDropdown.prototype.setFlat = function (b) {
+        this.flat = b;
+    };
+    BoundToDropdown.prototype.getPercentOfId = function () {
+        return this.perCentId;
+    };
+    BoundToDropdown.prototype.setPercentOfId = function (s) {
+        this.perCentId = s;
+    };
+    BoundToDropdown.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_DISCRETE_DROPDOWN;
+    };
+    BoundToDropdown.prototype.getBoundToString = function () {
+        return "Dropdown";
+    };
+    return BoundToDropdown;
+}(BoundToDiscrete));
+exports.BoundToDropdown = BoundToDropdown;
+var BoundToTimeDropdown = (function (_super) {
+    __extends(BoundToTimeDropdown, _super);
+    function BoundToTimeDropdown(visual, concept) {
+        var _this = _super.call(this, visual, concept) || this;
+        _this.flat = true;
+        _this.perCentId = null;
+        _super.prototype.setQueryAll.call(_this, true);
+        _super.prototype.setWalkAll.call(_this, true);
+        return _this;
+    }
+    BoundToTimeDropdown.prototype.expectValues = function () {
+        return 1;
+    };
+    BoundToTimeDropdown.prototype.isFlat = function () {
+        return this.flat;
+    };
+    BoundToTimeDropdown.prototype.setFlat = function (b) {
+        this.flat = b;
+    };
+    BoundToTimeDropdown.prototype.getPercentOfId = function () {
+        return this.perCentId;
+    };
+    BoundToTimeDropdown.prototype.setPercentOfId = function (s) {
+        this.perCentId = s;
+    };
+    BoundToTimeDropdown.prototype.getBoundTo = function () {
+        return BoundTo.BOUND_TIME_DROPDOWN;
+    };
+    BoundToTimeDropdown.prototype.getBoundToString = function () {
+        return "Dropdown";
+    };
+    return BoundToTimeDropdown;
+}(BoundToDiscrete));
+exports.BoundToTimeDropdown = BoundToTimeDropdown;
+var BindingEntry = (function () {
+    function BindingEntry(id, name, parse, save, createNew) {
+        this.id = 0;
+        this.name = "BoundTo";
+        this.parseObjectToBinding = null;
+        this.saveBindingToObject = null;
+        this.customise = null;
+        this.createNew = null;
+        this.id = id;
+        this.name = name;
+        this.parseObjectToBinding = parse;
+        this.saveBindingToObject = save;
+        this.createNew = createNew;
+    }
+    BindingEntry.prototype.getId = function () { return this.id; };
+    BindingEntry.prototype.getName = function () { return this.name; };
+    BindingEntry.prototype.setParseObjectToBinding = function (f) { this.parseObjectToBinding = f; };
+    BindingEntry.prototype.getParseObjectToBinding = function () { return this.parseObjectToBinding; };
+    BindingEntry.prototype.setSaveBindingToObject = function (f) { this.saveBindingToObject = f; };
+    BindingEntry.prototype.getSaveBindingToObject = function () { return this.saveBindingToObject; };
+    BindingEntry.prototype.setCustomise = function (f) { this.customise = f; };
+    BindingEntry.prototype.getCustomise = function () {
+        return this.customise;
+    };
+    BindingEntry.prototype.getCreateNew = function () { return this.createNew; };
+    BindingEntry.prototype.setCreateNew = function (c) { this.createNew = c; };
+    return BindingEntry;
+}());
+exports.BindingEntry = BindingEntry;
+var BindingRegister = (function () {
+    function BindingRegister() {
+        this.list = [];
+    }
+    BindingRegister.prototype.register = function (be) {
+        this.list.push(be);
+    };
+    BindingRegister.prototype.getList = function () { return this.list; };
+    return BindingRegister;
+}());
+exports.BindingRegister = BindingRegister;
+var DimensionBindingRegister = (function (_super) {
+    __extends(DimensionBindingRegister, _super);
+    function DimensionBindingRegister() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DimensionBindingRegister.registerState = function (be) {
+        DimensionBindingRegister.register.register(be);
+    };
+    DimensionBindingRegister.getList = function () {
+        return DimensionBindingRegister.register.getList();
+    };
+    DimensionBindingRegister.register = new DimensionBindingRegister();
+    return DimensionBindingRegister;
+}(BindingRegister));
+exports.DimensionBindingRegister = DimensionBindingRegister;
+var TimeBindingRegister = (function (_super) {
+    __extends(TimeBindingRegister, _super);
+    function TimeBindingRegister() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    TimeBindingRegister.registerState = function (be) {
+        TimeBindingRegister.register.register(be);
+    };
+    TimeBindingRegister.getList = function () {
+        return TimeBindingRegister.register.getList();
+    };
+    TimeBindingRegister.register = new TimeBindingRegister();
+    return TimeBindingRegister;
+}(BindingRegister));
+exports.TimeBindingRegister = TimeBindingRegister;
+var CrossSectionBindingRegister = (function (_super) {
+    __extends(CrossSectionBindingRegister, _super);
+    function CrossSectionBindingRegister() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    CrossSectionBindingRegister.registerState = function (be) {
+        CrossSectionBindingRegister.register.register(be);
+    };
+    CrossSectionBindingRegister.getList = function () {
+        return CrossSectionBindingRegister.register.getList();
+    };
+    CrossSectionBindingRegister.register = new CrossSectionBindingRegister();
+    return CrossSectionBindingRegister;
+}(BindingRegister));
+exports.CrossSectionBindingRegister = CrossSectionBindingRegister;
+var MeasureBindingRegister = (function (_super) {
+    __extends(MeasureBindingRegister, _super);
+    function MeasureBindingRegister() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    MeasureBindingRegister.registerState = function (be) {
+        MeasureBindingRegister.register.register(be);
+    };
+    MeasureBindingRegister.getList = function () {
+        return MeasureBindingRegister.register.getList();
+    };
+    MeasureBindingRegister.register = new MeasureBindingRegister();
+    return MeasureBindingRegister;
+}(BindingRegister));
+exports.MeasureBindingRegister = MeasureBindingRegister;
+var BindingRegisterUtil = (function () {
+    function BindingRegisterUtil() {
+    }
+    BindingRegisterUtil.findBindingEntry = function (i) {
+        var list = DimensionBindingRegister.getList();
+        for (var j = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        list = TimeBindingRegister.getList();
+        for (var j = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        list = CrossSectionBindingRegister.getList();
+        for (var j = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        list = MeasureBindingRegister.getList();
+        for (var j = 0; j < list.length; j++) {
+            if (list[j].getId() == i) {
+                return list[j];
+            }
+        }
+        console.log("Can't find bindingentry:" + i);
+    };
+    return BindingRegisterUtil;
+}());
+exports.BindingRegisterUtil = BindingRegisterUtil;
+var BindingsCustomiser = (function (_super) {
+    __extends(BindingsCustomiser, _super);
+    function BindingsCustomiser(props, state) {
+        var _this = _super.call(this, props, state) || this;
+        _this.state = null;
+        _this.props = null;
+        _this.props = props;
+        _this.state = state;
+        return _this;
+    }
+    BindingsCustomiser.prototype.render = function (props, state) {
+        return (preact_1.h("p", null, this.props.concept));
+    };
+    BindingsCustomiser.prototype.getBinding = function () {
+        return null;
+    };
+    BindingsCustomiser.prototype.setBinding = function (b) {
+        this.props.o = b;
+    };
+    return BindingsCustomiser;
+}(React.Component));
+exports.BindingsCustomiser = BindingsCustomiser;
+var DiscreteXCustomiser = (function (_super) {
+    __extends(DiscreteXCustomiser, _super);
+    function DiscreteXCustomiser(props, state) {
+        var _this = _super.call(this, props, state) || this;
+        _this.state = null;
+        _this.props = null;
+        _this.props = props;
+        _this.state = state;
+        return _this;
+    }
+    DiscreteXCustomiser.prototype.changeFlat = function (e) {
+        this.getBinding().setFlat(!this.getBinding().isFlat());
+        _super.prototype.setState.call(this, {});
+    };
+    DiscreteXCustomiser.prototype.changePercentId = function (e) {
+        this.getBinding().setPercentOfId(e);
+    };
+    DiscreteXCustomiser.prototype.listItems = function () {
+        var options = [];
+        options.push(preact_1.h(Select_1.default.Item, { value: null }, "No Percent of Id"));
+        this.props.o.getAllValues().map(function (item) {
+            options.push(preact_1.h(Select_1.default.Item, { value: item }, item));
+        });
+        return options;
+    };
+    DiscreteXCustomiser.prototype.render = function (props, state) {
+        var _this = this;
+        return (preact_1.h(Checkbox_1.default, { checked: this.getBinding().isFlat(), id: this.getBinding().getConcept() + "_flat", onclick: function (evt) { evt.stopPropagation(); _this.changeFlat(evt); } })
+            ,
+                preact_1.h(Select_1.default, { value: this.getBinding().getPercentOfId(), onChange: function (a) { return _this.changePercentId(a); } }, this.listItems()));
+    };
+    DiscreteXCustomiser.prototype.getBinding = function () {
+        return this.props.o;
+    };
+    return DiscreteXCustomiser;
+}(React.Component));
+exports.DiscreteXCustomiser = DiscreteXCustomiser;
+var DropdownBindingCustomiser = (function (_super) {
+    __extends(DropdownBindingCustomiser, _super);
+    function DropdownBindingCustomiser(props, state) {
+        var _this = _super.call(this, props, state) || this;
+        _this.state = null;
+        _this.props = null;
+        _this.props = props;
+        _this.state = state;
+        return _this;
+    }
+    DropdownBindingCustomiser.prototype.render = function () {
+        return (preact_1.h("p", null, this.props.o.getConcept(), " ", this.props.o.getBoundToString(), " Test"));
+    };
+    DropdownBindingCustomiser.prototype.getBinding = function (v) {
+        return parseObjectToBindingBoundToDropdown(this.props.o, v);
+    };
+    DropdownBindingCustomiser.prototype.setBinding = function (b) {
+        this.props.o = b;
+        this.props.concept = b.getConcept();
+    };
+    return DropdownBindingCustomiser;
+}(React.Component));
+exports.DropdownBindingCustomiser = DropdownBindingCustomiser;
+function parseObjectToBindingBoundToDropdown(o, v) {
+    var b = new BoundToDropdown(v, o['concept']);
+    b.setFlat(o['flat']);
+    b.setClientSide(o['clientSide']);
+    b.setPercentOfId(o['perCentOfId']);
+    return b;
+}
+/*
+function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
+    var o:any = {}
+    o.concept = b.getConcept();
+    o.typeid = b.getBoundTo();
+    o.typename = "BoundToDropdown";
+    o.clientSide = b.isClientSide();
+    o.flat = b.isFlat();
+    o.perCentOfId = b.getPercentOfId();
+    return o;
+    }*/
+function defaultSaveBindingToObject(b) {
+    var o = {};
+    o.concept = b.getConcept();
+    switch (b.getBoundTo()) {
+        case BoundTo.BOUND_CONTINUOUS_X:
+            o.typeid = BoundTo.BOUND_CONTINUOUS_X;
+            break;
+        case BoundTo.BOUND_CONTINUOUS_Y:
+            o.typeid = BoundTo.BOUND_CONTINUOUS_Y;
+            break;
+        case BoundTo.BOUND_TIME_X:
+            o.typeid = BoundTo.BOUND_TIME_X;
+            break;
+        case BoundTo.BOUND_TIME_Y:
+            o.typeid = BoundTo.BOUND_TIME_Y;
+            break;
+        case BoundTo.BOUND_DISCRETE_LIST:
+            o.typeid = BoundTo.BOUND_DISCRETE_LIST;
+            break;
+        case BoundTo.BOUND_DISCRETE_SERIES:
+            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+            break;
+        case BoundTo.BOUND_DISCRETE_SLIDER:
+            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+            break;
+    }
+    return b;
+}
+exports.defaultSaveBindingToObject = defaultSaveBindingToObject;
+function defaultParseObjectToBinding(o, v) {
+    var b = null;
+    switch (o['typeid']) {
+        case BoundTo.BOUND_CONTINUOUS_X:
+            b = new BoundToContinuousX(v, o['concept']);
+            break;
+        case BoundTo.BOUND_CONTINUOUS_Y:
+            b = new BoundToContinuousY(v, o['concept']);
+            break;
+        case BoundTo.BOUND_TIME_X:
+            b = new BoundToTimeX(v, o['concept']);
+            break;
+        case BoundTo.BOUND_TIME_Y:
+            b = new BoundToTimeY(v, o['concept']);
+            break;
+        case BoundTo.BOUND_DISCRETE_LIST:
+            b = new BoundToList(v, o['concept']);
+            break;
+        case BoundTo.BOUND_DISCRETE_SERIES:
+            b = new BoundToSeries(v, o['concept']);
+            break;
+        case BoundTo.BOUND_DISCRETE_SLIDER:
+            b = new BoundToSlider(v, o['concept']);
+            break;
+    }
+    return b;
+}
+exports.defaultParseObjectToBinding = defaultParseObjectToBinding;
+function saveBindingToObjectBoundToDropdown(b) {
+    var o = {};
+    o.concept = b.getConcept();
+    o.typeid = b.getBoundTo();
+    o.typename = "BoundToDropdown";
+    o.clientSide = b.isClientSide();
+    o.flat = b.isFlat();
+    o.perCentOfId = b.getPercentOfId();
+    return o;
+}
+function saveBindingToObjectBoundToDiscreteX(b) {
+    var o = {};
+    o.concept = b.getConcept();
+    o.typeid = b.getBoundTo();
+    o.typename = "BoundToDiscreteX";
+    return o;
+}
+exports.saveBindingToObjectBoundToDiscreteX = saveBindingToObjectBoundToDiscreteX;
+function parseObjectToBindingBoundToDiscreteX(o, v) {
+    var b = new BoundToDiscreteX(v, o['concept']);
+    return b;
+}
+exports.parseObjectToBindingBoundToDiscreteX = parseObjectToBindingBoundToDiscreteX;
+var be1 = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "Dropdown", parseObjectToBindingBoundToDropdown, saveBindingToObjectBoundToDropdown, BoundToDropdown);
+var be2 = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "DiscreteX", parseObjectToBindingBoundToDiscreteX, saveBindingToObjectBoundToDiscreteX, BoundToDiscreteX);
+var be3 = new BindingEntry(BoundTo.BOUND_DISCRETE_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToList);
+var be4 = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSeries);
+var be5 = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE, "Single Value", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleValue);
+var be6 = new BindingEntry(BoundTo.BOUND_DISCRETE_ALL, "All Values", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToAllValues);
+var be7 = new BindingEntry(BoundTo.BOUND_TIME_X, "Time X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+var be8 = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+var be9 = new BindingEntry(BoundTo.BOUND_TIME_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeDropdown);
+var be10 = new BindingEntry(BoundTo.BOUND_TIME_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeList);
+var be11 = new BindingEntry(BoundTo.BOUND_TIME_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeSeries);
+var be12 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_X, "X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousX);
+var be13 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_Y, "Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousY);
+var be14 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_COLOUR, "Colour", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousColour);
+DimensionBindingRegister.registerState(be1);
+DimensionBindingRegister.registerState(be2);
+DimensionBindingRegister.registerState(be3);
+DimensionBindingRegister.registerState(be4);
+DimensionBindingRegister.registerState(be5);
+DimensionBindingRegister.registerState(be6);
+TimeBindingRegister.registerState(be7);
+TimeBindingRegister.registerState(be8);
+TimeBindingRegister.registerState(be9);
+TimeBindingRegister.registerState(be10);
+TimeBindingRegister.registerState(be11);
+MeasureBindingRegister.registerState(be12);
+MeasureBindingRegister.registerState(be13);
+MeasureBindingRegister.registerState(be14);
+
+
+/***/ }),
+/* 37 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MDCRipple; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__foundation__ = __webpack_require__(264);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(58);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__foundation__["a"]; });
 /* unused harmony reexport util */
 /**
@@ -19060,7 +20152,7 @@ RippleCapableSurface.prototype.disabled;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19193,12 +20285,12 @@ class MDCComponent {
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__foundation__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__component__ = __webpack_require__(38);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__foundation__["a"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__component__["a"]; });
 /**
@@ -19225,7 +20317,271 @@ class MDCComponent {
 
 
 /***/ }),
-/* 39 */
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b)
+            if (b.hasOwnProperty(p))
+                d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var structure = __webpack_require__(4);
+var collections = __webpack_require__(17);
+var DataMessage = (function () {
+    function DataMessage() {
+        this.header = null;
+        this.dataSets = [];
+    }
+    DataMessage.prototype.getHeader = function () { return this.header; };
+    DataMessage.prototype.setHeader = function (h) { this.header = h; };
+    DataMessage.prototype.getDataSet = function (i) { return this.dataSets[i]; };
+    DataMessage.prototype.setDataSet = function (i, ds) { this.dataSets[i] = ds; };
+    DataMessage.prototype.addDataSet = function (ds) {
+        this.dataSets.push(ds);
+        return collections.arrays.indexOf(this.dataSets, ds);
+    };
+    DataMessage.prototype.removeDataSet = function (ds) {
+        collections.arrays.remove(this.dataSets, ds);
+    };
+    DataMessage.prototype.size = function () {
+        return this.dataSets.length;
+    };
+    return DataMessage;
+}());
+exports.DataMessage = DataMessage;
+var DataQuery = (function () {
+    function DataQuery() {
+    }
+    return DataQuery;
+}());
+exports.DataQuery = DataQuery;
+var StructureType = (function () {
+    function StructureType() {
+        this.header = null;
+        this.structures = null;
+    }
+    StructureType.prototype.getHeader = function () { return this.header; };
+    StructureType.prototype.setHeader = function (h) { this.header = h; };
+    StructureType.prototype.getStructures = function () {
+        return this.structures;
+    };
+    StructureType.prototype.setStructures = function (s) {
+        this.structures = s;
+    };
+    // Registry
+    StructureType.prototype.listDataflows = function () {
+        return this.structures.listDataflows();
+    };
+    StructureType.prototype.clear = function () {
+    };
+    StructureType.prototype.load = function (struct) {
+    };
+    StructureType.prototype.unload = function (struct) {
+    };
+    StructureType.prototype.findDataStructure = function (ref) {
+        return this.structures.findDataStructure(ref);
+    };
+    StructureType.prototype.findDataflow = function (ref) {
+        return this.structures.findDataflow(ref);
+    };
+    StructureType.prototype.findCode = function (ref) {
+        return this.structures.findCode(ref);
+    };
+    StructureType.prototype.findCodelist = function (ref) {
+        return this.structures.findCodelist(ref);
+    };
+    StructureType.prototype.findItemType = function (item) {
+        return this.structures.findItemType(item);
+    };
+    StructureType.prototype.findConcept = function (ref) {
+        return this.structures.findConcept(ref);
+    };
+    StructureType.prototype.findConceptScheme = function (ref) {
+        return this.structures.findConceptScheme(ref);
+    };
+    StructureType.prototype.searchDataStructure = function (ref) {
+        return this.structures.searchDataStructure(ref);
+    };
+    StructureType.prototype.searchDataflow = function (ref) {
+        return this.structures.searchDataflow(ref);
+    };
+    StructureType.prototype.searchCodelist = function (ref) {
+        return this.structures.searchCodelist(ref);
+    };
+    StructureType.prototype.searchItemType = function (item) {
+        return this.structures.searchItemType(item);
+    };
+    StructureType.prototype.searchConcept = function (ref) {
+        return this.structures.searchConcept(ref);
+    };
+    StructureType.prototype.searchConceptScheme = function (ref) {
+        return this.structures.searchConceptScheme(ref);
+    };
+    StructureType.prototype.save = function () {
+    };
+    return StructureType;
+}());
+exports.StructureType = StructureType;
+var HeaderTimeType = (function () {
+    function HeaderTimeType(d) {
+        this.date = null;
+        this.date = d;
+    }
+    HeaderTimeType.prototype.getDate = function () { return this.date; };
+    HeaderTimeType.prototype.setDate = function (d) {
+        this.date = d;
+    };
+    return HeaderTimeType;
+}());
+exports.HeaderTimeType = HeaderTimeType;
+var Contact = (function () {
+    function Contact() {
+        this.name = [];
+        this.departments = [];
+        this.roles = [];
+        this.telephones = [];
+        this.faxes = [];
+        this.z400s = [];
+        this.uris = [];
+        this.emails = [];
+    }
+    return Contact;
+}());
+exports.Contact = Contact;
+var PartyType = (function (_super) {
+    __extends(PartyType, _super);
+    function PartyType() {
+        var _this = this;
+        _this.contacts = [];
+        return _this;
+    }
+    return PartyType;
+}(structure.NameableType));
+exports.PartyType = PartyType;
+var Sender = (function (_super) {
+    __extends(Sender, _super);
+    function Sender() {
+        var _this = this;
+        return _this;
+    }
+    return Sender;
+}(PartyType));
+exports.Sender = Sender;
+var Header = (function () {
+    function Header() {
+        this.id = null;
+        this.test = null;
+        this.prepared = null;
+        this.sender = null;
+        this.receivers = [];
+        this.names = [];
+        this.structures = [];
+        this.dataproviderReference = null;
+        this.dataSetAction = null;
+        this.dataSetId = [];
+        this.extracted = null;
+        this.reportingBegin = null;
+        this.reportingEnd = null;
+        this.embargoDate = null;
+        this.source = [];
+    }
+    Header.prototype.getId = function () { return this.id; };
+    Header.prototype.setId = function (s) { this.id = s; };
+    Header.prototype.getTest = function () { return this.test; };
+    Header.prototype.setTest = function (b) {
+        this.test = b;
+    };
+    Header.prototype.getPrepared = function () { return this.prepared; };
+    Header.prototype.setPrepared = function (h) {
+        this.prepared = h;
+    };
+    Header.prototype.getSender = function () { return this.sender; };
+    Header.prototype.setSender = function (p) {
+        this.sender = p;
+    };
+    Header.prototype.getReceivers = function () {
+        return this.receivers;
+    };
+    Header.prototype.setReceivers = function (recs) {
+        this.receivers = recs;
+    };
+    Header.prototype.getNames = function () {
+        return this.names;
+    };
+    Header.prototype.setNames = function (n) {
+        this.names = n;
+    };
+    Header.prototype.setStructures = function (pl) {
+        this.structures = pl;
+    };
+    Header.prototype.getStructures = function () {
+        return this.structures;
+    };
+    Header.prototype.getDataproviderReference = function () {
+        return this.dataproviderReference;
+    };
+    Header.prototype.setDataproviderReference = function (ref) {
+        this.dataproviderReference = ref;
+    };
+    Header.prototype.setAction = function (ac) {
+        this.dataSetAction = ac;
+    };
+    Header.prototype.getAction = function () {
+        return this.dataSetAction;
+    };
+    Header.prototype.getDataSetId = function () {
+        return this.dataSetId;
+    };
+    Header.prototype.setDataSetId = function (ids) {
+        this.dataSetId = ids;
+    };
+    Header.prototype.getExtracted = function () {
+        return this.extracted;
+    };
+    Header.prototype.setExtracted = function (d) {
+        this.extracted = d;
+    };
+    Header.prototype.getReportingBegin = function () {
+        return this.reportingBegin;
+    };
+    Header.prototype.setReportingBegin = function (o) {
+        this.reportingBegin = o;
+    };
+    Header.prototype.getReportingEnd = function () {
+        return this.reportingEnd;
+    };
+    Header.prototype.setReportingEnd = function (o) {
+        this.reportingEnd = o;
+    };
+    Header.prototype.getEmbargoDate = function () {
+        return this.embargoDate;
+    };
+    Header.prototype.setEmbargoDate = function (dt) {
+        this.embargoDate = dt;
+    };
+    Header.prototype.getSource = function () {
+        return this.source;
+    };
+    Header.prototype.setSource = function (s) {
+        this.source = s;
+    };
+    return Header;
+}());
+exports.Header = Header;
+
+
+/***/ }),
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -36314,13 +37670,13 @@ class MDCComponent {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20), __webpack_require__(30)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21), __webpack_require__(30)(module)))
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Symbol = __webpack_require__(63),
+var Symbol = __webpack_require__(64),
     getRawTag = __webpack_require__(298),
     objectToString = __webpack_require__(299);
 
@@ -36351,7 +37707,7 @@ module.exports = baseGetTag;
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36374,7 +37730,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isArray = __webpack_require__(22);
+var _isArray = __webpack_require__(23);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
@@ -36547,10 +37903,10 @@ function endDrag() {
 }
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getNative = __webpack_require__(43);
+var getNative = __webpack_require__(45);
 
 /* Built-in method references that are verified to be native. */
 var nativeCreate = getNative(Object, 'create');
@@ -36559,7 +37915,7 @@ module.exports = nativeCreate;
 
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsNative = __webpack_require__(310),
@@ -36582,10 +37938,10 @@ module.exports = getNative;
 
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var eq = __webpack_require__(45);
+var eq = __webpack_require__(47);
 
 /**
  * Gets the index at which the `key` is found in `array` of key-value pairs.
@@ -36609,7 +37965,7 @@ module.exports = assocIndexOf;
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ (function(module, exports) {
 
 /**
@@ -36652,7 +38008,7 @@ module.exports = eq;
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isKeyable = __webpack_require__(327);
@@ -36676,10 +38032,10 @@ module.exports = getMapData;
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isArrayLike = __webpack_require__(70),
+var isArrayLike = __webpack_require__(71),
     isObjectLike = __webpack_require__(33);
 
 /**
@@ -36715,7 +38071,7 @@ module.exports = isArrayLikeObject;
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36762,7 +38118,7 @@ function removeTarget(targetId) {
 }
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36791,7 +38147,7 @@ function checkDecoratorArguments(functionName, signature) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36848,7 +38204,7 @@ module.exports = function hoistNonReactStatics(targetComponent, sourceComponent,
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37275,11 +38631,11 @@ var rippleFactory = function rippleFactory() {
 exports.default = rippleFactory;
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var _curry1 = __webpack_require__(27);
-var _isPlaceholder = __webpack_require__(78);
+var _isPlaceholder = __webpack_require__(79);
 
 
 /**
@@ -37309,1045 +38665,7 @@ module.exports = function _curry2(fn) {
 
 
 /***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b)
-            if (b.hasOwnProperty(p))
-                d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(1);
-var preact_1 = __webpack_require__(2);
-var structure = __webpack_require__(4);
-var sdmx = __webpack_require__(6);
-var data = __webpack_require__(25);
-var Checkbox_1 = __webpack_require__(76);
-var Select_1 = __webpack_require__(18);
-console.log('14');
-var BoundTo = (function () {
-    function BoundTo(visual, concept) {
-        this.boundTo = BoundTo.NOT_BOUND;
-        this.continuous = false;
-        this.queryAll = false;
-        this.walkAll = false;
-        this.clientSide = false;
-        this.possibleValues = null;
-        this.measureDescriptor = false;
-        this.visual = null;
-        this.concept = concept;
-        this.visual = visual;
-    }
-    BoundTo.escape = function (s) {
-        if (s.indexOf("'") != -1) {
-            s = s.replace("'", "\\'");
-        }
-        return s;
-    };
-    BoundTo.stripCRLFs = function (s) {
-        if (s.indexOf("\r") != -1) {
-            s = s.replace("\r", "");
-        }
-        if (s.indexOf("\n") != -1) {
-            s = s.replace("\n", "");
-        }
-        return s;
-    };
-    /**
-     * @return the concept
-     */
-    BoundTo.prototype.getConcept = function () {
-        return this.concept;
-    };
-    /**
-     * @param concept the concept to set
-     */
-    BoundTo.prototype.setConcept = function (concept) {
-        this.concept = concept;
-    };
-    /**
-     * @return the boundTo
-     */
-    BoundTo.prototype.getBoundTo = function () {
-        return BoundTo.NOT_BOUND;
-    };
-    BoundTo.prototype.getBoundToString = function () {
-        return "BoundTo";
-    };
-    /**
-     * @return the continuous
-     */
-    BoundTo.prototype.isContinuous = function () {
-        return this.continuous;
-    };
-    /**
-     * @param continuous the continuous to set
-     */
-    BoundTo.prototype.setContinuous = function (continuous) {
-        this.continuous = continuous;
-    };
-    BoundTo.prototype.isDiscrete = function () {
-        return !this.continuous;
-    };
-    BoundTo.prototype.expectValues = function () {
-        return this.queryAll ? 2 : 1;
-    };
-    BoundTo.prototype.isMeasureDescriptor = function () {
-        return this.measureDescriptor;
-    };
-    BoundTo.prototype.setMeasureDescriptor = function (measureDescriptor) {
-        this.measureDescriptor = measureDescriptor;
-    };
-    BoundTo.prototype.getConceptName = function () {
-        var loc = sdmx.SdmxIO.getLocale();
-        var comp = this.visual.getDataStructure().findComponentString(this.concept);
-        var concept = this.visual.getRegistry().findConcept(comp.getConceptIdentity());
-        return BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(concept)));
-    };
-    BoundTo.prototype.getCodelist = function () {
-        var is = data.ValueTypeResolver.getPossibleCodes(this.visual.getRegistry(), this.visual.getDataStructure(), this.concept);
-        return is;
-    };
-    BoundTo.prototype.getValue = function () {
-        var itm = this.visual.getBindingCurrentValue(this.concept);
-        if (itm != null) {
-            var s = BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itm)));
-            return s;
-        }
-        return "";
-    };
-    BoundTo.prototype.findValue = function (s) {
-        for (var i = 0; i < this.getPossibleValues().length; i++) {
-            var itm = this.getPossibleValues()[i];
-            if (BoundTo.escape(structure.NameableType.toString(itm)) == s) {
-                return itm;
-            }
-        }
-        return null;
-    };
-    BoundTo.prototype.setValue = function (s) {
-        if (s == null) {
-            this.setCurrentValue(null);
-            return;
-        }
-        for (var i = 0; i < this.getPossibleValues().length; i++) {
-            var itm = this.getPossibleValues()[i];
-            if (BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itm))) == s) {
-                this.setCurrentValue(itm);
-                return;
-            }
-        }
-        this.setCurrentValue(null);
-    };
-    BoundTo.prototype.getValues = function () {
-        var itms = this.getCurrentValues();
-        var result = [];
-        for (var i = 0; i < itms.length; i++) {
-            result[i] = BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(itms[i])));
-        }
-        return result;
-    };
-    BoundTo.prototype.setValues = function (s) {
-        var result = [];
-        for (var i = 0; i < s.length; i++) {
-            result.push(this.findValue(s[i]));
-        }
-        this.setCurrentValues(result);
-    };
-    BoundTo.prototype.setCurrentValue = function (itm) {
-        if (itm != null) {
-            var vals = this.getCurrentValues();
-            vals.splice(0, vals.length);
-            if (this.isClientSide()) {
-                this.visual.setDirty(true);
-            }
-            else {
-                this.visual.setRequery(true);
-            }
-        }
-        else {
-            this.getCurrentValues().length = 0;
-            if (this.isClientSide()) {
-                this.visual.setDirty(true);
-            }
-            else {
-                this.visual.setRequery(true);
-            }
-        }
-    };
-    BoundTo.prototype.getCurrentValue = function () {
-        var result = this.visual.getBindingCurrentValues(this.concept);
-        if (result.length > 0) {
-            return result[0];
-        }
-        else
-            return null;
-    };
-    /**
-     * @return the currentValues
-     */
-    BoundTo.prototype.getCurrentValues = function () {
-        return this.visual.getBindingCurrentValues(this.concept);
-    };
-    /**
-     * @return the currentValues
-     */
-    BoundTo.prototype.getCurrentValuesString = function () {
-        return this.visual.getBindingCurrentValuesString(this.concept);
-    };
-    /**
-     * @return the currentValues
-     */
-    BoundTo.prototype.getPossibleValuesString = function () {
-        var list = this.getPossibleValues();
-        var result = [];
-        for (var i = 0; i < list.length; i++) {
-            result.push(BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(list[i]))));
-        }
-        return result;
-    };
-    BoundTo.prototype.getAllValuesString = function () {
-        var list = this.getAllValues();
-        var result = [];
-        for (var i = 0; i < list.length; i++) {
-            result.push(BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(list[i]))));
-        }
-        return result;
-    };
-    /**
-     * @param currentValues the currentValues to set
-     */
-    BoundTo.prototype.setCurrentValues = function (currentValues) {
-        var currentValues = this.removeDuplicates(currentValues);
-        this.visual.setBindingCurrentValues(this.concept, currentValues);
-    };
-    BoundTo.prototype.removeDuplicates = function (list) {
-        var result = [];
-        for (var i = 0; i < list.length; i++) {
-            var b = false;
-            for (var j = i + 1; j < list.length; j++) {
-                if (list[i].getId().equalsID(list[j].getId())) {
-                    b = true;
-                }
-            }
-            if (!b) {
-                result.push(list[i]);
-            }
-        }
-        return result;
-    };
-    BoundTo.prototype.isClientSide = function () {
-        return this.clientSide;
-    };
-    /**
-     * @return the possibleValues
-     */
-    BoundTo.prototype.getPossibleValues = function () {
-        if (this.possibleValues == null) {
-            this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
-        }
-        return this.possibleValues;
-    };
-    /**
-     * @return the possibleValues
-     */
-    BoundTo.prototype.setPossibleValues = function (list) {
-        this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
-    };
-    BoundTo.prototype.getAllValues = function () {
-        var isc = data.ValueTypeResolver.getPossibleCodes(this.getVisual().getRegistry(), this.getVisual().getDataStructure(), this.concept);
-        if (isc == null) {
-            return [];
-        }
-        var list = [];
-        for (var i = 0; i < isc.size(); i++) {
-            list.push(isc.getItem(i));
-        }
-        return list;
-    };
-    BoundTo.prototype.isInCurrentValues = function (s) {
-        if (this.walkAll) {
-            return true;
-        }
-        for (var i = 0; i < this.visual.getBindingCurrentValues(this.concept).length; i++) {
-            var item = this.visual.getBindingCurrentValues(this.concept)[i];
-            if (item.getId().equalsString(s)) {
-                return true;
-            }
-        }
-        return false;
-    };
-    BoundTo.prototype.isQueryAll = function () {
-        return this.queryAll;
-    };
-    BoundTo.prototype.setQueryAll = function (b) {
-        this.queryAll = b;
-    };
-    /**
-     * @param clientSide the clientSide to set
-     */
-    BoundTo.prototype.setClientSide = function (cs) {
-        this.clientSide = cs;
-        if (this.clientSide) {
-            this.setQueryAll(true);
-        }
-        else {
-            this.setQueryAll(false);
-            var current = this.getCurrentValues();
-            current.push(this.getPossibleValues()[0]);
-            this.setCurrentValues(current);
-        }
-    };
-    BoundTo.prototype.isTimeDimension = function () {
-        var comp = this.getVisual().getDataStructure().findComponentString(this.concept);
-        return comp instanceof structure.TimeDimension;
-    };
-    /**
-     * @return the bindings
-     */
-    BoundTo.prototype.getVisual = function () {
-        return this.visual;
-    };
-    /**
-     * @return the walkAll
-     */
-    BoundTo.prototype.isWalkAll = function () {
-        return this.walkAll;
-    };
-    /**
-     * @param walkAll the walkAll to set
-     */
-    BoundTo.prototype.setWalkAll = function (walkAll) {
-        this.walkAll = walkAll;
-    };
-    /**
-     * @param bindings the bindings to set
-     */
-    BoundTo.prototype.setVisual = function (cc) {
-        this.visual = cc;
-    };
-    BoundTo.prototype.findItemFromId = function (s) {
-        for (var i = 0; i < this.getAllValues().length; i++) {
-            if (this.getAllValues()[i].getId().toString() == s) {
-                return this.getAllValues()[i];
-            }
-        }
-        return null;
-    };
-    BoundTo.prototype.findItemFromName = function (s) {
-        for (var i = 0; i < this.getAllValues().length; i++) {
-            if (structure.NameableType.toString(this.getAllValues()[i]) == s) {
-                return this.getAllValues()[i];
-            }
-        }
-        return null;
-    };
-    BoundTo.NOT_BOUND = -1;
-    BoundTo.BOUND_CONTINUOUS_X = 0;
-    BoundTo.BOUND_DISCRETE_X = 1;
-    BoundTo.BOUND_CONTINUOUS_Y = 2;
-    BoundTo.BOUND_DISCRETE_Y = 3;
-    BoundTo.BOUND_AREA = 4;
-    BoundTo.BOUND_CONTINUOUS_COLOUR = 5;
-    BoundTo.BOUND_DISCRETE_COLOUR = 6;
-    BoundTo.BOUND_CONTINUOUS_SIZE = 7;
-    BoundTo.BOUND_DISCRETE_SIZE = 8;
-    BoundTo.BOUND_TOOLTIP = 9;
-    BoundTo.BOUND_DISCRETE_DROPDOWN = 10;
-    BoundTo.BOUND_DISCRETE_LIST = 11;
-    BoundTo.BOUND_DISCRETE_SLIDER = 12;
-    BoundTo.BOUND_DISCRETE_STATIC = 13;
-    BoundTo.BOUND_DISCRETE_SERIES = 14;
-    BoundTo.BOUND_CONTINUOUS_BETWEEN = 15;
-    BoundTo.BOUND_CONTINUOUS_GREATERTHAN = 16;
-    BoundTo.BOUND_CONTINUOUS_LESSTHAN = 17;
-    BoundTo.BOUND_TIME_X = 18;
-    BoundTo.BOUND_TIME_Y = 19;
-    BoundTo.BOUND_TIME_DROPDOWN = 20;
-    BoundTo.BOUND_TIME_LIST = 27;
-    BoundTo.BOUND_TIME_SERIES = 27;
-    BoundTo.BOUND_MEASURES_DROPDOWN = 21;
-    BoundTo.BOUND_MEASURES_LIST = 22;
-    BoundTo.BOUND_MEASURES_INDIVIDUAL = 23;
-    BoundTo.BOUND_MEASURES_SERIES = 24;
-    BoundTo.BOUND_DISCRETE_SINGLE = 25;
-    BoundTo.BOUND_DISCRETE_ALL = 26;
-    BoundTo.DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    BoundTo.TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    BoundTo.MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
-    BoundTo.MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
-    return BoundTo;
-}());
-exports.BoundTo = BoundTo;
-var BoundToDiscrete = (function (_super) {
-    __extends(BoundToDiscrete, _super);
-    function BoundToDiscrete(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToDiscrete.prototype.getBoundTo = function () {
-        return BoundTo.NOT_BOUND;
-    };
-    BoundToDiscrete.prototype.getBoundToString = function () {
-        return "Discrete";
-    };
-    return BoundToDiscrete;
-}(BoundTo));
-exports.BoundToDiscrete = BoundToDiscrete;
-var BoundToSingleValue = (function (_super) {
-    __extends(BoundToSingleValue, _super);
-    function BoundToSingleValue(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToSingleValue.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_SINGLE;
-    };
-    BoundToSingleValue.prototype.getBoundToString = function () {
-        return "SingleValue";
-    };
-    return BoundToSingleValue;
-}(BoundToDiscrete));
-exports.BoundToSingleValue = BoundToSingleValue;
-var BoundToAllValues = (function (_super) {
-    __extends(BoundToAllValues, _super);
-    function BoundToAllValues(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToAllValues.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_ALL;
-    };
-    BoundToAllValues.prototype.getBoundToString = function () {
-        return "All Values";
-    };
-    return BoundToAllValues;
-}(BoundToDiscrete));
-exports.BoundToAllValues = BoundToAllValues;
-var BoundToTime = (function (_super) {
-    __extends(BoundToTime, _super);
-    function BoundToTime(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToTime.prototype.getBoundTo = function () {
-        return BoundTo.NOT_BOUND;
-    };
-    return BoundToTime;
-}(BoundTo));
-exports.BoundToTime = BoundToTime;
-var BoundToTimeX = (function (_super) {
-    __extends(BoundToTimeX, _super);
-    function BoundToTimeX(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToTimeX.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_TIME_X;
-    };
-    return BoundToTimeX;
-}(BoundTo));
-exports.BoundToTimeX = BoundToTimeX;
-var BoundToTimeY = (function (_super) {
-    __extends(BoundToTimeY, _super);
-    function BoundToTimeY(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToTimeY.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_TIME_Y;
-    };
-    return BoundToTimeY;
-}(BoundTo));
-exports.BoundToTimeY = BoundToTimeY;
-var BoundToContinuous = (function (_super) {
-    __extends(BoundToContinuous, _super);
-    function BoundToContinuous(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setContinuous.call(_this, true);
-        return _this;
-    }
-    BoundToContinuous.prototype.getBoundTo = function () {
-        return BoundTo.NOT_BOUND;
-    };
-    BoundToContinuous.prototype.getBoundToString = function () {
-        return "Continuous";
-    };
-    return BoundToContinuous;
-}(BoundTo));
-exports.BoundToContinuous = BoundToContinuous;
-var BoundToDiscreteX = (function (_super) {
-    __extends(BoundToDiscreteX, _super);
-    function BoundToDiscreteX(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToDiscreteX.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_X;
-    };
-    BoundToDiscreteX.prototype.getBoundToString = function () {
-        return "DiscreteX";
-    };
-    return BoundToDiscreteX;
-}(BoundToDiscrete));
-exports.BoundToDiscreteX = BoundToDiscreteX;
-var BoundToDiscreteY = (function (_super) {
-    __extends(BoundToDiscreteY, _super);
-    function BoundToDiscreteY(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToDiscreteY.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_Y;
-    };
-    BoundToDiscreteY.prototype.getBoundToString = function () {
-        return "DiscreteY";
-    };
-    return BoundToDiscreteY;
-}(BoundToDiscrete));
-exports.BoundToDiscreteY = BoundToDiscreteY;
-var BoundToContinuousX = (function (_super) {
-    __extends(BoundToContinuousX, _super);
-    function BoundToContinuousX(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToContinuousX.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_CONTINUOUS_X;
-    };
-    BoundToContinuousX.prototype.getBoundToString = function () {
-        return "BoundToContinuousX";
-    };
-    return BoundToContinuousX;
-}(BoundToContinuous));
-exports.BoundToContinuousX = BoundToContinuousX;
-var BoundToContinuousY = (function (_super) {
-    __extends(BoundToContinuousY, _super);
-    function BoundToContinuousY(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToContinuousY.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_CONTINUOUS_Y;
-    };
-    BoundToContinuousY.prototype.getBoundToString = function () {
-        return "BoundToContinuousY";
-    };
-    return BoundToContinuousY;
-}(BoundToContinuous));
-exports.BoundToContinuousY = BoundToContinuousY;
-var BoundToContinuousColour = (function (_super) {
-    __extends(BoundToContinuousColour, _super);
-    function BoundToContinuousColour(visual, concept) {
-        return _super.call(this, visual, concept) || this;
-    }
-    BoundToContinuousColour.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_CONTINUOUS_COLOUR;
-    };
-    BoundToContinuousColour.prototype.getBoundToString = function () {
-        return "BoundToContinuousColour";
-    };
-    return BoundToContinuousColour;
-}(BoundToContinuous));
-exports.BoundToContinuousColour = BoundToContinuousColour;
-var BoundToList = (function (_super) {
-    __extends(BoundToList, _super);
-    function BoundToList(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToList.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_LIST;
-    };
-    BoundToList.prototype.getBoundToString = function () {
-        return "BoundToList";
-    };
-    return BoundToList;
-}(BoundToDiscrete));
-exports.BoundToList = BoundToList;
-var BoundToTimeList = (function (_super) {
-    __extends(BoundToTimeList, _super);
-    function BoundToTimeList(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToTimeList.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_TIME_LIST;
-    };
-    BoundToTimeList.prototype.getBoundToString = function () {
-        return "BoundToTimeList";
-    };
-    return BoundToTimeList;
-}(BoundToTime));
-exports.BoundToTimeList = BoundToTimeList;
-var BoundToTimeSeries = (function (_super) {
-    __extends(BoundToTimeSeries, _super);
-    function BoundToTimeSeries(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToTimeSeries.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_TIME_SERIES;
-    };
-    BoundToTimeSeries.prototype.getBoundToString = function () {
-        return "BoundToTimeSeries";
-    };
-    return BoundToTimeSeries;
-}(BoundToTime));
-exports.BoundToTimeSeries = BoundToTimeSeries;
-var BoundToSeries = (function (_super) {
-    __extends(BoundToSeries, _super);
-    function BoundToSeries(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToSeries.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_SERIES;
-    };
-    BoundToSeries.prototype.getBoundToString = function () {
-        return "Series";
-    };
-    return BoundToSeries;
-}(BoundToDiscrete));
-exports.BoundToSeries = BoundToSeries;
-var BoundToSlider = (function (_super) {
-    __extends(BoundToSlider, _super);
-    function BoundToSlider(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToSlider.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_SLIDER;
-    };
-    BoundToSlider.prototype.getBoundToString = function () {
-        return "Slider";
-    };
-    return BoundToSlider;
-}(BoundToDiscrete));
-exports.BoundToSlider = BoundToSlider;
-var BoundToDropdown = (function (_super) {
-    __extends(BoundToDropdown, _super);
-    function BoundToDropdown(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _this.flat = true;
-        _this.perCentId = null;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToDropdown.prototype.expectValues = function () {
-        return 1;
-    };
-    BoundToDropdown.prototype.isFlat = function () {
-        return this.flat;
-    };
-    BoundToDropdown.prototype.setFlat = function (b) {
-        this.flat = b;
-    };
-    BoundToDropdown.prototype.getPercentOfId = function () {
-        return this.perCentId;
-    };
-    BoundToDropdown.prototype.setPercentOfId = function (s) {
-        this.perCentId = s;
-    };
-    BoundToDropdown.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_DISCRETE_DROPDOWN;
-    };
-    BoundToDropdown.prototype.getBoundToString = function () {
-        return "Dropdown";
-    };
-    return BoundToDropdown;
-}(BoundToDiscrete));
-exports.BoundToDropdown = BoundToDropdown;
-var BoundToTimeDropdown = (function (_super) {
-    __extends(BoundToTimeDropdown, _super);
-    function BoundToTimeDropdown(visual, concept) {
-        var _this = _super.call(this, visual, concept) || this;
-        _this.flat = true;
-        _this.perCentId = null;
-        _super.prototype.setQueryAll.call(_this, true);
-        _super.prototype.setWalkAll.call(_this, true);
-        return _this;
-    }
-    BoundToTimeDropdown.prototype.expectValues = function () {
-        return 1;
-    };
-    BoundToTimeDropdown.prototype.isFlat = function () {
-        return this.flat;
-    };
-    BoundToTimeDropdown.prototype.setFlat = function (b) {
-        this.flat = b;
-    };
-    BoundToTimeDropdown.prototype.getPercentOfId = function () {
-        return this.perCentId;
-    };
-    BoundToTimeDropdown.prototype.setPercentOfId = function (s) {
-        this.perCentId = s;
-    };
-    BoundToTimeDropdown.prototype.getBoundTo = function () {
-        return BoundTo.BOUND_TIME_DROPDOWN;
-    };
-    BoundToTimeDropdown.prototype.getBoundToString = function () {
-        return "Dropdown";
-    };
-    return BoundToTimeDropdown;
-}(BoundToDiscrete));
-exports.BoundToTimeDropdown = BoundToTimeDropdown;
-var BindingEntry = (function () {
-    function BindingEntry(id, name, parse, save, createNew) {
-        this.id = 0;
-        this.name = "BoundTo";
-        this.parseObjectToBinding = null;
-        this.saveBindingToObject = null;
-        this.customise = null;
-        this.createNew = null;
-        this.id = id;
-        this.name = name;
-        this.parseObjectToBinding = parse;
-        this.saveBindingToObject = save;
-        this.createNew = createNew;
-    }
-    BindingEntry.prototype.getId = function () { return this.id; };
-    BindingEntry.prototype.getName = function () { return this.name; };
-    BindingEntry.prototype.setParseObjectToBinding = function (f) { this.parseObjectToBinding = f; };
-    BindingEntry.prototype.getParseObjectToBinding = function () { return this.parseObjectToBinding; };
-    BindingEntry.prototype.setSaveBindingToObject = function (f) { this.saveBindingToObject = f; };
-    BindingEntry.prototype.getSaveBindingToObject = function () { return this.saveBindingToObject; };
-    BindingEntry.prototype.setCustomise = function (f) { this.customise = f; };
-    BindingEntry.prototype.getCustomise = function () {
-        return this.customise;
-    };
-    BindingEntry.prototype.getCreateNew = function () { return this.createNew; };
-    BindingEntry.prototype.setCreateNew = function (c) { this.createNew = c; };
-    return BindingEntry;
-}());
-exports.BindingEntry = BindingEntry;
-var BindingRegister = (function () {
-    function BindingRegister() {
-        this.list = [];
-    }
-    BindingRegister.prototype.register = function (be) {
-        this.list.push(be);
-    };
-    BindingRegister.prototype.getList = function () { return this.list; };
-    return BindingRegister;
-}());
-exports.BindingRegister = BindingRegister;
-var DimensionBindingRegister = (function (_super) {
-    __extends(DimensionBindingRegister, _super);
-    function DimensionBindingRegister() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    DimensionBindingRegister.registerState = function (be) {
-        DimensionBindingRegister.register.register(be);
-    };
-    DimensionBindingRegister.getList = function () {
-        return DimensionBindingRegister.register.getList();
-    };
-    DimensionBindingRegister.register = new DimensionBindingRegister();
-    return DimensionBindingRegister;
-}(BindingRegister));
-exports.DimensionBindingRegister = DimensionBindingRegister;
-var TimeBindingRegister = (function (_super) {
-    __extends(TimeBindingRegister, _super);
-    function TimeBindingRegister() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    TimeBindingRegister.registerState = function (be) {
-        TimeBindingRegister.register.register(be);
-    };
-    TimeBindingRegister.getList = function () {
-        return TimeBindingRegister.register.getList();
-    };
-    TimeBindingRegister.register = new TimeBindingRegister();
-    return TimeBindingRegister;
-}(BindingRegister));
-exports.TimeBindingRegister = TimeBindingRegister;
-var CrossSectionBindingRegister = (function (_super) {
-    __extends(CrossSectionBindingRegister, _super);
-    function CrossSectionBindingRegister() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    CrossSectionBindingRegister.registerState = function (be) {
-        CrossSectionBindingRegister.register.register(be);
-    };
-    CrossSectionBindingRegister.getList = function () {
-        return CrossSectionBindingRegister.register.getList();
-    };
-    CrossSectionBindingRegister.register = new CrossSectionBindingRegister();
-    return CrossSectionBindingRegister;
-}(BindingRegister));
-exports.CrossSectionBindingRegister = CrossSectionBindingRegister;
-var MeasureBindingRegister = (function (_super) {
-    __extends(MeasureBindingRegister, _super);
-    function MeasureBindingRegister() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    MeasureBindingRegister.registerState = function (be) {
-        MeasureBindingRegister.register.register(be);
-    };
-    MeasureBindingRegister.getList = function () {
-        return MeasureBindingRegister.register.getList();
-    };
-    MeasureBindingRegister.register = new MeasureBindingRegister();
-    return MeasureBindingRegister;
-}(BindingRegister));
-exports.MeasureBindingRegister = MeasureBindingRegister;
-var BindingRegisterUtil = (function () {
-    function BindingRegisterUtil() {
-    }
-    BindingRegisterUtil.findBindingEntry = function (i) {
-        var list = DimensionBindingRegister.getList();
-        for (var j = 0; j < list.length; j++) {
-            if (list[j].getId() == i) {
-                return list[j];
-            }
-        }
-        list = TimeBindingRegister.getList();
-        for (var j = 0; j < list.length; j++) {
-            if (list[j].getId() == i) {
-                return list[j];
-            }
-        }
-        list = CrossSectionBindingRegister.getList();
-        for (var j = 0; j < list.length; j++) {
-            if (list[j].getId() == i) {
-                return list[j];
-            }
-        }
-        list = MeasureBindingRegister.getList();
-        for (var j = 0; j < list.length; j++) {
-            if (list[j].getId() == i) {
-                return list[j];
-            }
-        }
-        console.log("Can't find bindingentry:" + i);
-    };
-    return BindingRegisterUtil;
-}());
-exports.BindingRegisterUtil = BindingRegisterUtil;
-var BindingsCustomiser = (function (_super) {
-    __extends(BindingsCustomiser, _super);
-    function BindingsCustomiser(props, state) {
-        var _this = _super.call(this, props, state) || this;
-        _this.state = null;
-        _this.props = null;
-        _this.props = props;
-        _this.state = state;
-        return _this;
-    }
-    BindingsCustomiser.prototype.render = function (props, state) {
-        return (preact_1.h("p", null, this.props.concept));
-    };
-    BindingsCustomiser.prototype.getBinding = function () {
-        return null;
-    };
-    BindingsCustomiser.prototype.setBinding = function (b) {
-        this.props.o = b;
-    };
-    return BindingsCustomiser;
-}(React.Component));
-exports.BindingsCustomiser = BindingsCustomiser;
-var DiscreteXCustomiser = (function (_super) {
-    __extends(DiscreteXCustomiser, _super);
-    function DiscreteXCustomiser(props, state) {
-        var _this = _super.call(this, props, state) || this;
-        _this.state = null;
-        _this.props = null;
-        _this.props = props;
-        _this.state = state;
-        return _this;
-    }
-    DiscreteXCustomiser.prototype.changeFlat = function (e) {
-        this.getBinding().setFlat(!this.getBinding().isFlat());
-        _super.prototype.setState.call(this, {});
-    };
-    DiscreteXCustomiser.prototype.changePercentId = function (e) {
-        this.getBinding().setPercentOfId(e);
-    };
-    DiscreteXCustomiser.prototype.listItems = function () {
-        var options = [];
-        options.push(preact_1.h(Select_1.default.Item, { value: null }, "No Percent of Id"));
-        this.props.o.getAllValues().map(function (item) {
-            options.push(preact_1.h(Select_1.default.Item, { value: item }, item));
-        });
-        return options;
-    };
-    DiscreteXCustomiser.prototype.render = function (props, state) {
-        var _this = this;
-        return (preact_1.h(Checkbox_1.default, { checked: this.getBinding().isFlat(), id: this.getBinding().getConcept() + "_flat", onclick: function (evt) { evt.stopPropagation(); _this.changeFlat(evt); } })
-            ,
-                preact_1.h(Select_1.default, { value: this.getBinding().getPercentOfId(), onChange: function (a) { return _this.changePercentId(a); } }, this.listItems()));
-    };
-    DiscreteXCustomiser.prototype.getBinding = function () {
-        return this.props.o;
-    };
-    return DiscreteXCustomiser;
-}(React.Component));
-exports.DiscreteXCustomiser = DiscreteXCustomiser;
-var DropdownBindingCustomiser = (function (_super) {
-    __extends(DropdownBindingCustomiser, _super);
-    function DropdownBindingCustomiser(props, state) {
-        var _this = _super.call(this, props, state) || this;
-        _this.state = null;
-        _this.props = null;
-        _this.props = props;
-        _this.state = state;
-        return _this;
-    }
-    DropdownBindingCustomiser.prototype.render = function () {
-        return (preact_1.h("p", null, this.props.o.getConcept(), " ", this.props.o.getBoundToString(), " Test"));
-    };
-    DropdownBindingCustomiser.prototype.getBinding = function (v) {
-        return parseObjectToBindingBoundToDropdown(this.props.o, v);
-    };
-    DropdownBindingCustomiser.prototype.setBinding = function (b) {
-        this.props.o = b;
-        this.props.concept = b.getConcept();
-    };
-    return DropdownBindingCustomiser;
-}(React.Component));
-exports.DropdownBindingCustomiser = DropdownBindingCustomiser;
-function parseObjectToBindingBoundToDropdown(o, v) {
-    var b = new BoundToDropdown(v, o['concept']);
-    b.setFlat(o['flat']);
-    b.setClientSide(o['clientSide']);
-    b.setPercentOfId(o['perCentOfId']);
-    return b;
-}
-/*
-function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
-    var o:any = {}
-    o.concept = b.getConcept();
-    o.typeid = b.getBoundTo();
-    o.typename = "BoundToDropdown";
-    o.clientSide = b.isClientSide();
-    o.flat = b.isFlat();
-    o.perCentOfId = b.getPercentOfId();
-    return o;
-    }*/
-function defaultSaveBindingToObject(b) {
-    var o = {};
-    o.concept = b.getConcept();
-    switch (b.getBoundTo()) {
-        case BoundTo.BOUND_CONTINUOUS_X:
-            o.typeid = BoundTo.BOUND_CONTINUOUS_X;
-            break;
-        case BoundTo.BOUND_CONTINUOUS_Y:
-            o.typeid = BoundTo.BOUND_CONTINUOUS_Y;
-            break;
-        case BoundTo.BOUND_TIME_X:
-            o.typeid = BoundTo.BOUND_TIME_X;
-            break;
-        case BoundTo.BOUND_TIME_Y:
-            o.typeid = BoundTo.BOUND_TIME_Y;
-            break;
-        case BoundTo.BOUND_DISCRETE_LIST:
-            o.typeid = BoundTo.BOUND_DISCRETE_LIST;
-            break;
-        case BoundTo.BOUND_DISCRETE_SERIES:
-            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
-            break;
-        case BoundTo.BOUND_DISCRETE_SLIDER:
-            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
-            break;
-    }
-    return b;
-}
-exports.defaultSaveBindingToObject = defaultSaveBindingToObject;
-function defaultParseObjectToBinding(o, v) {
-    var b = null;
-    switch (o['typeid']) {
-        case BoundTo.BOUND_CONTINUOUS_X:
-            b = new BoundToContinuousX(v, o['concept']);
-            break;
-        case BoundTo.BOUND_CONTINUOUS_Y:
-            b = new BoundToContinuousY(v, o['concept']);
-            break;
-        case BoundTo.BOUND_TIME_X:
-            b = new BoundToTimeX(v, o['concept']);
-            break;
-        case BoundTo.BOUND_TIME_Y:
-            b = new BoundToTimeY(v, o['concept']);
-            break;
-        case BoundTo.BOUND_DISCRETE_LIST:
-            b = new BoundToList(v, o['concept']);
-            break;
-        case BoundTo.BOUND_DISCRETE_SERIES:
-            b = new BoundToSeries(v, o['concept']);
-            break;
-        case BoundTo.BOUND_DISCRETE_SLIDER:
-            b = new BoundToSlider(v, o['concept']);
-            break;
-    }
-    return b;
-}
-exports.defaultParseObjectToBinding = defaultParseObjectToBinding;
-function saveBindingToObjectBoundToDropdown(b) {
-    var o = {};
-    o.concept = b.getConcept();
-    o.typeid = b.getBoundTo();
-    o.typename = "BoundToDropdown";
-    o.clientSide = b.isClientSide();
-    o.flat = b.isFlat();
-    o.perCentOfId = b.getPercentOfId();
-    return o;
-}
-function saveBindingToObjectBoundToDiscreteX(b) {
-    var o = {};
-    o.concept = b.getConcept();
-    o.typeid = b.getBoundTo();
-    o.typename = "BoundToDiscreteX";
-    return o;
-}
-exports.saveBindingToObjectBoundToDiscreteX = saveBindingToObjectBoundToDiscreteX;
-function parseObjectToBindingBoundToDiscreteX(o, v) {
-    var b = new BoundToDiscreteX(v, o['concept']);
-    return b;
-}
-exports.parseObjectToBindingBoundToDiscreteX = parseObjectToBindingBoundToDiscreteX;
-var be1 = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "Dropdown", parseObjectToBindingBoundToDropdown, saveBindingToObjectBoundToDropdown, BoundToDropdown);
-var be2 = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "DiscreteX", parseObjectToBindingBoundToDiscreteX, saveBindingToObjectBoundToDiscreteX, BoundToDiscreteX);
-var be3 = new BindingEntry(BoundTo.BOUND_DISCRETE_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToList);
-var be4 = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSeries);
-var be5 = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE, "Single Value", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleValue);
-var be6 = new BindingEntry(BoundTo.BOUND_DISCRETE_ALL, "All Values", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToAllValues);
-var be7 = new BindingEntry(BoundTo.BOUND_TIME_X, "Time X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
-var be8 = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
-var be9 = new BindingEntry(BoundTo.BOUND_TIME_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeDropdown);
-var be10 = new BindingEntry(BoundTo.BOUND_TIME_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeList);
-var be11 = new BindingEntry(BoundTo.BOUND_TIME_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeSeries);
-var be12 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_X, "X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousX);
-var be13 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_Y, "Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousY);
-var be14 = new BindingEntry(BoundTo.BOUND_CONTINUOUS_COLOUR, "Colour", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousColour);
-DimensionBindingRegister.registerState(be1);
-DimensionBindingRegister.registerState(be2);
-DimensionBindingRegister.registerState(be3);
-DimensionBindingRegister.registerState(be4);
-DimensionBindingRegister.registerState(be5);
-DimensionBindingRegister.registerState(be6);
-TimeBindingRegister.registerState(be7);
-TimeBindingRegister.registerState(be8);
-TimeBindingRegister.registerState(be9);
-TimeBindingRegister.registerState(be10);
-TimeBindingRegister.registerState(be11);
-MeasureBindingRegister.registerState(be12);
-MeasureBindingRegister.registerState(be13);
-MeasureBindingRegister.registerState(be14);
-
-
-/***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38389,7 +38707,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 module.exports = emptyFunction;
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38449,7 +38767,7 @@ module.exports = invariant;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38468,7 +38786,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -38620,7 +38938,7 @@ function getNormalizedEventCoords(ev, pageOffset, clientRect) {
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -38785,7 +39103,7 @@ function solvePositionFromXValue_(xVal, x1, x2) {
 
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38904,13 +39222,13 @@ exports.duration = duration;
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
+var util = __webpack_require__(11);
 var arrays = __webpack_require__(31);
 var LinkedList = /** @class */ (function () {
     /**
@@ -39288,7 +39606,7 @@ exports.default = LinkedList;
 //# sourceMappingURL=LinkedList.js.map
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40042,7 +40360,7 @@ exports.Month = Month;
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40091,7 +40409,7 @@ Object.defineProperty(exports, 'DropTarget', {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var root = __webpack_require__(32);
@@ -40103,7 +40421,7 @@ module.exports = Symbol;
 
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var MapCache = __webpack_require__(213),
@@ -40136,7 +40454,7 @@ module.exports = SetCache;
 
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIndexOf = __webpack_require__(333);
@@ -40159,7 +40477,7 @@ module.exports = arrayIncludes;
 
 
 /***/ }),
-/* 66 */
+/* 67 */
 /***/ (function(module, exports) {
 
 /**
@@ -40187,7 +40505,7 @@ module.exports = arrayIncludesWith;
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ (function(module, exports) {
 
 /**
@@ -40214,7 +40532,7 @@ module.exports = arrayMap;
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ (function(module, exports) {
 
 /**
@@ -40234,7 +40552,7 @@ module.exports = baseUnary;
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ (function(module, exports) {
 
 /**
@@ -40253,7 +40571,7 @@ module.exports = cacheHas;
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isFunction = __webpack_require__(214),
@@ -40292,7 +40610,7 @@ module.exports = isArrayLike;
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40333,7 +40651,7 @@ function shallowEqual(objA, objB) {
 }
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40349,7 +40667,7 @@ function isDisposable(obj) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40363,15 +40681,15 @@ var URL = exports.URL = '__NATIVE_URL__';
 var TEXT = exports.TEXT = '__NATIVE_TEXT__';
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_dialog___ = __webpack_require__(411);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Button__ = __webpack_require__(75);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Button__ = __webpack_require__(76);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 
@@ -40508,13 +40826,13 @@ Dialog.FooterButton = DialogFooterButton;
 /* harmony default export */ __webpack_exports__["default"] = (Dialog);
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Icon___ = __webpack_require__(417);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -40565,13 +40883,13 @@ Button.Icon = ButtonIcon;
 /* harmony default export */ __webpack_exports__["default"] = (Button);
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_checkbox___ = __webpack_require__(418);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -40662,13 +40980,13 @@ function toggleCheckbox(oldprops, newprops, cbox) {
 }
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* unused harmony export MDCSelectionControlState */
 /* unused harmony export MDCSelectionControl */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_ripple__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_ripple__ = __webpack_require__(37);
 /**
  * @license
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -40712,7 +41030,7 @@ class MDCSelectionControl {
 
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports) {
 
 module.exports = function _isPlaceholder(a) {
@@ -40723,12 +41041,12 @@ module.exports = function _isPlaceholder(a) {
 
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var _curry1 = __webpack_require__(27);
-var _curry2 = __webpack_require__(52);
-var _isPlaceholder = __webpack_require__(78);
+var _curry2 = __webpack_require__(54);
+var _isPlaceholder = __webpack_require__(79);
 
 
 /**
@@ -40767,7 +41085,7 @@ module.exports = function _curry3(fn) {
 
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40781,7 +41099,7 @@ module.exports = function _curry3(fn) {
 
 
 
-var emptyFunction = __webpack_require__(54);
+var emptyFunction = __webpack_require__(55);
 
 /**
  * Similar to invariant but only logs a warning if the condition is not met.
@@ -40836,7 +41154,7 @@ module.exports = warning;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -40938,11 +41256,11 @@ class MDCRippleAdapter {
 
 
 /***/ }),
-/* 82 */
+/* 83 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(59);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__simple__ = __webpack_require__(267);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_1__simple__["a"]; });
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__simple__["b"]; });
@@ -40970,13 +41288,13 @@ class MDCRippleAdapter {
 
 
 /***/ }),
-/* 83 */
+/* 84 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 
@@ -41155,7 +41473,7 @@ List.SecondaryText = ListSecondaryText;
 /* harmony default export */ __webpack_exports__["default"] = (List);
 
 /***/ }),
-/* 84 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41233,7 +41551,7 @@ return af;
 
 
 /***/ }),
-/* 85 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41380,7 +41698,7 @@ return ar;
 
 
 /***/ }),
-/* 86 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41444,7 +41762,7 @@ return arDz;
 
 
 /***/ }),
-/* 87 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41508,7 +41826,7 @@ return arKw;
 
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41639,7 +41957,7 @@ return arLy;
 
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41704,7 +42022,7 @@ return arMa;
 
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41814,7 +42132,7 @@ return arSa;
 
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41878,7 +42196,7 @@ return arTn;
 
 
 /***/ }),
-/* 92 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -41988,7 +42306,7 @@ return az;
 
 
 /***/ }),
-/* 93 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42127,7 +42445,7 @@ return be;
 
 
 /***/ }),
-/* 94 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42222,7 +42540,7 @@ return bg;
 
 
 /***/ }),
-/* 95 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42286,7 +42604,7 @@ return bm;
 
 
 /***/ }),
-/* 96 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42410,7 +42728,7 @@ return bn;
 
 
 /***/ }),
-/* 97 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42534,7 +42852,7 @@ return bo;
 
 
 /***/ }),
-/* 98 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42647,7 +42965,7 @@ return br;
 
 
 /***/ }),
-/* 99 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42795,7 +43113,7 @@ return bs;
 
 
 /***/ }),
-/* 100 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -42888,7 +43206,7 @@ return ca;
 
 
 /***/ }),
-/* 101 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43065,7 +43383,7 @@ return cs;
 
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43133,7 +43451,7 @@ return cv;
 
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43219,7 +43537,7 @@ return cy;
 
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43284,7 +43602,7 @@ return da;
 
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43367,7 +43685,7 @@ return de;
 
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43451,7 +43769,7 @@ return deAt;
 
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43534,7 +43852,7 @@ return deCh;
 
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43639,7 +43957,7 @@ return dv;
 
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43744,7 +44062,7 @@ return el;
 
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43816,7 +44134,7 @@ return enAu;
 
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43884,7 +44202,7 @@ return enCa;
 
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -43956,7 +44274,7 @@ return enGb;
 
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44028,7 +44346,7 @@ return enIe;
 
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44100,7 +44418,7 @@ return enNz;
 
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44178,7 +44496,7 @@ return eo;
 
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44275,7 +44593,7 @@ return es;
 
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44371,7 +44689,7 @@ return esDo;
 
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44459,7 +44777,7 @@ return esUs;
 
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44544,7 +44862,7 @@ return et;
 
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44615,7 +44933,7 @@ return eu;
 
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44727,7 +45045,7 @@ return fa;
 
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44839,7 +45157,7 @@ return fi;
 
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44904,7 +45222,7 @@ return fo;
 
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -44992,7 +45310,7 @@ return fr;
 
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45071,7 +45389,7 @@ return frCa;
 
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45154,7 +45472,7 @@ return frCh;
 
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45234,7 +45552,7 @@ return fy;
 
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45315,7 +45633,7 @@ return gd;
 
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45397,7 +45715,7 @@ return gl;
 
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45524,7 +45842,7 @@ return gomLatn;
 
 
 /***/ }),
-/* 131 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45653,7 +45971,7 @@ return gu;
 
 
 /***/ }),
-/* 132 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45757,7 +46075,7 @@ return he;
 
 
 /***/ }),
-/* 133 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -45886,7 +46204,7 @@ return hi;
 
 
 /***/ }),
-/* 134 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46036,7 +46354,7 @@ return hr;
 
 
 /***/ }),
-/* 135 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46150,7 +46468,7 @@ return hu;
 
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46250,7 +46568,7 @@ return hyAm;
 
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46338,7 +46656,7 @@ return id;
 
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46470,7 +46788,7 @@ return is;
 
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46545,7 +46863,7 @@ return it;
 
 
 /***/ }),
-/* 140 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46630,7 +46948,7 @@ return ja;
 
 
 /***/ }),
-/* 141 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46718,7 +47036,7 @@ return jv;
 
 
 /***/ }),
-/* 142 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46812,7 +47130,7 @@ return ka;
 
 
 /***/ }),
-/* 143 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46904,7 +47222,7 @@ return kk;
 
 
 /***/ }),
-/* 144 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -46967,7 +47285,7 @@ return km;
 
 
 /***/ }),
-/* 145 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47098,7 +47416,7 @@ return kn;
 
 
 /***/ }),
-/* 146 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47186,7 +47504,7 @@ return ko;
 
 
 /***/ }),
-/* 147 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47279,7 +47597,7 @@ return ky;
 
 
 /***/ }),
-/* 148 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47421,7 +47739,7 @@ return lb;
 
 
 /***/ }),
-/* 149 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47496,7 +47814,7 @@ return lo;
 
 
 /***/ }),
-/* 150 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47618,7 +47936,7 @@ return lt;
 
 
 /***/ }),
-/* 151 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47720,7 +48038,7 @@ return lv;
 
 
 /***/ }),
-/* 152 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47836,7 +48154,7 @@ return me;
 
 
 /***/ }),
-/* 153 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -47905,7 +48223,7 @@ return mi;
 
 
 /***/ }),
-/* 154 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48000,7 +48318,7 @@ return mk;
 
 
 /***/ }),
-/* 155 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48086,7 +48404,7 @@ return ml;
 
 
 /***/ }),
-/* 156 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48250,7 +48568,7 @@ return mr;
 
 
 /***/ }),
-/* 157 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48337,7 +48655,7 @@ return ms;
 
 
 /***/ }),
-/* 158 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48425,7 +48743,7 @@ return msMy;
 
 
 /***/ }),
-/* 159 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48526,7 +48844,7 @@ return my;
 
 
 /***/ }),
-/* 160 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48594,7 +48912,7 @@ return nb;
 
 
 /***/ }),
-/* 161 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48722,7 +49040,7 @@ return ne;
 
 
 /***/ }),
-/* 162 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48815,7 +49133,7 @@ return nl;
 
 
 /***/ }),
-/* 163 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48908,7 +49226,7 @@ return nlBe;
 
 
 /***/ }),
-/* 164 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -48973,7 +49291,7 @@ return nn;
 
 
 /***/ }),
-/* 165 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49102,7 +49420,7 @@ return paIn;
 
 
 /***/ }),
-/* 166 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49231,7 +49549,7 @@ return pl;
 
 
 /***/ }),
-/* 167 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49301,7 +49619,7 @@ return pt;
 
 
 /***/ }),
-/* 168 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49368,7 +49686,7 @@ return ptBr;
 
 
 /***/ }),
-/* 169 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49448,7 +49766,7 @@ return ro;
 
 
 /***/ }),
-/* 170 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49636,7 +49954,7 @@ return ru;
 
 
 /***/ }),
-/* 171 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49739,7 +50057,7 @@ return sd;
 
 
 /***/ }),
-/* 172 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49805,7 +50123,7 @@ return se;
 
 
 /***/ }),
-/* 173 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -49881,7 +50199,7 @@ return si;
 
 
 /***/ }),
-/* 174 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50036,7 +50354,7 @@ return sk;
 
 
 /***/ }),
-/* 175 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50203,7 +50521,7 @@ return sl;
 
 
 /***/ }),
-/* 176 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50278,7 +50596,7 @@ return sq;
 
 
 /***/ }),
-/* 177 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50393,7 +50711,7 @@ return sr;
 
 
 /***/ }),
-/* 178 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50508,7 +50826,7 @@ return srCyrl;
 
 
 /***/ }),
-/* 179 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50602,7 +50920,7 @@ return ss;
 
 
 /***/ }),
-/* 180 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50676,7 +50994,7 @@ return sv;
 
 
 /***/ }),
-/* 181 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50740,7 +51058,7 @@ return sw;
 
 
 /***/ }),
-/* 182 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50875,7 +51193,7 @@ return ta;
 
 
 /***/ }),
-/* 183 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -50969,7 +51287,7 @@ return te;
 
 
 /***/ }),
-/* 184 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51042,7 +51360,7 @@ return tet;
 
 
 /***/ }),
-/* 185 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51114,7 +51432,7 @@ return th;
 
 
 /***/ }),
-/* 186 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51181,7 +51499,7 @@ return tlPh;
 
 
 /***/ }),
-/* 187 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51306,7 +51624,7 @@ return tlh;
 
 
 /***/ }),
-/* 188 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51401,7 +51719,7 @@ return tr;
 
 
 /***/ }),
-/* 189 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51497,7 +51815,7 @@ return tzl;
 
 
 /***/ }),
-/* 190 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51560,7 +51878,7 @@ return tzm;
 
 
 /***/ }),
-/* 191 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51623,7 +51941,7 @@ return tzmLatn;
 
 
 /***/ }),
-/* 192 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51779,7 +52097,7 @@ return uk;
 
 
 /***/ }),
-/* 193 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51883,7 +52201,7 @@ return ur;
 
 
 /***/ }),
-/* 194 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -51946,7 +52264,7 @@ return uz;
 
 
 /***/ }),
-/* 195 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52009,7 +52327,7 @@ return uzLatn;
 
 
 /***/ }),
-/* 196 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52093,7 +52411,7 @@ return vi;
 
 
 /***/ }),
-/* 197 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52166,7 +52484,7 @@ return xPseudo;
 
 
 /***/ }),
-/* 198 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52231,7 +52549,7 @@ return yo;
 
 
 /***/ }),
-/* 199 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52347,7 +52665,7 @@ return zhCn;
 
 
 /***/ }),
-/* 200 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52457,7 +52775,7 @@ return zhHk;
 
 
 /***/ }),
-/* 201 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //! moment.js locale configuration
@@ -52566,15 +52884,15 @@ return zhTw;
 
 
 /***/ }),
-/* 202 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
+var util = __webpack_require__(11);
 var arrays = __webpack_require__(31);
-var Dictionary_1 = __webpack_require__(24);
+var Dictionary_1 = __webpack_require__(25);
 var Set = /** @class */ (function () {
     /**
      * Creates an empty set.
@@ -52741,13 +53059,13 @@ exports.default = Set;
 //# sourceMappingURL=Set.js.map
 
 /***/ }),
-/* 203 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var LinkedList_1 = __webpack_require__(60);
+var LinkedList_1 = __webpack_require__(61);
 var Queue = /** @class */ (function () {
     /**
      * Creates an empty queue.
@@ -52855,13 +53173,13 @@ exports.default = Queue;
 //# sourceMappingURL=Queue.js.map
 
 /***/ }),
-/* 204 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var collections = __webpack_require__(10);
+var collections = __webpack_require__(11);
 var arrays = __webpack_require__(31);
 var Heap = /** @class */ (function () {
     /**
@@ -53088,7 +53406,7 @@ exports.default = Heap;
 //# sourceMappingURL=Heap.js.map
 
 /***/ }),
-/* 205 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53104,8 +53422,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var Dictionary_1 = __webpack_require__(24);
-var util = __webpack_require__(10);
+var Dictionary_1 = __webpack_require__(25);
+var util = __webpack_require__(11);
 var FactoryDictionary = /** @class */ (function (_super) {
     __extends(FactoryDictionary, _super);
     /**
@@ -53176,270 +53494,6 @@ exports.default = FactoryDictionary;
 //# sourceMappingURL=FactoryDictionary.js.map
 
 /***/ }),
-/* 206 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b)
-            if (b.hasOwnProperty(p))
-                d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var structure = __webpack_require__(4);
-var collections = __webpack_require__(17);
-var DataMessage = (function () {
-    function DataMessage() {
-        this.header = null;
-        this.dataSets = [];
-    }
-    DataMessage.prototype.getHeader = function () { return this.header; };
-    DataMessage.prototype.setHeader = function (h) { this.header = h; };
-    DataMessage.prototype.getDataSet = function (i) { return this.dataSets[i]; };
-    DataMessage.prototype.setDataSet = function (i, ds) { this.dataSets[i] = ds; };
-    DataMessage.prototype.addDataSet = function (ds) {
-        this.dataSets.push(ds);
-        return collections.arrays.indexOf(this.dataSets, ds);
-    };
-    DataMessage.prototype.removeDataSet = function (ds) {
-        collections.arrays.remove(this.dataSets, ds);
-    };
-    DataMessage.prototype.size = function () {
-        return this.dataSets.length;
-    };
-    return DataMessage;
-}());
-exports.DataMessage = DataMessage;
-var DataQuery = (function () {
-    function DataQuery() {
-    }
-    return DataQuery;
-}());
-exports.DataQuery = DataQuery;
-var StructureType = (function () {
-    function StructureType() {
-        this.header = null;
-        this.structures = null;
-    }
-    StructureType.prototype.getHeader = function () { return this.header; };
-    StructureType.prototype.setHeader = function (h) { this.header = h; };
-    StructureType.prototype.getStructures = function () {
-        return this.structures;
-    };
-    StructureType.prototype.setStructures = function (s) {
-        this.structures = s;
-    };
-    // Registry
-    StructureType.prototype.listDataflows = function () {
-        return this.structures.listDataflows();
-    };
-    StructureType.prototype.clear = function () {
-    };
-    StructureType.prototype.load = function (struct) {
-    };
-    StructureType.prototype.unload = function (struct) {
-    };
-    StructureType.prototype.findDataStructure = function (ref) {
-        return this.structures.findDataStructure(ref);
-    };
-    StructureType.prototype.findDataflow = function (ref) {
-        return this.structures.findDataflow(ref);
-    };
-    StructureType.prototype.findCode = function (ref) {
-        return this.structures.findCode(ref);
-    };
-    StructureType.prototype.findCodelist = function (ref) {
-        return this.structures.findCodelist(ref);
-    };
-    StructureType.prototype.findItemType = function (item) {
-        return this.structures.findItemType(item);
-    };
-    StructureType.prototype.findConcept = function (ref) {
-        return this.structures.findConcept(ref);
-    };
-    StructureType.prototype.findConceptScheme = function (ref) {
-        return this.structures.findConceptScheme(ref);
-    };
-    StructureType.prototype.searchDataStructure = function (ref) {
-        return this.structures.searchDataStructure(ref);
-    };
-    StructureType.prototype.searchDataflow = function (ref) {
-        return this.structures.searchDataflow(ref);
-    };
-    StructureType.prototype.searchCodelist = function (ref) {
-        return this.structures.searchCodelist(ref);
-    };
-    StructureType.prototype.searchItemType = function (item) {
-        return this.structures.searchItemType(item);
-    };
-    StructureType.prototype.searchConcept = function (ref) {
-        return this.structures.searchConcept(ref);
-    };
-    StructureType.prototype.searchConceptScheme = function (ref) {
-        return this.structures.searchConceptScheme(ref);
-    };
-    StructureType.prototype.save = function () {
-    };
-    return StructureType;
-}());
-exports.StructureType = StructureType;
-var HeaderTimeType = (function () {
-    function HeaderTimeType(d) {
-        this.date = null;
-        this.date = d;
-    }
-    HeaderTimeType.prototype.getDate = function () { return this.date; };
-    HeaderTimeType.prototype.setDate = function (d) {
-        this.date = d;
-    };
-    return HeaderTimeType;
-}());
-exports.HeaderTimeType = HeaderTimeType;
-var Contact = (function () {
-    function Contact() {
-        this.name = [];
-        this.departments = [];
-        this.roles = [];
-        this.telephones = [];
-        this.faxes = [];
-        this.z400s = [];
-        this.uris = [];
-        this.emails = [];
-    }
-    return Contact;
-}());
-exports.Contact = Contact;
-var PartyType = (function (_super) {
-    __extends(PartyType, _super);
-    function PartyType() {
-        var _this = this;
-        _this.contacts = [];
-        return _this;
-    }
-    return PartyType;
-}(structure.NameableType));
-exports.PartyType = PartyType;
-var Sender = (function (_super) {
-    __extends(Sender, _super);
-    function Sender() {
-        var _this = this;
-        return _this;
-    }
-    return Sender;
-}(PartyType));
-exports.Sender = Sender;
-var Header = (function () {
-    function Header() {
-        this.id = null;
-        this.test = null;
-        this.prepared = null;
-        this.sender = null;
-        this.receivers = [];
-        this.names = [];
-        this.structures = [];
-        this.dataproviderReference = null;
-        this.dataSetAction = null;
-        this.dataSetId = [];
-        this.extracted = null;
-        this.reportingBegin = null;
-        this.reportingEnd = null;
-        this.embargoDate = null;
-        this.source = [];
-    }
-    Header.prototype.getId = function () { return this.id; };
-    Header.prototype.setId = function (s) { this.id = s; };
-    Header.prototype.getTest = function () { return this.test; };
-    Header.prototype.setTest = function (b) {
-        this.test = b;
-    };
-    Header.prototype.getPrepared = function () { return this.prepared; };
-    Header.prototype.setPrepared = function (h) {
-        this.prepared = h;
-    };
-    Header.prototype.getSender = function () { return this.sender; };
-    Header.prototype.setSender = function (p) {
-        this.sender = p;
-    };
-    Header.prototype.getReceivers = function () {
-        return this.receivers;
-    };
-    Header.prototype.setReceivers = function (recs) {
-        this.receivers = recs;
-    };
-    Header.prototype.getNames = function () {
-        return this.names;
-    };
-    Header.prototype.setNames = function (n) {
-        this.names = n;
-    };
-    Header.prototype.setStructures = function (pl) {
-        this.structures = pl;
-    };
-    Header.prototype.getStructures = function () {
-        return this.structures;
-    };
-    Header.prototype.getDataproviderReference = function () {
-        return this.dataproviderReference;
-    };
-    Header.prototype.setDataproviderReference = function (ref) {
-        this.dataproviderReference = ref;
-    };
-    Header.prototype.setAction = function (ac) {
-        this.dataSetAction = ac;
-    };
-    Header.prototype.getAction = function () {
-        return this.dataSetAction;
-    };
-    Header.prototype.getDataSetId = function () {
-        return this.dataSetId;
-    };
-    Header.prototype.setDataSetId = function (ids) {
-        this.dataSetId = ids;
-    };
-    Header.prototype.getExtracted = function () {
-        return this.extracted;
-    };
-    Header.prototype.setExtracted = function (d) {
-        this.extracted = d;
-    };
-    Header.prototype.getReportingBegin = function () {
-        return this.reportingBegin;
-    };
-    Header.prototype.setReportingBegin = function (o) {
-        this.reportingBegin = o;
-    };
-    Header.prototype.getReportingEnd = function () {
-        return this.reportingEnd;
-    };
-    Header.prototype.setReportingEnd = function (o) {
-        this.reportingEnd = o;
-    };
-    Header.prototype.getEmbargoDate = function () {
-        return this.embargoDate;
-    };
-    Header.prototype.setEmbargoDate = function (dt) {
-        this.embargoDate = dt;
-    };
-    Header.prototype.getSource = function () {
-        return this.source;
-    };
-    Header.prototype.setSource = function (s) {
-        this.source = s;
-    };
-    return Header;
-}());
-exports.Header = Header;
-
-
-/***/ }),
 /* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -53458,7 +53512,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 
 module.exports = freeGlobal;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
 /* 209 */
@@ -53477,7 +53531,7 @@ exports.default = dragOffset;
 exports.getSourceClientOffset = getSourceClientOffset;
 exports.getDifferenceFromInitialOffset = getDifferenceFromInitialOffset;
 
-var _dragDrop = __webpack_require__(41);
+var _dragDrop = __webpack_require__(43);
 
 var initialState = {
 	initialSourceClientOffset: null,
@@ -53557,7 +53611,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = matchesType;
 
-var _isArray = __webpack_require__(22);
+var _isArray = __webpack_require__(23);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
@@ -53579,7 +53633,7 @@ function matchesType(targetType, draggedItemType) {
 
 var baseDifference = __webpack_require__(212),
     baseRest = __webpack_require__(26),
-    isArrayLikeObject = __webpack_require__(47);
+    isArrayLikeObject = __webpack_require__(49);
 
 /**
  * Creates an array excluding all given values using
@@ -53614,12 +53668,12 @@ module.exports = without;
 /* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SetCache = __webpack_require__(64),
-    arrayIncludes = __webpack_require__(65),
-    arrayIncludesWith = __webpack_require__(66),
-    arrayMap = __webpack_require__(67),
-    baseUnary = __webpack_require__(68),
-    cacheHas = __webpack_require__(69);
+var SetCache = __webpack_require__(65),
+    arrayIncludes = __webpack_require__(66),
+    arrayIncludesWith = __webpack_require__(67),
+    arrayMap = __webpack_require__(68),
+    baseUnary = __webpack_require__(69),
+    cacheHas = __webpack_require__(70);
 
 /** Used as the size to enable large array optimizations. */
 var LARGE_ARRAY_SIZE = 200;
@@ -53725,7 +53779,7 @@ module.exports = MapCache;
 /* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetTag = __webpack_require__(40),
+var baseGetTag = __webpack_require__(42),
     isObject = __webpack_require__(34);
 
 /** `Object#toString` result references. */
@@ -53822,7 +53876,7 @@ module.exports = apply;
 /* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getNative = __webpack_require__(43);
+var getNative = __webpack_require__(45);
 
 var defineProperty = (function() {
   try {
@@ -53897,9 +53951,9 @@ var _intersection = __webpack_require__(351);
 
 var _intersection2 = _interopRequireDefault(_intersection);
 
-var _dragDrop = __webpack_require__(41);
+var _dragDrop = __webpack_require__(43);
 
-var _registry = __webpack_require__(48);
+var _registry = __webpack_require__(50);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54065,10 +54119,10 @@ module.exports = isArguments;
 /* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SetCache = __webpack_require__(64),
-    arrayIncludes = __webpack_require__(65),
-    arrayIncludesWith = __webpack_require__(66),
-    cacheHas = __webpack_require__(69),
+var SetCache = __webpack_require__(65),
+    arrayIncludes = __webpack_require__(66),
+    arrayIncludesWith = __webpack_require__(67),
+    cacheHas = __webpack_require__(70),
     createSet = __webpack_require__(349),
     setToArray = __webpack_require__(224);
 
@@ -54259,7 +54313,7 @@ var _preact2 = _interopRequireDefault(_preact);
 
 var _disposables = __webpack_require__(365);
 
-var _shallowEqual = __webpack_require__(71);
+var _shallowEqual = __webpack_require__(72);
 
 var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 
@@ -54267,7 +54321,7 @@ var _shallowEqualScalar = __webpack_require__(225);
 
 var _shallowEqualScalar2 = _interopRequireDefault(_shallowEqualScalar);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
@@ -54275,7 +54329,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _hoistNonReactStatics = __webpack_require__(50);
+var _hoistNonReactStatics = __webpack_require__(52);
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
@@ -54540,7 +54594,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = areOptionsEqual;
 
-var _shallowEqual = __webpack_require__(71);
+var _shallowEqual = __webpack_require__(72);
 
 var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 
@@ -54569,7 +54623,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 exports.default = isValidType;
 
-var _isArray = __webpack_require__(22);
+var _isArray = __webpack_require__(23);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
@@ -54903,7 +54957,7 @@ var _FontIcon = __webpack_require__(28);
 
 var _FontIcon2 = _interopRequireDefault(_FontIcon);
 
-var _Ripple = __webpack_require__(51);
+var _Ripple = __webpack_require__(53);
 
 var _Ripple2 = _interopRequireDefault(_Ripple);
 
@@ -55525,7 +55579,7 @@ var _FontIcon = __webpack_require__(28);
 
 var _FontIcon2 = _interopRequireDefault(_FontIcon);
 
-var _Ripple = __webpack_require__(51);
+var _Ripple = __webpack_require__(53);
 
 var _Ripple2 = _interopRequireDefault(_Ripple);
 
@@ -56309,7 +56363,7 @@ module.exports = function _arity(n, fn) {
 /* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _curry3 = __webpack_require__(79);
+var _curry3 = __webpack_require__(80);
 var _reduce = __webpack_require__(455);
 
 
@@ -56810,7 +56864,7 @@ console.log('0.4');
 var editor_1 = __webpack_require__(484);
 console.log('0.5');
 console.log('0.6');
-var Tabs = __webpack_require__(495);
+var Tabs = __webpack_require__(497);
 console.log('0.7');
 console.log('0.8');
 console.log('0.9');
@@ -56830,7 +56884,7 @@ var Main = (function (_super) {
     }
     Main.prototype.getChildContext = function () { return this.context; };
     Main.prototype.render = function () {
-        return (preact_1.h(Tabs, null, preact_1.h(Tabs.Panel, { title: 'SdmxClient' }, preact_1.h("div", null, preact_1.h(SdmxClient_1.default, null))), preact_1.h(Tabs.Panel, { title: 'Tab #2' }, preact_1.h("div", null, preact_1.h(editor_1.default, null))), preact_1.h(Tabs.Panel, { title: 'Tab #3' }, preact_1.h("div", { id: "render" }, preact_1.h("p", null, "I will hold a visual one day")))));
+        return (preact_1.h(Tabs, null, preact_1.h(Tabs.Panel, { title: 'SdmxClient' }, preact_1.h("div", null, preact_1.h(SdmxClient_1.default, null))), preact_1.h(Tabs.Panel, { title: 'Tab #2' }, preact_1.h("div", null, preact_1.h(editor_1.default, null)))));
     };
     Main.prototype.setState = function (o) {
         _super.prototype.setState.call(this, o);
@@ -56855,12 +56909,12 @@ React.render(preact_1.h(Main, null), document.querySelector('#app'));
 
 
 
-var emptyFunction = __webpack_require__(54);
-var invariant = __webpack_require__(55);
-var warning = __webpack_require__(80);
+var emptyFunction = __webpack_require__(55);
+var invariant = __webpack_require__(56);
+var warning = __webpack_require__(81);
 var assign = __webpack_require__(259);
 
-var ReactPropTypesSecret = __webpack_require__(56);
+var ReactPropTypesSecret = __webpack_require__(57);
 var checkPropTypes = __webpack_require__(260);
 
 module.exports = function(isValidElement, throwOnDirectAccess) {
@@ -57503,9 +57557,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 if (process.env.NODE_ENV !== 'production') {
-  var invariant = __webpack_require__(55);
-  var warning = __webpack_require__(80);
-  var ReactPropTypesSecret = __webpack_require__(56);
+  var invariant = __webpack_require__(56);
+  var warning = __webpack_require__(81);
+  var ReactPropTypesSecret = __webpack_require__(57);
   var loggedTypeFailures = {};
 }
 
@@ -57569,9 +57623,9 @@ module.exports = checkPropTypes;
 
 
 
-var emptyFunction = __webpack_require__(54);
-var invariant = __webpack_require__(55);
-var ReactPropTypesSecret = __webpack_require__(56);
+var emptyFunction = __webpack_require__(55);
+var invariant = __webpack_require__(56);
+var ReactPropTypesSecret = __webpack_require__(57);
 
 module.exports = function() {
   function shim(props, propName, componentName, location, propFullName, secret) {
@@ -57648,8 +57702,8 @@ var FilterDialog_1 = __webpack_require__(410);
 var MyTimeDialog_1 = __webpack_require__(428);
 var TableToolbar_1 = __webpack_require__(483);
 var structure = __webpack_require__(4);
-var data = __webpack_require__(25);
-var _ = __webpack_require__(39);
+var data = __webpack_require__(18);
+var _ = __webpack_require__(41);
 var collections = __webpack_require__(17);
 console.log('2');
 var SdmxClient = (function (_super) {
@@ -57928,7 +57982,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Select_1 = __webpack_require__(18);
+var Select_1 = __webpack_require__(19);
 var sdmx = __webpack_require__(6);
 var Services = (function (_super) {
     __extends(Services, _super);
@@ -57993,9 +58047,9 @@ exports.default = Services;
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_foundation__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(81);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(82);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants__ = __webpack_require__(265);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(58);
 /**
  * @license
  * Copyright 2016 Google Inc. All Rights Reserved.
@@ -58574,8 +58628,8 @@ const numbers = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_menu__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_menu__ = __webpack_require__(83);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__foundation__ = __webpack_require__(271);
 /* unused harmony reexport MDCSelectFoundation */
 /**
@@ -58717,9 +58771,9 @@ class MDCSelect extends __WEBPACK_IMPORTED_MODULE_0__material_base__["a" /* MDCC
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MDCSimpleMenu; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_component__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__foundation__ = __webpack_require__(268);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(59);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__foundation__["a"]; });
 /**
  * @license
@@ -58881,7 +58935,7 @@ class MDCSimpleMenu extends __WEBPACK_IMPORTED_MODULE_0__material_base_component
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_foundation__ = __webpack_require__(29);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__adapter__ = __webpack_require__(269);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants__ = __webpack_require__(270);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(59);
 /**
  * @license
  * Copyright 2016 Google Inc. All Rights Reserved.
@@ -59606,9 +59660,9 @@ const numbers = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(272);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_menu__ = __webpack_require__(82);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_menu__ = __webpack_require__(83);
 /**
  * Copyright 2016 Google Inc. All Rights Reserved.
  *
@@ -59900,242 +59954,242 @@ const strings = {
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./af": 84,
-	"./af.js": 84,
-	"./ar": 85,
-	"./ar-dz": 86,
-	"./ar-dz.js": 86,
-	"./ar-kw": 87,
-	"./ar-kw.js": 87,
-	"./ar-ly": 88,
-	"./ar-ly.js": 88,
-	"./ar-ma": 89,
-	"./ar-ma.js": 89,
-	"./ar-sa": 90,
-	"./ar-sa.js": 90,
-	"./ar-tn": 91,
-	"./ar-tn.js": 91,
-	"./ar.js": 85,
-	"./az": 92,
-	"./az.js": 92,
-	"./be": 93,
-	"./be.js": 93,
-	"./bg": 94,
-	"./bg.js": 94,
-	"./bm": 95,
-	"./bm.js": 95,
-	"./bn": 96,
-	"./bn.js": 96,
-	"./bo": 97,
-	"./bo.js": 97,
-	"./br": 98,
-	"./br.js": 98,
-	"./bs": 99,
-	"./bs.js": 99,
-	"./ca": 100,
-	"./ca.js": 100,
-	"./cs": 101,
-	"./cs.js": 101,
-	"./cv": 102,
-	"./cv.js": 102,
-	"./cy": 103,
-	"./cy.js": 103,
-	"./da": 104,
-	"./da.js": 104,
-	"./de": 105,
-	"./de-at": 106,
-	"./de-at.js": 106,
-	"./de-ch": 107,
-	"./de-ch.js": 107,
-	"./de.js": 105,
-	"./dv": 108,
-	"./dv.js": 108,
-	"./el": 109,
-	"./el.js": 109,
-	"./en-au": 110,
-	"./en-au.js": 110,
-	"./en-ca": 111,
-	"./en-ca.js": 111,
-	"./en-gb": 112,
-	"./en-gb.js": 112,
-	"./en-ie": 113,
-	"./en-ie.js": 113,
-	"./en-nz": 114,
-	"./en-nz.js": 114,
-	"./eo": 115,
-	"./eo.js": 115,
-	"./es": 116,
-	"./es-do": 117,
-	"./es-do.js": 117,
-	"./es-us": 118,
-	"./es-us.js": 118,
-	"./es.js": 116,
-	"./et": 119,
-	"./et.js": 119,
-	"./eu": 120,
-	"./eu.js": 120,
-	"./fa": 121,
-	"./fa.js": 121,
-	"./fi": 122,
-	"./fi.js": 122,
-	"./fo": 123,
-	"./fo.js": 123,
-	"./fr": 124,
-	"./fr-ca": 125,
-	"./fr-ca.js": 125,
-	"./fr-ch": 126,
-	"./fr-ch.js": 126,
-	"./fr.js": 124,
-	"./fy": 127,
-	"./fy.js": 127,
-	"./gd": 128,
-	"./gd.js": 128,
-	"./gl": 129,
-	"./gl.js": 129,
-	"./gom-latn": 130,
-	"./gom-latn.js": 130,
-	"./gu": 131,
-	"./gu.js": 131,
-	"./he": 132,
-	"./he.js": 132,
-	"./hi": 133,
-	"./hi.js": 133,
-	"./hr": 134,
-	"./hr.js": 134,
-	"./hu": 135,
-	"./hu.js": 135,
-	"./hy-am": 136,
-	"./hy-am.js": 136,
-	"./id": 137,
-	"./id.js": 137,
-	"./is": 138,
-	"./is.js": 138,
-	"./it": 139,
-	"./it.js": 139,
-	"./ja": 140,
-	"./ja.js": 140,
-	"./jv": 141,
-	"./jv.js": 141,
-	"./ka": 142,
-	"./ka.js": 142,
-	"./kk": 143,
-	"./kk.js": 143,
-	"./km": 144,
-	"./km.js": 144,
-	"./kn": 145,
-	"./kn.js": 145,
-	"./ko": 146,
-	"./ko.js": 146,
-	"./ky": 147,
-	"./ky.js": 147,
-	"./lb": 148,
-	"./lb.js": 148,
-	"./lo": 149,
-	"./lo.js": 149,
-	"./lt": 150,
-	"./lt.js": 150,
-	"./lv": 151,
-	"./lv.js": 151,
-	"./me": 152,
-	"./me.js": 152,
-	"./mi": 153,
-	"./mi.js": 153,
-	"./mk": 154,
-	"./mk.js": 154,
-	"./ml": 155,
-	"./ml.js": 155,
-	"./mr": 156,
-	"./mr.js": 156,
-	"./ms": 157,
-	"./ms-my": 158,
-	"./ms-my.js": 158,
-	"./ms.js": 157,
-	"./my": 159,
-	"./my.js": 159,
-	"./nb": 160,
-	"./nb.js": 160,
-	"./ne": 161,
-	"./ne.js": 161,
-	"./nl": 162,
-	"./nl-be": 163,
-	"./nl-be.js": 163,
-	"./nl.js": 162,
-	"./nn": 164,
-	"./nn.js": 164,
-	"./pa-in": 165,
-	"./pa-in.js": 165,
-	"./pl": 166,
-	"./pl.js": 166,
-	"./pt": 167,
-	"./pt-br": 168,
-	"./pt-br.js": 168,
-	"./pt.js": 167,
-	"./ro": 169,
-	"./ro.js": 169,
-	"./ru": 170,
-	"./ru.js": 170,
-	"./sd": 171,
-	"./sd.js": 171,
-	"./se": 172,
-	"./se.js": 172,
-	"./si": 173,
-	"./si.js": 173,
-	"./sk": 174,
-	"./sk.js": 174,
-	"./sl": 175,
-	"./sl.js": 175,
-	"./sq": 176,
-	"./sq.js": 176,
-	"./sr": 177,
-	"./sr-cyrl": 178,
-	"./sr-cyrl.js": 178,
-	"./sr.js": 177,
-	"./ss": 179,
-	"./ss.js": 179,
-	"./sv": 180,
-	"./sv.js": 180,
-	"./sw": 181,
-	"./sw.js": 181,
-	"./ta": 182,
-	"./ta.js": 182,
-	"./te": 183,
-	"./te.js": 183,
-	"./tet": 184,
-	"./tet.js": 184,
-	"./th": 185,
-	"./th.js": 185,
-	"./tl-ph": 186,
-	"./tl-ph.js": 186,
-	"./tlh": 187,
-	"./tlh.js": 187,
-	"./tr": 188,
-	"./tr.js": 188,
-	"./tzl": 189,
-	"./tzl.js": 189,
-	"./tzm": 190,
-	"./tzm-latn": 191,
-	"./tzm-latn.js": 191,
-	"./tzm.js": 190,
-	"./uk": 192,
-	"./uk.js": 192,
-	"./ur": 193,
-	"./ur.js": 193,
-	"./uz": 194,
-	"./uz-latn": 195,
-	"./uz-latn.js": 195,
-	"./uz.js": 194,
-	"./vi": 196,
-	"./vi.js": 196,
-	"./x-pseudo": 197,
-	"./x-pseudo.js": 197,
-	"./yo": 198,
-	"./yo.js": 198,
-	"./zh-cn": 199,
-	"./zh-cn.js": 199,
-	"./zh-hk": 200,
-	"./zh-hk.js": 200,
-	"./zh-tw": 201,
-	"./zh-tw.js": 201
+	"./af": 85,
+	"./af.js": 85,
+	"./ar": 86,
+	"./ar-dz": 87,
+	"./ar-dz.js": 87,
+	"./ar-kw": 88,
+	"./ar-kw.js": 88,
+	"./ar-ly": 89,
+	"./ar-ly.js": 89,
+	"./ar-ma": 90,
+	"./ar-ma.js": 90,
+	"./ar-sa": 91,
+	"./ar-sa.js": 91,
+	"./ar-tn": 92,
+	"./ar-tn.js": 92,
+	"./ar.js": 86,
+	"./az": 93,
+	"./az.js": 93,
+	"./be": 94,
+	"./be.js": 94,
+	"./bg": 95,
+	"./bg.js": 95,
+	"./bm": 96,
+	"./bm.js": 96,
+	"./bn": 97,
+	"./bn.js": 97,
+	"./bo": 98,
+	"./bo.js": 98,
+	"./br": 99,
+	"./br.js": 99,
+	"./bs": 100,
+	"./bs.js": 100,
+	"./ca": 101,
+	"./ca.js": 101,
+	"./cs": 102,
+	"./cs.js": 102,
+	"./cv": 103,
+	"./cv.js": 103,
+	"./cy": 104,
+	"./cy.js": 104,
+	"./da": 105,
+	"./da.js": 105,
+	"./de": 106,
+	"./de-at": 107,
+	"./de-at.js": 107,
+	"./de-ch": 108,
+	"./de-ch.js": 108,
+	"./de.js": 106,
+	"./dv": 109,
+	"./dv.js": 109,
+	"./el": 110,
+	"./el.js": 110,
+	"./en-au": 111,
+	"./en-au.js": 111,
+	"./en-ca": 112,
+	"./en-ca.js": 112,
+	"./en-gb": 113,
+	"./en-gb.js": 113,
+	"./en-ie": 114,
+	"./en-ie.js": 114,
+	"./en-nz": 115,
+	"./en-nz.js": 115,
+	"./eo": 116,
+	"./eo.js": 116,
+	"./es": 117,
+	"./es-do": 118,
+	"./es-do.js": 118,
+	"./es-us": 119,
+	"./es-us.js": 119,
+	"./es.js": 117,
+	"./et": 120,
+	"./et.js": 120,
+	"./eu": 121,
+	"./eu.js": 121,
+	"./fa": 122,
+	"./fa.js": 122,
+	"./fi": 123,
+	"./fi.js": 123,
+	"./fo": 124,
+	"./fo.js": 124,
+	"./fr": 125,
+	"./fr-ca": 126,
+	"./fr-ca.js": 126,
+	"./fr-ch": 127,
+	"./fr-ch.js": 127,
+	"./fr.js": 125,
+	"./fy": 128,
+	"./fy.js": 128,
+	"./gd": 129,
+	"./gd.js": 129,
+	"./gl": 130,
+	"./gl.js": 130,
+	"./gom-latn": 131,
+	"./gom-latn.js": 131,
+	"./gu": 132,
+	"./gu.js": 132,
+	"./he": 133,
+	"./he.js": 133,
+	"./hi": 134,
+	"./hi.js": 134,
+	"./hr": 135,
+	"./hr.js": 135,
+	"./hu": 136,
+	"./hu.js": 136,
+	"./hy-am": 137,
+	"./hy-am.js": 137,
+	"./id": 138,
+	"./id.js": 138,
+	"./is": 139,
+	"./is.js": 139,
+	"./it": 140,
+	"./it.js": 140,
+	"./ja": 141,
+	"./ja.js": 141,
+	"./jv": 142,
+	"./jv.js": 142,
+	"./ka": 143,
+	"./ka.js": 143,
+	"./kk": 144,
+	"./kk.js": 144,
+	"./km": 145,
+	"./km.js": 145,
+	"./kn": 146,
+	"./kn.js": 146,
+	"./ko": 147,
+	"./ko.js": 147,
+	"./ky": 148,
+	"./ky.js": 148,
+	"./lb": 149,
+	"./lb.js": 149,
+	"./lo": 150,
+	"./lo.js": 150,
+	"./lt": 151,
+	"./lt.js": 151,
+	"./lv": 152,
+	"./lv.js": 152,
+	"./me": 153,
+	"./me.js": 153,
+	"./mi": 154,
+	"./mi.js": 154,
+	"./mk": 155,
+	"./mk.js": 155,
+	"./ml": 156,
+	"./ml.js": 156,
+	"./mr": 157,
+	"./mr.js": 157,
+	"./ms": 158,
+	"./ms-my": 159,
+	"./ms-my.js": 159,
+	"./ms.js": 158,
+	"./my": 160,
+	"./my.js": 160,
+	"./nb": 161,
+	"./nb.js": 161,
+	"./ne": 162,
+	"./ne.js": 162,
+	"./nl": 163,
+	"./nl-be": 164,
+	"./nl-be.js": 164,
+	"./nl.js": 163,
+	"./nn": 165,
+	"./nn.js": 165,
+	"./pa-in": 166,
+	"./pa-in.js": 166,
+	"./pl": 167,
+	"./pl.js": 167,
+	"./pt": 168,
+	"./pt-br": 169,
+	"./pt-br.js": 169,
+	"./pt.js": 168,
+	"./ro": 170,
+	"./ro.js": 170,
+	"./ru": 171,
+	"./ru.js": 171,
+	"./sd": 172,
+	"./sd.js": 172,
+	"./se": 173,
+	"./se.js": 173,
+	"./si": 174,
+	"./si.js": 174,
+	"./sk": 175,
+	"./sk.js": 175,
+	"./sl": 176,
+	"./sl.js": 176,
+	"./sq": 177,
+	"./sq.js": 177,
+	"./sr": 178,
+	"./sr-cyrl": 179,
+	"./sr-cyrl.js": 179,
+	"./sr.js": 178,
+	"./ss": 180,
+	"./ss.js": 180,
+	"./sv": 181,
+	"./sv.js": 181,
+	"./sw": 182,
+	"./sw.js": 182,
+	"./ta": 183,
+	"./ta.js": 183,
+	"./te": 184,
+	"./te.js": 184,
+	"./tet": 185,
+	"./tet.js": 185,
+	"./th": 186,
+	"./th.js": 186,
+	"./tl-ph": 187,
+	"./tl-ph.js": 187,
+	"./tlh": 188,
+	"./tlh.js": 188,
+	"./tr": 189,
+	"./tr.js": 189,
+	"./tzl": 190,
+	"./tzl.js": 190,
+	"./tzm": 191,
+	"./tzm-latn": 192,
+	"./tzm-latn.js": 192,
+	"./tzm.js": 191,
+	"./uk": 193,
+	"./uk.js": 193,
+	"./ur": 194,
+	"./ur.js": 194,
+	"./uz": 195,
+	"./uz-latn": 196,
+	"./uz-latn.js": 196,
+	"./uz.js": 195,
+	"./vi": 197,
+	"./vi.js": 197,
+	"./x-pseudo": 198,
+	"./x-pseudo.js": 198,
+	"./yo": 199,
+	"./yo.js": 199,
+	"./zh-cn": 200,
+	"./zh-cn.js": 200,
+	"./zh-hk": 201,
+	"./zh-hk.js": 201,
+	"./zh-tw": 202,
+	"./zh-tw.js": 202
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -60155,6 +60209,1659 @@ webpackContext.id = 273;
 
 /***/ }),
 /* 274 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util = __webpack_require__(11);
+var Dictionary_1 = __webpack_require__(25);
+var Set_1 = __webpack_require__(203);
+var Bag = /** @class */ (function () {
+    /**
+     * Creates an empty bag.
+     * @class <p>A bag is a special kind of set in which members are
+     * allowed to appear more than once.</p>
+     * <p>If the inserted elements are custom objects a function
+     * which converts elements to unique strings must be provided. Example:</p>
+     *
+     * <pre>
+     * function petToString(pet) {
+     *  return pet.name;
+     * }
+     * </pre>
+     *
+     * @constructor
+     * @param {function(Object):string=} toStrFunction optional function used
+     * to convert elements to strings. If the elements aren't strings or if toString()
+     * is not appropriate, a custom function which receives an object and returns a
+     * unique string must be provided.
+     */
+    function Bag(toStrFunction) {
+        this.toStrF = toStrFunction || util.defaultToString;
+        this.dictionary = new Dictionary_1.default(this.toStrF);
+        this.nElements = 0;
+    }
+    /**
+    * Adds nCopies of the specified object to this bag.
+    * @param {Object} element element to add.
+    * @param {number=} nCopies the number of copies to add, if this argument is
+    * undefined 1 copy is added.
+    * @return {boolean} true unless element is undefined.
+    */
+    Bag.prototype.add = function (element, nCopies) {
+        if (nCopies === void 0) { nCopies = 1; }
+        if (util.isUndefined(element) || nCopies <= 0) {
+            return false;
+        }
+        if (!this.contains(element)) {
+            var node = {
+                value: element,
+                copies: nCopies
+            };
+            this.dictionary.setValue(element, node);
+        }
+        else {
+            this.dictionary.getValue(element).copies += nCopies;
+        }
+        this.nElements += nCopies;
+        return true;
+    };
+    /**
+    * Counts the number of copies of the specified object in this bag.
+    * @param {Object} element the object to search for..
+    * @return {number} the number of copies of the object, 0 if not found
+    */
+    Bag.prototype.count = function (element) {
+        if (!this.contains(element)) {
+            return 0;
+        }
+        else {
+            return this.dictionary.getValue(element).copies;
+        }
+    };
+    /**
+     * Returns true if this bag contains the specified element.
+     * @param {Object} element element to search for.
+     * @return {boolean} true if this bag contains the specified element,
+     * false otherwise.
+     */
+    Bag.prototype.contains = function (element) {
+        return this.dictionary.containsKey(element);
+    };
+    /**
+    * Removes nCopies of the specified object to this bag.
+    * If the number of copies to remove is greater than the actual number
+    * of copies in the Bag, all copies are removed.
+    * @param {Object} element element to remove.
+    * @param {number=} nCopies the number of copies to remove, if this argument is
+    * undefined 1 copy is removed.
+    * @return {boolean} true if at least 1 element was removed.
+    */
+    Bag.prototype.remove = function (element, nCopies) {
+        if (nCopies === void 0) { nCopies = 1; }
+        if (util.isUndefined(element) || nCopies <= 0) {
+            return false;
+        }
+        if (!this.contains(element)) {
+            return false;
+        }
+        else {
+            var node = this.dictionary.getValue(element);
+            if (nCopies > node.copies) {
+                this.nElements -= node.copies;
+            }
+            else {
+                this.nElements -= nCopies;
+            }
+            node.copies -= nCopies;
+            if (node.copies <= 0) {
+                this.dictionary.remove(element);
+            }
+            return true;
+        }
+    };
+    /**
+     * Returns an array containing all of the elements in this big in arbitrary order,
+     * including multiple copies.
+     * @return {Array} an array containing all of the elements in this bag.
+     */
+    Bag.prototype.toArray = function () {
+        var a = [];
+        var values = this.dictionary.values();
+        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+            var node = values_1[_i];
+            var element = node.value;
+            var copies = node.copies;
+            for (var j = 0; j < copies; j++) {
+                a.push(element);
+            }
+        }
+        return a;
+    };
+    /**
+     * Returns a set of unique elements in this bag.
+     * @return {collections.Set<T>} a set of unique elements in this bag.
+     */
+    Bag.prototype.toSet = function () {
+        var toret = new Set_1.default(this.toStrF);
+        var elements = this.dictionary.values();
+        for (var _i = 0, elements_1 = elements; _i < elements_1.length; _i++) {
+            var ele = elements_1[_i];
+            var value = ele.value;
+            toret.add(value);
+        }
+        return toret;
+    };
+    /**
+     * Executes the provided function once for each element
+     * present in this bag, including multiple copies.
+     * @param {function(Object):*} callback function to execute, it is
+     * invoked with one argument: the element. To break the iteration you can
+     * optionally return false.
+     */
+    Bag.prototype.forEach = function (callback) {
+        this.dictionary.forEach(function (k, v) {
+            var value = v.value;
+            var copies = v.copies;
+            for (var i = 0; i < copies; i++) {
+                if (callback(value) === false) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    };
+    /**
+     * Returns the number of elements in this bag.
+     * @return {number} the number of elements in this bag.
+     */
+    Bag.prototype.size = function () {
+        return this.nElements;
+    };
+    /**
+     * Returns true if this bag contains no elements.
+     * @return {boolean} true if this bag contains no elements.
+     */
+    Bag.prototype.isEmpty = function () {
+        return this.nElements === 0;
+    };
+    /**
+     * Removes all of the elements from this bag.
+     */
+    Bag.prototype.clear = function () {
+        this.nElements = 0;
+        this.dictionary.clear();
+    };
+    return Bag;
+}()); // End of bag
+exports.default = Bag;
+//# sourceMappingURL=Bag.js.map
+
+/***/ }),
+/* 275 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util = __webpack_require__(11);
+var Queue_1 = __webpack_require__(204);
+var BSTree = /** @class */ (function () {
+    /**
+     * Creates an empty binary search tree.
+     * @class <p>A binary search tree is a binary tree in which each
+     * internal node stores an element such that the elements stored in the
+     * left subtree are less than it and the elements
+     * stored in the right subtree are greater.</p>
+     * <p>Formally, a binary search tree is a node-based binary tree data structure which
+     * has the following properties:</p>
+     * <ul>
+     * <li>The left subtree of a node contains only nodes with elements less
+     * than the node's element</li>
+     * <li>The right subtree of a node contains only nodes with elements greater
+     * than the node's element</li>
+     * <li>Both the left and right subtrees must also be binary search trees.</li>
+     * </ul>
+     * <p>If the inserted elements are custom objects a compare function must
+     * be provided at construction time, otherwise the <=, === and >= operators are
+     * used to compare elements. Example:</p>
+     * <pre>
+     * function compare(a, b) {
+     *  if (a is less than b by some ordering criterion) {
+     *     return -1;
+     *  } if (a is greater than b by the ordering criterion) {
+     *     return 1;
+     *  }
+     *  // a must be equal to b
+     *  return 0;
+     * }
+     * </pre>
+     * @constructor
+     * @param {function(Object,Object):number=} compareFunction optional
+     * function used to compare two elements. Must return a negative integer,
+     * zero, or a positive integer as the first argument is less than, equal to,
+     * or greater than the second.
+     */
+    function BSTree(compareFunction) {
+        this.root = null;
+        this.compare = compareFunction || util.defaultCompare;
+        this.nElements = 0;
+    }
+    /**
+     * Adds the specified element to this tree if it is not already present.
+     * @param {Object} element the element to insert.
+     * @return {boolean} true if this tree did not already contain the specified element.
+     */
+    BSTree.prototype.add = function (element) {
+        if (util.isUndefined(element)) {
+            return false;
+        }
+        if (this.insertNode(this.createNode(element)) !== null) {
+            this.nElements++;
+            return true;
+        }
+        return false;
+    };
+    /**
+     * Removes all of the elements from this tree.
+     */
+    BSTree.prototype.clear = function () {
+        this.root = null;
+        this.nElements = 0;
+    };
+    /**
+     * Returns true if this tree contains no elements.
+     * @return {boolean} true if this tree contains no elements.
+     */
+    BSTree.prototype.isEmpty = function () {
+        return this.nElements === 0;
+    };
+    /**
+     * Returns the number of elements in this tree.
+     * @return {number} the number of elements in this tree.
+     */
+    BSTree.prototype.size = function () {
+        return this.nElements;
+    };
+    /**
+     * Returns true if this tree contains the specified element.
+     * @param {Object} element element to search for.
+     * @return {boolean} true if this tree contains the specified element,
+     * false otherwise.
+     */
+    BSTree.prototype.contains = function (element) {
+        if (util.isUndefined(element)) {
+            return false;
+        }
+        return this.searchNode(this.root, element) !== null;
+    };
+    /**
+     * Removes the specified element from this tree if it is present.
+     * @return {boolean} true if this tree contained the specified element.
+     */
+    BSTree.prototype.remove = function (element) {
+        var node = this.searchNode(this.root, element);
+        if (node === null) {
+            return false;
+        }
+        this.removeNode(node);
+        this.nElements--;
+        return true;
+    };
+    /**
+     * Executes the provided function once for each element present in this tree in
+     * in-order.
+     * @param {function(Object):*} callback function to execute, it is invoked with one
+     * argument: the element value, to break the iteration you can optionally return false.
+     */
+    BSTree.prototype.inorderTraversal = function (callback) {
+        this.inorderTraversalAux(this.root, callback, {
+            stop: false
+        });
+    };
+    /**
+     * Executes the provided function once for each element present in this tree in pre-order.
+     * @param {function(Object):*} callback function to execute, it is invoked with one
+     * argument: the element value, to break the iteration you can optionally return false.
+     */
+    BSTree.prototype.preorderTraversal = function (callback) {
+        this.preorderTraversalAux(this.root, callback, {
+            stop: false
+        });
+    };
+    /**
+     * Executes the provided function once for each element present in this tree in post-order.
+     * @param {function(Object):*} callback function to execute, it is invoked with one
+     * argument: the element value, to break the iteration you can optionally return false.
+     */
+    BSTree.prototype.postorderTraversal = function (callback) {
+        this.postorderTraversalAux(this.root, callback, {
+            stop: false
+        });
+    };
+    /**
+     * Executes the provided function once for each element present in this tree in
+     * level-order.
+     * @param {function(Object):*} callback function to execute, it is invoked with one
+     * argument: the element value, to break the iteration you can optionally return false.
+     */
+    BSTree.prototype.levelTraversal = function (callback) {
+        this.levelTraversalAux(this.root, callback);
+    };
+    /**
+     * Returns the minimum element of this tree.
+     * @return {*} the minimum element of this tree or undefined if this tree is
+     * is empty.
+     */
+    BSTree.prototype.minimum = function () {
+        if (this.isEmpty()) {
+            return undefined;
+        }
+        return this.minimumAux(this.root).element;
+    };
+    /**
+     * Returns the maximum element of this tree.
+     * @return {*} the maximum element of this tree or undefined if this tree is
+     * is empty.
+     */
+    BSTree.prototype.maximum = function () {
+        if (this.isEmpty()) {
+            return undefined;
+        }
+        return this.maximumAux(this.root).element;
+    };
+    /**
+     * Executes the provided function once for each element present in this tree in inorder.
+     * Equivalent to inorderTraversal.
+     * @param {function(Object):*} callback function to execute, it is
+     * invoked with one argument: the element value, to break the iteration you can
+     * optionally return false.
+     */
+    BSTree.prototype.forEach = function (callback) {
+        this.inorderTraversal(callback);
+    };
+    /**
+     * Returns an array containing all of the elements in this tree in in-order.
+     * @return {Array} an array containing all of the elements in this tree in in-order.
+     */
+    BSTree.prototype.toArray = function () {
+        var array = [];
+        this.inorderTraversal(function (element) {
+            array.push(element);
+            return true;
+        });
+        return array;
+    };
+    /**
+     * Returns the height of this tree.
+     * @return {number} the height of this tree or -1 if is empty.
+     */
+    BSTree.prototype.height = function () {
+        return this.heightAux(this.root);
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.searchNode = function (node, element) {
+        var cmp = null;
+        while (node !== null && cmp !== 0) {
+            cmp = this.compare(element, node.element);
+            if (cmp < 0) {
+                node = node.leftCh;
+            }
+            else if (cmp > 0) {
+                node = node.rightCh;
+            }
+        }
+        return node;
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.transplant = function (n1, n2) {
+        if (n1.parent === null) {
+            this.root = n2;
+        }
+        else if (n1 === n1.parent.leftCh) {
+            n1.parent.leftCh = n2;
+        }
+        else {
+            n1.parent.rightCh = n2;
+        }
+        if (n2 !== null) {
+            n2.parent = n1.parent;
+        }
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.removeNode = function (node) {
+        if (node.leftCh === null) {
+            this.transplant(node, node.rightCh);
+        }
+        else if (node.rightCh === null) {
+            this.transplant(node, node.leftCh);
+        }
+        else {
+            var y = this.minimumAux(node.rightCh);
+            if (y.parent !== node) {
+                this.transplant(y, y.rightCh);
+                y.rightCh = node.rightCh;
+                y.rightCh.parent = y;
+            }
+            this.transplant(node, y);
+            y.leftCh = node.leftCh;
+            y.leftCh.parent = y;
+        }
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.inorderTraversalAux = function (node, callback, signal) {
+        if (node === null || signal.stop) {
+            return;
+        }
+        this.inorderTraversalAux(node.leftCh, callback, signal);
+        if (signal.stop) {
+            return;
+        }
+        signal.stop = callback(node.element) === false;
+        if (signal.stop) {
+            return;
+        }
+        this.inorderTraversalAux(node.rightCh, callback, signal);
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.levelTraversalAux = function (node, callback) {
+        var queue = new Queue_1.default();
+        if (node !== null) {
+            queue.enqueue(node);
+        }
+        while (!queue.isEmpty()) {
+            node = queue.dequeue();
+            if (callback(node.element) === false) {
+                return;
+            }
+            if (node.leftCh !== null) {
+                queue.enqueue(node.leftCh);
+            }
+            if (node.rightCh !== null) {
+                queue.enqueue(node.rightCh);
+            }
+        }
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.preorderTraversalAux = function (node, callback, signal) {
+        if (node === null || signal.stop) {
+            return;
+        }
+        signal.stop = callback(node.element) === false;
+        if (signal.stop) {
+            return;
+        }
+        this.preorderTraversalAux(node.leftCh, callback, signal);
+        if (signal.stop) {
+            return;
+        }
+        this.preorderTraversalAux(node.rightCh, callback, signal);
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.postorderTraversalAux = function (node, callback, signal) {
+        if (node === null || signal.stop) {
+            return;
+        }
+        this.postorderTraversalAux(node.leftCh, callback, signal);
+        if (signal.stop) {
+            return;
+        }
+        this.postorderTraversalAux(node.rightCh, callback, signal);
+        if (signal.stop) {
+            return;
+        }
+        signal.stop = callback(node.element) === false;
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.minimumAux = function (node) {
+        while (node.leftCh !== null) {
+            node = node.leftCh;
+        }
+        return node;
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.maximumAux = function (node) {
+        while (node.rightCh !== null) {
+            node = node.rightCh;
+        }
+        return node;
+    };
+    /**
+      * @private
+      */
+    BSTree.prototype.heightAux = function (node) {
+        if (node === null) {
+            return -1;
+        }
+        return Math.max(this.heightAux(node.leftCh), this.heightAux(node.rightCh)) + 1;
+    };
+    /*
+    * @private
+    */
+    BSTree.prototype.insertNode = function (node) {
+        var parent = null;
+        var position = this.root;
+        var cmp = null;
+        while (position !== null) {
+            cmp = this.compare(node.element, position.element);
+            if (cmp === 0) {
+                return null;
+            }
+            else if (cmp < 0) {
+                parent = position;
+                position = position.leftCh;
+            }
+            else {
+                parent = position;
+                position = position.rightCh;
+            }
+        }
+        node.parent = parent;
+        if (parent === null) {
+            // tree is empty
+            this.root = node;
+        }
+        else if (this.compare(node.element, parent.element) < 0) {
+            parent.leftCh = node;
+        }
+        else {
+            parent.rightCh = node;
+        }
+        return node;
+    };
+    /**
+    * @private
+    */
+    BSTree.prototype.createNode = function (element) {
+        return {
+            element: element,
+            leftCh: null,
+            rightCh: null,
+            parent: null
+        };
+    };
+    return BSTree;
+}());
+exports.default = BSTree;
+//# sourceMappingURL=BSTree.js.map
+
+/***/ }),
+/* 276 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var Dictionary_1 = __webpack_require__(25);
+var util = __webpack_require__(11);
+/**
+ * This class is used by the LinkedDictionary Internally
+ * Has to be a class, not an interface, because it needs to have
+ * the 'unlink' function defined.
+ */
+var LinkedDictionaryPair = /** @class */ (function () {
+    function LinkedDictionaryPair(key, value) {
+        this.key = key;
+        this.value = value;
+    }
+    LinkedDictionaryPair.prototype.unlink = function () {
+        this.prev.next = this.next;
+        this.next.prev = this.prev;
+    };
+    return LinkedDictionaryPair;
+}());
+var LinkedDictionary = /** @class */ (function (_super) {
+    __extends(LinkedDictionary, _super);
+    function LinkedDictionary(toStrFunction) {
+        var _this = _super.call(this, toStrFunction) || this;
+        _this.head = new LinkedDictionaryPair(null, null);
+        _this.tail = new LinkedDictionaryPair(null, null);
+        _this.head.next = _this.tail;
+        _this.tail.prev = _this.head;
+        return _this;
+    }
+    /**
+     * Inserts the new node to the 'tail' of the list, updating the
+     * neighbors, and moving 'this.tail' (the End of List indicator) that
+     * to the end.
+     */
+    LinkedDictionary.prototype.appendToTail = function (entry) {
+        var lastNode = this.tail.prev;
+        lastNode.next = entry;
+        entry.prev = lastNode;
+        entry.next = this.tail;
+        this.tail.prev = entry;
+    };
+    /**
+     * Retrieves a linked dictionary from the table internally
+     */
+    LinkedDictionary.prototype.getLinkedDictionaryPair = function (key) {
+        if (util.isUndefined(key)) {
+            return undefined;
+        }
+        var k = '$' + this.toStr(key);
+        var pair = (this.table[k]);
+        return pair;
+    };
+    /**
+     * Returns the value to which this dictionary maps the specified key.
+     * Returns undefined if this dictionary contains no mapping for this key.
+     * @param {Object} key key whose associated value is to be returned.
+     * @return {*} the value to which this dictionary maps the specified key or
+     * undefined if the map contains no mapping for this key.
+     */
+    LinkedDictionary.prototype.getValue = function (key) {
+        var pair = this.getLinkedDictionaryPair(key);
+        if (!util.isUndefined(pair)) {
+            return pair.value;
+        }
+        return undefined;
+    };
+    /**
+     * Removes the mapping for this key from this dictionary if it is present.
+     * Also, if a value is present for this key, the entry is removed from the
+     * insertion ordering.
+     * @param {Object} key key whose mapping is to be removed from the
+     * dictionary.
+     * @return {*} previous value associated with specified key, or undefined if
+     * there was no mapping for key.
+     */
+    LinkedDictionary.prototype.remove = function (key) {
+        var pair = this.getLinkedDictionaryPair(key);
+        if (!util.isUndefined(pair)) {
+            _super.prototype.remove.call(this, key); // This will remove it from the table
+            pair.unlink(); // This will unlink it from the chain
+            return pair.value;
+        }
+        return undefined;
+    };
+    /**
+    * Removes all mappings from this LinkedDictionary.
+    * @this {collections.LinkedDictionary}
+    */
+    LinkedDictionary.prototype.clear = function () {
+        _super.prototype.clear.call(this);
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+    };
+    /**
+     * Internal function used when updating an existing KeyValue pair.
+     * It places the new value indexed by key into the table, but maintains
+     * its place in the linked ordering.
+     */
+    LinkedDictionary.prototype.replace = function (oldPair, newPair) {
+        var k = '$' + this.toStr(newPair.key);
+        // set the new Pair's links to existingPair's links
+        newPair.next = oldPair.next;
+        newPair.prev = oldPair.prev;
+        // Delete Existing Pair from the table, unlink it from chain.
+        // As a result, the nElements gets decremented by this operation
+        this.remove(oldPair.key);
+        // Link new Pair in place of where oldPair was,
+        // by pointing the old pair's neighbors to it.
+        newPair.prev.next = newPair;
+        newPair.next.prev = newPair;
+        this.table[k] = newPair;
+        // To make up for the fact that the number of elements was decremented,
+        // We need to increase it by one.
+        ++this.nElements;
+    };
+    /**
+     * Associates the specified value with the specified key in this dictionary.
+     * If the dictionary previously contained a mapping for this key, the old
+     * value is replaced by the specified value.
+     * Updating of a key that already exists maintains its place in the
+     * insertion order into the map.
+     * @param {Object} key key with which the specified value is to be
+     * associated.
+     * @param {Object} value value to be associated with the specified key.
+     * @return {*} previous value associated with the specified key, or undefined if
+     * there was no mapping for the key or if the key/value are undefined.
+     */
+    LinkedDictionary.prototype.setValue = function (key, value) {
+        if (util.isUndefined(key) || util.isUndefined(value)) {
+            return undefined;
+        }
+        var existingPair = this.getLinkedDictionaryPair(key);
+        var newPair = new LinkedDictionaryPair(key, value);
+        var k = '$' + this.toStr(key);
+        // If there is already an element for that key, we
+        // keep it's place in the LinkedList
+        if (!util.isUndefined(existingPair)) {
+            this.replace(existingPair, newPair);
+            return existingPair.value;
+        }
+        else {
+            this.appendToTail(newPair);
+            this.table[k] = newPair;
+            ++this.nElements;
+            return undefined;
+        }
+    };
+    /**
+     * Returns an array containing all of the keys in this LinkedDictionary, ordered
+     * by insertion order.
+     * @return {Array} an array containing all of the keys in this LinkedDictionary,
+     * ordered by insertion order.
+     */
+    LinkedDictionary.prototype.keys = function () {
+        var array = [];
+        this.forEach(function (key, value) {
+            array.push(key);
+        });
+        return array;
+    };
+    /**
+     * Returns an array containing all of the values in this LinkedDictionary, ordered by
+     * insertion order.
+     * @return {Array} an array containing all of the values in this LinkedDictionary,
+     * ordered by insertion order.
+     */
+    LinkedDictionary.prototype.values = function () {
+        var array = [];
+        this.forEach(function (key, value) {
+            array.push(value);
+        });
+        return array;
+    };
+    /**
+    * Executes the provided function once for each key-value pair
+    * present in this LinkedDictionary. It is done in the order of insertion
+    * into the LinkedDictionary
+    * @param {function(Object,Object):*} callback function to execute, it is
+    * invoked with two arguments: key and value. To break the iteration you can
+    * optionally return false.
+    */
+    LinkedDictionary.prototype.forEach = function (callback) {
+        var crawlNode = this.head.next;
+        while (crawlNode.next != null) {
+            var ret = callback(crawlNode.key, crawlNode.value);
+            if (ret === false) {
+                return;
+            }
+            crawlNode = crawlNode.next;
+        }
+    };
+    return LinkedDictionary;
+}(Dictionary_1.default)); // End of LinkedDictionary
+exports.default = LinkedDictionary;
+// /**
+//  * Returns true if this dictionary is equal to the given dictionary.
+//  * Two dictionaries are equal if they contain the same mappings.
+//  * @param {collections.Dictionary} other the other dictionary.
+//  * @param {function(Object,Object):boolean=} valuesEqualFunction optional
+//  * function used to check if two values are equal.
+//  * @return {boolean} true if this dictionary is equal to the given dictionary.
+//  */
+// collections.Dictionary.prototype.equals = function(other,valuesEqualFunction) {
+// 	const eqF = valuesEqualFunction || collections.defaultEquals;
+// 	if(!(other instanceof collections.Dictionary)){
+// 		return false;
+// 	}
+// 	if(this.size() !== other.size()){
+// 		return false;
+// 	}
+// 	return this.equalsAux(this.firstNode,other.firstNode,eqF);
+// }
+//# sourceMappingURL=LinkedDictionary.js.map
+
+/***/ }),
+/* 277 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util = __webpack_require__(11);
+var Dictionary_1 = __webpack_require__(25);
+var arrays = __webpack_require__(31);
+var MultiDictionary = /** @class */ (function () {
+    /**
+     * Creates an empty multi dictionary.
+     * @class <p>A multi dictionary is a special kind of dictionary that holds
+     * multiple values against each key. Setting a value into the dictionary will
+     * add the value to an array at that key. Getting a key will return an array,
+     * holding all the values set to that key.
+     * You can configure to allow duplicates in the values.
+     * This implementation accepts any kind of objects as keys.</p>
+     *
+     * <p>If the keys are custom objects a function which converts keys to strings must be
+     * provided. Example:</p>
+     *
+     * <pre>
+     * function petToString(pet) {
+       *  return pet.name;
+       * }
+     * </pre>
+     * <p>If the values are custom objects a function to check equality between values
+     * must be provided. Example:</p>
+     *
+     * <pre>
+     * function petsAreEqualByAge(pet1,pet2) {
+       *  return pet1.age===pet2.age;
+       * }
+     * </pre>
+     * @constructor
+     * @param {function(Object):string=} toStrFunction optional function
+     * to convert keys to strings. If the keys aren't strings or if toString()
+     * is not appropriate, a custom function which receives a key and returns a
+     * unique string must be provided.
+     * @param {function(Object,Object):boolean=} valuesEqualsFunction optional
+     * function to check if two values are equal.
+     *
+     * @param allowDuplicateValues
+     */
+    function MultiDictionary(toStrFunction, valuesEqualsFunction, allowDuplicateValues) {
+        if (allowDuplicateValues === void 0) { allowDuplicateValues = false; }
+        this.dict = new Dictionary_1.default(toStrFunction);
+        this.equalsF = valuesEqualsFunction || util.defaultEquals;
+        this.allowDuplicate = allowDuplicateValues;
+    }
+    /**
+    * Returns an array holding the values to which this dictionary maps
+    * the specified key.
+    * Returns an empty array if this dictionary contains no mappings for this key.
+    * @param {Object} key key whose associated values are to be returned.
+    * @return {Array} an array holding the values to which this dictionary maps
+    * the specified key.
+    */
+    MultiDictionary.prototype.getValue = function (key) {
+        var values = this.dict.getValue(key);
+        if (util.isUndefined(values)) {
+            return [];
+        }
+        return arrays.copy(values);
+    };
+    /**
+     * Adds the value to the array associated with the specified key, if
+     * it is not already present.
+     * @param {Object} key key with which the specified value is to be
+     * associated.
+     * @param {Object} value the value to add to the array at the key
+     * @return {boolean} true if the value was not already associated with that key.
+     */
+    MultiDictionary.prototype.setValue = function (key, value) {
+        if (util.isUndefined(key) || util.isUndefined(value)) {
+            return false;
+        }
+        if (!this.containsKey(key)) {
+            this.dict.setValue(key, [value]);
+            return true;
+        }
+        var array = this.dict.getValue(key);
+        if (!this.allowDuplicate) {
+            if (arrays.contains(array, value, this.equalsF)) {
+                return false;
+            }
+        }
+        array.push(value);
+        return true;
+    };
+    /**
+     * Removes the specified values from the array of values associated with the
+     * specified key. If a value isn't given, all values associated with the specified
+     * key are removed.
+     * @param {Object} key key whose mapping is to be removed from the
+     * dictionary.
+     * @param {Object=} value optional argument to specify the value to remove
+     * from the array associated with the specified key.
+     * @return {*} true if the dictionary changed, false if the key doesn't exist or
+     * if the specified value isn't associated with the specified key.
+     */
+    MultiDictionary.prototype.remove = function (key, value) {
+        if (util.isUndefined(value)) {
+            var v = this.dict.remove(key);
+            return !util.isUndefined(v);
+        }
+        var array = this.dict.getValue(key);
+        if (arrays.remove(array, value, this.equalsF)) {
+            if (array.length === 0) {
+                this.dict.remove(key);
+            }
+            return true;
+        }
+        return false;
+    };
+    /**
+     * Returns an array containing all of the keys in this dictionary.
+     * @return {Array} an array containing all of the keys in this dictionary.
+     */
+    MultiDictionary.prototype.keys = function () {
+        return this.dict.keys();
+    };
+    /**
+     * Returns an array containing all of the values in this dictionary.
+     * @return {Array} an array containing all of the values in this dictionary.
+     */
+    MultiDictionary.prototype.values = function () {
+        var values = this.dict.values();
+        var array = [];
+        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+            var v = values_1[_i];
+            for (var _a = 0, v_1 = v; _a < v_1.length; _a++) {
+                var w = v_1[_a];
+                array.push(w);
+            }
+        }
+        return array;
+    };
+    /**
+     * Returns true if this dictionary at least one value associatted the specified key.
+     * @param {Object} key key whose presence in this dictionary is to be
+     * tested.
+     * @return {boolean} true if this dictionary at least one value associatted
+     * the specified key.
+     */
+    MultiDictionary.prototype.containsKey = function (key) {
+        return this.dict.containsKey(key);
+    };
+    /**
+     * Removes all mappings from this dictionary.
+     */
+    MultiDictionary.prototype.clear = function () {
+        this.dict.clear();
+    };
+    /**
+     * Returns the number of keys in this dictionary.
+     * @return {number} the number of key-value mappings in this dictionary.
+     */
+    MultiDictionary.prototype.size = function () {
+        return this.dict.size();
+    };
+    /**
+     * Returns true if this dictionary contains no mappings.
+     * @return {boolean} true if this dictionary contains no mappings.
+     */
+    MultiDictionary.prototype.isEmpty = function () {
+        return this.dict.isEmpty();
+    };
+    return MultiDictionary;
+}()); // end of multi dictionary
+exports.default = MultiDictionary;
+//# sourceMappingURL=MultiDictionary.js.map
+
+/***/ }),
+/* 278 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util = __webpack_require__(11);
+var Heap_1 = __webpack_require__(205);
+var PriorityQueue = /** @class */ (function () {
+    /**
+     * Creates an empty priority queue.
+     * @class <p>In a priority queue each element is associated with a "priority",
+     * elements are dequeued in highest-priority-first order (the elements with the
+     * highest priority are dequeued first). Priority Queues are implemented as heaps.
+     * If the inserted elements are custom objects a compare function must be provided,
+     * otherwise the <=, === and >= operators are used to compare object priority.</p>
+     * <pre>
+     * function compare(a, b) {
+     *  if (a is less than b by some ordering criterion) {
+     *     return -1;
+     *  } if (a is greater than b by the ordering criterion) {
+     *     return 1;
+     *  }
+     *  // a must be equal to b
+     *  return 0;
+     * }
+     * </pre>
+     * @constructor
+     * @param {function(Object,Object):number=} compareFunction optional
+     * function used to compare two element priorities. Must return a negative integer,
+     * zero, or a positive integer as the first argument is less than, equal to,
+     * or greater than the second.
+     */
+    function PriorityQueue(compareFunction) {
+        this.heap = new Heap_1.default(util.reverseCompareFunction(compareFunction));
+    }
+    /**
+     * Inserts the specified element into this priority queue.
+     * @param {Object} element the element to insert.
+     * @return {boolean} true if the element was inserted, or false if it is undefined.
+     */
+    PriorityQueue.prototype.enqueue = function (element) {
+        return this.heap.add(element);
+    };
+    /**
+     * Inserts the specified element into this priority queue.
+     * @param {Object} element the element to insert.
+     * @return {boolean} true if the element was inserted, or false if it is undefined.
+     */
+    PriorityQueue.prototype.add = function (element) {
+        return this.heap.add(element);
+    };
+    /**
+     * Retrieves and removes the highest priority element of this queue.
+     * @return {*} the the highest priority element of this queue,
+     *  or undefined if this queue is empty.
+     */
+    PriorityQueue.prototype.dequeue = function () {
+        if (this.heap.size() !== 0) {
+            var el = this.heap.peek();
+            this.heap.removeRoot();
+            return el;
+        }
+        return undefined;
+    };
+    /**
+     * Retrieves, but does not remove, the highest priority element of this queue.
+     * @return {*} the highest priority element of this queue, or undefined if this queue is empty.
+     */
+    PriorityQueue.prototype.peek = function () {
+        return this.heap.peek();
+    };
+    /**
+     * Returns true if this priority queue contains the specified element.
+     * @param {Object} element element to search for.
+     * @return {boolean} true if this priority queue contains the specified element,
+     * false otherwise.
+     */
+    PriorityQueue.prototype.contains = function (element) {
+        return this.heap.contains(element);
+    };
+    /**
+     * Checks if this priority queue is empty.
+     * @return {boolean} true if and only if this priority queue contains no items; false
+     * otherwise.
+     */
+    PriorityQueue.prototype.isEmpty = function () {
+        return this.heap.isEmpty();
+    };
+    /**
+     * Returns the number of elements in this priority queue.
+     * @return {number} the number of elements in this priority queue.
+     */
+    PriorityQueue.prototype.size = function () {
+        return this.heap.size();
+    };
+    /**
+     * Removes all of the elements from this priority queue.
+     */
+    PriorityQueue.prototype.clear = function () {
+        this.heap.clear();
+    };
+    /**
+     * Executes the provided function once for each element present in this queue in
+     * no particular order.
+     * @param {function(Object):*} callback function to execute, it is
+     * invoked with one argument: the element value, to break the iteration you can
+     * optionally return false.
+     */
+    PriorityQueue.prototype.forEach = function (callback) {
+        this.heap.forEach(callback);
+    };
+    return PriorityQueue;
+}()); // end of priority queue
+exports.default = PriorityQueue;
+//# sourceMappingURL=PriorityQueue.js.map
+
+/***/ }),
+/* 279 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var LinkedList_1 = __webpack_require__(61);
+var Stack = /** @class */ (function () {
+    /**
+     * Creates an empty Stack.
+     * @class A Stack is a Last-In-First-Out (LIFO) data structure, the last
+     * element added to the stack will be the first one to be removed. This
+     * implementation uses a linked list as a container.
+     * @constructor
+     */
+    function Stack() {
+        this.list = new LinkedList_1.default();
+    }
+    /**
+     * Pushes an item onto the top of this stack.
+     * @param {Object} elem the element to be pushed onto this stack.
+     * @return {boolean} true if the element was pushed or false if it is undefined.
+     */
+    Stack.prototype.push = function (elem) {
+        return this.list.add(elem, 0);
+    };
+    /**
+     * Pushes an item onto the top of this stack.
+     * @param {Object} elem the element to be pushed onto this stack.
+     * @return {boolean} true if the element was pushed or false if it is undefined.
+     */
+    Stack.prototype.add = function (elem) {
+        return this.list.add(elem, 0);
+    };
+    /**
+     * Removes the object at the top of this stack and returns that object.
+     * @return {*} the object at the top of this stack or undefined if the
+     * stack is empty.
+     */
+    Stack.prototype.pop = function () {
+        return this.list.removeElementAtIndex(0);
+    };
+    /**
+     * Looks at the object at the top of this stack without removing it from the
+     * stack.
+     * @return {*} the object at the top of this stack or undefined if the
+     * stack is empty.
+     */
+    Stack.prototype.peek = function () {
+        return this.list.first();
+    };
+    /**
+     * Returns the number of elements in this stack.
+     * @return {number} the number of elements in this stack.
+     */
+    Stack.prototype.size = function () {
+        return this.list.size();
+    };
+    /**
+     * Returns true if this stack contains the specified element.
+     * <p>If the elements inside this stack are
+     * not comparable with the === operator, a custom equals function should be
+     * provided to perform searches, the function must receive two arguments and
+     * return true if they are equal, false otherwise. Example:</p>
+     *
+     * <pre>
+     * const petsAreEqualByName (pet1, pet2) {
+     *  return pet1.name === pet2.name;
+     * }
+     * </pre>
+     * @param {Object} elem element to search for.
+     * @param {function(Object,Object):boolean=} equalsFunction optional
+     * function to check if two elements are equal.
+     * @return {boolean} true if this stack contains the specified element,
+     * false otherwise.
+     */
+    Stack.prototype.contains = function (elem, equalsFunction) {
+        return this.list.contains(elem, equalsFunction);
+    };
+    /**
+     * Checks if this stack is empty.
+     * @return {boolean} true if and only if this stack contains no items; false
+     * otherwise.
+     */
+    Stack.prototype.isEmpty = function () {
+        return this.list.isEmpty();
+    };
+    /**
+     * Removes all of the elements from this stack.
+     */
+    Stack.prototype.clear = function () {
+        this.list.clear();
+    };
+    /**
+     * Executes the provided function once for each element present in this stack in
+     * LIFO order.
+     * @param {function(Object):*} callback function to execute, it is
+     * invoked with one argument: the element value, to break the iteration you can
+     * optionally return false.
+     */
+    Stack.prototype.forEach = function (callback) {
+        this.list.forEach(callback);
+    };
+    return Stack;
+}()); // End of stack
+exports.default = Stack;
+//# sourceMappingURL=Stack.js.map
+
+/***/ }),
+/* 280 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Direction;
+(function (Direction) {
+    Direction[Direction["BEFORE"] = 0] = "BEFORE";
+    Direction[Direction["AFTER"] = 1] = "AFTER";
+    Direction[Direction["INSIDE_AT_END"] = 2] = "INSIDE_AT_END";
+    Direction[Direction["INSIDE_AT_START"] = 3] = "INSIDE_AT_START";
+})(Direction || (Direction = {}));
+var MultiRootTree = /** @class */ (function () {
+    function MultiRootTree(rootIds, nodes) {
+        if (rootIds === void 0) { rootIds = []; }
+        if (nodes === void 0) { nodes = {}; }
+        this.rootIds = rootIds;
+        this.nodes = nodes;
+        this.initRootIds();
+        this.initNodes();
+    }
+    MultiRootTree.prototype.initRootIds = function () {
+        for (var _i = 0, _a = this.rootIds; _i < _a.length; _i++) {
+            var rootId = _a[_i];
+            this.createEmptyNodeIfNotExist(rootId);
+        }
+    };
+    MultiRootTree.prototype.initNodes = function () {
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                for (var _i = 0, _a = this.nodes[nodeKey]; _i < _a.length; _i++) {
+                    var nodeListItem = _a[_i];
+                    this.createEmptyNodeIfNotExist(nodeListItem);
+                }
+            }
+        }
+    };
+    MultiRootTree.prototype.createEmptyNodeIfNotExist = function (nodeKey) {
+        if (!this.nodes[nodeKey]) {
+            this.nodes[nodeKey] = [];
+        }
+    };
+    MultiRootTree.prototype.getRootIds = function () {
+        var clone = this.rootIds.slice();
+        return clone;
+    };
+    MultiRootTree.prototype.getNodes = function () {
+        var clone = {};
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                clone[nodeKey] = this.nodes[nodeKey].slice();
+            }
+        }
+        return clone;
+    };
+    MultiRootTree.prototype.getObject = function () {
+        return {
+            rootIds: this.getRootIds(),
+            nodes: this.getNodes(),
+        };
+    };
+    MultiRootTree.prototype.toObject = function () {
+        return this.getObject();
+    };
+    MultiRootTree.prototype.flatten = function () {
+        var _this = this;
+        var extraPropsObject = [];
+        for (var i = 0; i < this.rootIds.length; i++) {
+            var rootId = this.rootIds[i];
+            extraPropsObject.push({
+                id: rootId,
+                level: 0,
+                hasParent: false,
+                childrenCount: undefined,
+            });
+            traverse(rootId, this.nodes, extraPropsObject, 0);
+        }
+        for (var _i = 0, extraPropsObject_1 = extraPropsObject; _i < extraPropsObject_1.length; _i++) {
+            var o = extraPropsObject_1[_i];
+            o.childrenCount = countChildren(o.id);
+        }
+        return extraPropsObject;
+        function countChildren(id) {
+            if (!_this.nodes[id]) {
+                return 0;
+            }
+            else {
+                var childrenCount = _this.nodes[id].length;
+                return childrenCount;
+            }
+        }
+        function traverse(startId, nodes, returnArray, level) {
+            if (level === void 0) { level = 0; }
+            if (!startId || !nodes || !returnArray || !nodes[startId]) {
+                return;
+            }
+            level++;
+            var idsList = nodes[startId];
+            for (var i = 0; i < idsList.length; i++) {
+                var id = idsList[i];
+                returnArray.push({ id: id, level: level, hasParent: true });
+                traverse(id, nodes, returnArray, level);
+            }
+            level--;
+        }
+    };
+    MultiRootTree.prototype.moveIdBeforeId = function (moveId, beforeId) {
+        return this.moveId(moveId, beforeId, Direction.BEFORE);
+    };
+    MultiRootTree.prototype.moveIdAfterId = function (moveId, afterId) {
+        return this.moveId(moveId, afterId, Direction.AFTER);
+    };
+    MultiRootTree.prototype.moveIdIntoId = function (moveId, insideId, atStart) {
+        if (atStart === void 0) { atStart = true; }
+        if (atStart) {
+            return this.moveId(moveId, insideId, Direction.INSIDE_AT_START);
+        }
+        else {
+            return this.moveId(moveId, insideId, Direction.INSIDE_AT_END);
+        }
+    };
+    MultiRootTree.prototype.swapRootIdWithRootId = function (rootId, withRootId) {
+        var leftIndex = this.findRootId(rootId);
+        var rightIndex = this.findRootId(withRootId);
+        this.swapRootPositionWithRootPosition(leftIndex, rightIndex);
+    };
+    MultiRootTree.prototype.swapRootPositionWithRootPosition = function (swapRootPosition, withRootPosition) {
+        var temp = this.rootIds[withRootPosition];
+        this.rootIds[withRootPosition] = this.rootIds[swapRootPosition];
+        this.rootIds[swapRootPosition] = temp;
+    };
+    MultiRootTree.prototype.deleteId = function (id) {
+        this.rootDeleteId(id);
+        this.nodeAndSubNodesDelete(id);
+        this.nodeRefrencesDelete(id);
+    };
+    MultiRootTree.prototype.insertIdBeforeId = function (beforeId, insertId) {
+        var foundRootIdIndex = this.findRootId(beforeId);
+        if (foundRootIdIndex > -1) {
+            this.insertIdIntoRoot(insertId, foundRootIdIndex);
+        }
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                var foundNodeIdIndex = this.findNodeId(nodeKey, beforeId);
+                if (foundNodeIdIndex > -1) {
+                    this.insertIdIntoNode(nodeKey, insertId, foundNodeIdIndex);
+                }
+            }
+        }
+    };
+    MultiRootTree.prototype.insertIdAfterId = function (belowId, insertId) {
+        var foundRootIdIndex = this.findRootId(belowId);
+        if (foundRootIdIndex > -1) {
+            this.insertIdIntoRoot(insertId, foundRootIdIndex + 1);
+        }
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                var foundNodeIdIndex = this.findNodeId(nodeKey, belowId);
+                if (foundNodeIdIndex > -1) {
+                    this.insertIdIntoNode(nodeKey, insertId, foundNodeIdIndex + 1);
+                }
+            }
+        }
+    };
+    MultiRootTree.prototype.insertIdIntoId = function (insideId, insertId) {
+        this.nodeInsertAtEnd(insideId, insertId);
+        this.nodes[insertId] = [];
+    };
+    MultiRootTree.prototype.insertIdIntoRoot = function (id, position) {
+        if (position === undefined) {
+            this.rootInsertAtEnd(id);
+        }
+        else {
+            if (position < 0) {
+                var length_1 = this.rootIds.length;
+                this.rootIds.splice((position + length_1 + 1), 0, id);
+            }
+            else {
+                this.rootIds.splice(position, 0, id);
+            }
+        }
+        this.nodes[id] = this.nodes[id] || [];
+    };
+    MultiRootTree.prototype.insertIdIntoNode = function (nodeKey, id, position) {
+        this.nodes[nodeKey] = this.nodes[nodeKey] || [];
+        this.nodes[id] = this.nodes[id] || [];
+        if (position === undefined) {
+            this.nodeInsertAtEnd(nodeKey, id);
+        }
+        else {
+            if (position < 0) {
+                var length_2 = this.nodes[nodeKey].length;
+                this.nodes[nodeKey].splice((position + length_2 + 1), 0, id);
+            }
+            else {
+                this.nodes[nodeKey].splice(position, 0, id);
+            }
+        }
+    };
+    MultiRootTree.prototype.moveId = function (moveId, beforeId, direction) {
+        var sourceId = moveId;
+        var sourceRootIndex = this.findRootId(sourceId);
+        var sourceNodeKey;
+        var sourceNodeIdIndex;
+        if (this.nodes[beforeId]) {
+            sourceNodeKey = beforeId;
+        }
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                sourceNodeIdIndex = this.findNodeId(nodeKey, beforeId);
+                break;
+            }
+        }
+        // got all
+        var targetId = beforeId;
+        var targetRootIndex = this.findRootId(targetId);
+        var targetNodeKey;
+        var targetNodeIdIndex;
+        if (this.nodes[beforeId]) {
+            targetNodeKey = beforeId;
+        }
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                targetNodeIdIndex = this.findNodeId(nodeKey, beforeId);
+                break;
+            }
+        }
+        // got all
+        if (sourceRootIndex > -1) {
+            if (targetRootIndex > -1) {
+                // moving root to root
+                // console.log(`Moving ROOT to ROOT`);
+                // console.log(`RootIds:`);
+                // console.log(this.rootIds);
+                // console.log(`TargetIndex=${targetRootIndex}, SourceIndex=${sourceRootIndex}`);
+                // console.log(`TargetId=${targetId}, SourceId=${sourceId}`);
+                this.rootDelete(sourceRootIndex); // indexes change now
+                if (targetRootIndex > sourceRootIndex) {
+                    targetRootIndex--;
+                }
+                else {
+                }
+                switch (direction) {
+                    case Direction.BEFORE:
+                        this.insertIdIntoRoot(sourceId, targetRootIndex);
+                        break;
+                    case Direction.AFTER:
+                        this.insertIdIntoRoot(sourceId, targetRootIndex + 1);
+                        break;
+                    case Direction.INSIDE_AT_START:
+                        this.nodeInsertAtStart(targetId, sourceId);
+                        break;
+                    case Direction.INSIDE_AT_END:
+                        this.nodeInsertAtEnd(targetId, sourceId);
+                        break;
+                }
+            }
+            else {
+                // moving root (source) ABOVE node (target)
+                // will remove one entry from roots
+                this.rootDelete(sourceRootIndex);
+                for (var nodeKey in this.nodes) {
+                    if (this.nodes.hasOwnProperty(nodeKey)) {
+                        var index = this.findNodeId(nodeKey, targetId);
+                        if (index > -1) {
+                            switch (direction) {
+                                case Direction.BEFORE:
+                                    this.insertIdIntoNode(nodeKey, sourceId, index);
+                                    break;
+                                case Direction.AFTER:
+                                    this.insertIdIntoNode(nodeKey, sourceId, index + 1);
+                                    break;
+                                case Direction.INSIDE_AT_START:
+                                    this.nodeInsertAtStart(targetId, sourceId);
+                                    break;
+                                case Direction.INSIDE_AT_END:
+                                    this.nodeInsertAtEnd(targetId, sourceId);
+                                    break;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            if (targetRootIndex > -1) {
+                // moving node (source) ABOVE root (target)
+                // delete source id from each node
+                for (var nodeKey in this.nodes) {
+                    if (this.nodes.hasOwnProperty(nodeKey)) {
+                        var index = this.findNodeId(nodeKey, sourceId);
+                        if (index > -1) {
+                            // this.nodeInsertId(nodeKey, sourceId, index);
+                            this.nodeDeleteAtIndex(nodeKey, index);
+                            break;
+                        }
+                    }
+                }
+                switch (direction) {
+                    case Direction.BEFORE:
+                        this.insertIdIntoRoot(sourceId, targetRootIndex);
+                        break;
+                    case Direction.AFTER:
+                        this.insertIdIntoRoot(sourceId, targetRootIndex + 1);
+                        break;
+                    case Direction.INSIDE_AT_START:
+                        this.nodeInsertAtStart(targetId, sourceId);
+                        break;
+                    case Direction.INSIDE_AT_END:
+                        this.nodeInsertAtEnd(targetId, sourceId);
+                        break;
+                }
+            }
+            else {
+                // moving node (source) ABOVE node (target)
+                // delete source id from each node
+                for (var nodeKey in this.nodes) {
+                    if (this.nodes.hasOwnProperty(nodeKey)) {
+                        var index = this.findNodeId(nodeKey, sourceId);
+                        if (index > -1) {
+                            this.nodeDeleteAtIndex(nodeKey, index);
+                            break;
+                        }
+                    }
+                }
+                for (var nodeKey in this.nodes) {
+                    if (this.nodes.hasOwnProperty(nodeKey)) {
+                        var index = this.findNodeId(nodeKey, targetId);
+                        if (index > -1) {
+                            switch (direction) {
+                                case Direction.BEFORE:
+                                    this.insertIdIntoNode(nodeKey, sourceId, index);
+                                    break;
+                                case Direction.AFTER:
+                                    this.insertIdIntoNode(nodeKey, sourceId, index + 1);
+                                    break;
+                                case Direction.INSIDE_AT_START:
+                                    this.nodeInsertAtStart(targetId, sourceId);
+                                    break;
+                                case Direction.INSIDE_AT_END:
+                                    this.nodeInsertAtEnd(targetId, sourceId);
+                                    break;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    };
+    MultiRootTree.prototype.swapArrayElements = function (arr, indexA, indexB) {
+        var temp = arr[indexA];
+        arr[indexA] = arr[indexB];
+        arr[indexB] = temp;
+        return arr;
+    };
+    MultiRootTree.prototype.rootDeleteId = function (id) {
+        var index = this.findRootId(id);
+        if (index > -1) {
+            this.rootDelete(index);
+        }
+    };
+    MultiRootTree.prototype.nodeAndSubNodesDelete = function (nodeKey) {
+        var toDeleteLater = [];
+        for (var i = 0; i < this.nodes[nodeKey].length; i++) {
+            var id = this.nodes[nodeKey][i];
+            this.nodeAndSubNodesDelete(id);
+            toDeleteLater.push(nodeKey);
+        }
+        this.nodeDelete(nodeKey);
+        for (var i = 0; i < toDeleteLater.length; i++) {
+            this.nodeDelete(toDeleteLater[i]);
+        }
+    };
+    MultiRootTree.prototype.nodeRefrencesDelete = function (id) {
+        for (var nodeKey in this.nodes) {
+            if (this.nodes.hasOwnProperty(nodeKey)) {
+                for (var i = 0; i < this.nodes[nodeKey].length; i++) {
+                    var targetId = this.nodes[nodeKey][i];
+                    if (targetId === id) {
+                        this.nodeDeleteAtIndex(nodeKey, i);
+                    }
+                }
+            }
+        }
+    };
+    MultiRootTree.prototype.nodeDelete = function (nodeKey) {
+        delete this.nodes[nodeKey];
+    };
+    MultiRootTree.prototype.findRootId = function (id) {
+        return this.rootIds.indexOf(id);
+    };
+    MultiRootTree.prototype.findNodeId = function (nodeKey, id) {
+        return this.nodes[nodeKey].indexOf(id);
+    };
+    MultiRootTree.prototype.findNode = function (nodeKey) {
+        return this.nodes[nodeKey];
+    };
+    MultiRootTree.prototype.nodeInsertAtStart = function (nodeKey, id) {
+        this.nodes[nodeKey].unshift(id);
+    };
+    MultiRootTree.prototype.nodeInsertAtEnd = function (nodeKey, id) {
+        this.nodes[nodeKey].push(id);
+    };
+    MultiRootTree.prototype.rootDelete = function (index) {
+        this.rootIds.splice(index, 1);
+    };
+    MultiRootTree.prototype.nodeDeleteAtIndex = function (nodeKey, index) {
+        this.nodes[nodeKey].splice(index, 1);
+    };
+    MultiRootTree.prototype.rootInsertAtStart = function (id) {
+        this.rootIds.unshift(id);
+    };
+    MultiRootTree.prototype.rootInsertAtEnd = function (id) {
+        this.rootIds.push(id);
+    };
+    return MultiRootTree;
+}());
+exports.default = MultiRootTree;
+//# sourceMappingURL=MultiRootTree.js.map
+
+/***/ }),
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60180,12 +61887,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var collections = __webpack_require__(17);
 var registry = __webpack_require__(14);
 var structure = __webpack_require__(4);
-var message = __webpack_require__(206);
+var message = __webpack_require__(40);
 var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
-var data = __webpack_require__(25);
+var common = __webpack_require__(10);
+var data = __webpack_require__(18);
 var sdmx = __webpack_require__(6);
-var xml = __webpack_require__(59);
+var xml = __webpack_require__(60);
 function parseXml(s) {
     var parseXml;
     parseXml = new DOMParser();
@@ -61531,1659 +63238,6 @@ exports.Sdmx20StructureReaderTools = Sdmx20StructureReaderTools;
 
 
 /***/ }),
-/* 275 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
-var Dictionary_1 = __webpack_require__(24);
-var Set_1 = __webpack_require__(202);
-var Bag = /** @class */ (function () {
-    /**
-     * Creates an empty bag.
-     * @class <p>A bag is a special kind of set in which members are
-     * allowed to appear more than once.</p>
-     * <p>If the inserted elements are custom objects a function
-     * which converts elements to unique strings must be provided. Example:</p>
-     *
-     * <pre>
-     * function petToString(pet) {
-     *  return pet.name;
-     * }
-     * </pre>
-     *
-     * @constructor
-     * @param {function(Object):string=} toStrFunction optional function used
-     * to convert elements to strings. If the elements aren't strings or if toString()
-     * is not appropriate, a custom function which receives an object and returns a
-     * unique string must be provided.
-     */
-    function Bag(toStrFunction) {
-        this.toStrF = toStrFunction || util.defaultToString;
-        this.dictionary = new Dictionary_1.default(this.toStrF);
-        this.nElements = 0;
-    }
-    /**
-    * Adds nCopies of the specified object to this bag.
-    * @param {Object} element element to add.
-    * @param {number=} nCopies the number of copies to add, if this argument is
-    * undefined 1 copy is added.
-    * @return {boolean} true unless element is undefined.
-    */
-    Bag.prototype.add = function (element, nCopies) {
-        if (nCopies === void 0) { nCopies = 1; }
-        if (util.isUndefined(element) || nCopies <= 0) {
-            return false;
-        }
-        if (!this.contains(element)) {
-            var node = {
-                value: element,
-                copies: nCopies
-            };
-            this.dictionary.setValue(element, node);
-        }
-        else {
-            this.dictionary.getValue(element).copies += nCopies;
-        }
-        this.nElements += nCopies;
-        return true;
-    };
-    /**
-    * Counts the number of copies of the specified object in this bag.
-    * @param {Object} element the object to search for..
-    * @return {number} the number of copies of the object, 0 if not found
-    */
-    Bag.prototype.count = function (element) {
-        if (!this.contains(element)) {
-            return 0;
-        }
-        else {
-            return this.dictionary.getValue(element).copies;
-        }
-    };
-    /**
-     * Returns true if this bag contains the specified element.
-     * @param {Object} element element to search for.
-     * @return {boolean} true if this bag contains the specified element,
-     * false otherwise.
-     */
-    Bag.prototype.contains = function (element) {
-        return this.dictionary.containsKey(element);
-    };
-    /**
-    * Removes nCopies of the specified object to this bag.
-    * If the number of copies to remove is greater than the actual number
-    * of copies in the Bag, all copies are removed.
-    * @param {Object} element element to remove.
-    * @param {number=} nCopies the number of copies to remove, if this argument is
-    * undefined 1 copy is removed.
-    * @return {boolean} true if at least 1 element was removed.
-    */
-    Bag.prototype.remove = function (element, nCopies) {
-        if (nCopies === void 0) { nCopies = 1; }
-        if (util.isUndefined(element) || nCopies <= 0) {
-            return false;
-        }
-        if (!this.contains(element)) {
-            return false;
-        }
-        else {
-            var node = this.dictionary.getValue(element);
-            if (nCopies > node.copies) {
-                this.nElements -= node.copies;
-            }
-            else {
-                this.nElements -= nCopies;
-            }
-            node.copies -= nCopies;
-            if (node.copies <= 0) {
-                this.dictionary.remove(element);
-            }
-            return true;
-        }
-    };
-    /**
-     * Returns an array containing all of the elements in this big in arbitrary order,
-     * including multiple copies.
-     * @return {Array} an array containing all of the elements in this bag.
-     */
-    Bag.prototype.toArray = function () {
-        var a = [];
-        var values = this.dictionary.values();
-        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
-            var node = values_1[_i];
-            var element = node.value;
-            var copies = node.copies;
-            for (var j = 0; j < copies; j++) {
-                a.push(element);
-            }
-        }
-        return a;
-    };
-    /**
-     * Returns a set of unique elements in this bag.
-     * @return {collections.Set<T>} a set of unique elements in this bag.
-     */
-    Bag.prototype.toSet = function () {
-        var toret = new Set_1.default(this.toStrF);
-        var elements = this.dictionary.values();
-        for (var _i = 0, elements_1 = elements; _i < elements_1.length; _i++) {
-            var ele = elements_1[_i];
-            var value = ele.value;
-            toret.add(value);
-        }
-        return toret;
-    };
-    /**
-     * Executes the provided function once for each element
-     * present in this bag, including multiple copies.
-     * @param {function(Object):*} callback function to execute, it is
-     * invoked with one argument: the element. To break the iteration you can
-     * optionally return false.
-     */
-    Bag.prototype.forEach = function (callback) {
-        this.dictionary.forEach(function (k, v) {
-            var value = v.value;
-            var copies = v.copies;
-            for (var i = 0; i < copies; i++) {
-                if (callback(value) === false) {
-                    return false;
-                }
-            }
-            return true;
-        });
-    };
-    /**
-     * Returns the number of elements in this bag.
-     * @return {number} the number of elements in this bag.
-     */
-    Bag.prototype.size = function () {
-        return this.nElements;
-    };
-    /**
-     * Returns true if this bag contains no elements.
-     * @return {boolean} true if this bag contains no elements.
-     */
-    Bag.prototype.isEmpty = function () {
-        return this.nElements === 0;
-    };
-    /**
-     * Removes all of the elements from this bag.
-     */
-    Bag.prototype.clear = function () {
-        this.nElements = 0;
-        this.dictionary.clear();
-    };
-    return Bag;
-}()); // End of bag
-exports.default = Bag;
-//# sourceMappingURL=Bag.js.map
-
-/***/ }),
-/* 276 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
-var Queue_1 = __webpack_require__(203);
-var BSTree = /** @class */ (function () {
-    /**
-     * Creates an empty binary search tree.
-     * @class <p>A binary search tree is a binary tree in which each
-     * internal node stores an element such that the elements stored in the
-     * left subtree are less than it and the elements
-     * stored in the right subtree are greater.</p>
-     * <p>Formally, a binary search tree is a node-based binary tree data structure which
-     * has the following properties:</p>
-     * <ul>
-     * <li>The left subtree of a node contains only nodes with elements less
-     * than the node's element</li>
-     * <li>The right subtree of a node contains only nodes with elements greater
-     * than the node's element</li>
-     * <li>Both the left and right subtrees must also be binary search trees.</li>
-     * </ul>
-     * <p>If the inserted elements are custom objects a compare function must
-     * be provided at construction time, otherwise the <=, === and >= operators are
-     * used to compare elements. Example:</p>
-     * <pre>
-     * function compare(a, b) {
-     *  if (a is less than b by some ordering criterion) {
-     *     return -1;
-     *  } if (a is greater than b by the ordering criterion) {
-     *     return 1;
-     *  }
-     *  // a must be equal to b
-     *  return 0;
-     * }
-     * </pre>
-     * @constructor
-     * @param {function(Object,Object):number=} compareFunction optional
-     * function used to compare two elements. Must return a negative integer,
-     * zero, or a positive integer as the first argument is less than, equal to,
-     * or greater than the second.
-     */
-    function BSTree(compareFunction) {
-        this.root = null;
-        this.compare = compareFunction || util.defaultCompare;
-        this.nElements = 0;
-    }
-    /**
-     * Adds the specified element to this tree if it is not already present.
-     * @param {Object} element the element to insert.
-     * @return {boolean} true if this tree did not already contain the specified element.
-     */
-    BSTree.prototype.add = function (element) {
-        if (util.isUndefined(element)) {
-            return false;
-        }
-        if (this.insertNode(this.createNode(element)) !== null) {
-            this.nElements++;
-            return true;
-        }
-        return false;
-    };
-    /**
-     * Removes all of the elements from this tree.
-     */
-    BSTree.prototype.clear = function () {
-        this.root = null;
-        this.nElements = 0;
-    };
-    /**
-     * Returns true if this tree contains no elements.
-     * @return {boolean} true if this tree contains no elements.
-     */
-    BSTree.prototype.isEmpty = function () {
-        return this.nElements === 0;
-    };
-    /**
-     * Returns the number of elements in this tree.
-     * @return {number} the number of elements in this tree.
-     */
-    BSTree.prototype.size = function () {
-        return this.nElements;
-    };
-    /**
-     * Returns true if this tree contains the specified element.
-     * @param {Object} element element to search for.
-     * @return {boolean} true if this tree contains the specified element,
-     * false otherwise.
-     */
-    BSTree.prototype.contains = function (element) {
-        if (util.isUndefined(element)) {
-            return false;
-        }
-        return this.searchNode(this.root, element) !== null;
-    };
-    /**
-     * Removes the specified element from this tree if it is present.
-     * @return {boolean} true if this tree contained the specified element.
-     */
-    BSTree.prototype.remove = function (element) {
-        var node = this.searchNode(this.root, element);
-        if (node === null) {
-            return false;
-        }
-        this.removeNode(node);
-        this.nElements--;
-        return true;
-    };
-    /**
-     * Executes the provided function once for each element present in this tree in
-     * in-order.
-     * @param {function(Object):*} callback function to execute, it is invoked with one
-     * argument: the element value, to break the iteration you can optionally return false.
-     */
-    BSTree.prototype.inorderTraversal = function (callback) {
-        this.inorderTraversalAux(this.root, callback, {
-            stop: false
-        });
-    };
-    /**
-     * Executes the provided function once for each element present in this tree in pre-order.
-     * @param {function(Object):*} callback function to execute, it is invoked with one
-     * argument: the element value, to break the iteration you can optionally return false.
-     */
-    BSTree.prototype.preorderTraversal = function (callback) {
-        this.preorderTraversalAux(this.root, callback, {
-            stop: false
-        });
-    };
-    /**
-     * Executes the provided function once for each element present in this tree in post-order.
-     * @param {function(Object):*} callback function to execute, it is invoked with one
-     * argument: the element value, to break the iteration you can optionally return false.
-     */
-    BSTree.prototype.postorderTraversal = function (callback) {
-        this.postorderTraversalAux(this.root, callback, {
-            stop: false
-        });
-    };
-    /**
-     * Executes the provided function once for each element present in this tree in
-     * level-order.
-     * @param {function(Object):*} callback function to execute, it is invoked with one
-     * argument: the element value, to break the iteration you can optionally return false.
-     */
-    BSTree.prototype.levelTraversal = function (callback) {
-        this.levelTraversalAux(this.root, callback);
-    };
-    /**
-     * Returns the minimum element of this tree.
-     * @return {*} the minimum element of this tree or undefined if this tree is
-     * is empty.
-     */
-    BSTree.prototype.minimum = function () {
-        if (this.isEmpty()) {
-            return undefined;
-        }
-        return this.minimumAux(this.root).element;
-    };
-    /**
-     * Returns the maximum element of this tree.
-     * @return {*} the maximum element of this tree or undefined if this tree is
-     * is empty.
-     */
-    BSTree.prototype.maximum = function () {
-        if (this.isEmpty()) {
-            return undefined;
-        }
-        return this.maximumAux(this.root).element;
-    };
-    /**
-     * Executes the provided function once for each element present in this tree in inorder.
-     * Equivalent to inorderTraversal.
-     * @param {function(Object):*} callback function to execute, it is
-     * invoked with one argument: the element value, to break the iteration you can
-     * optionally return false.
-     */
-    BSTree.prototype.forEach = function (callback) {
-        this.inorderTraversal(callback);
-    };
-    /**
-     * Returns an array containing all of the elements in this tree in in-order.
-     * @return {Array} an array containing all of the elements in this tree in in-order.
-     */
-    BSTree.prototype.toArray = function () {
-        var array = [];
-        this.inorderTraversal(function (element) {
-            array.push(element);
-            return true;
-        });
-        return array;
-    };
-    /**
-     * Returns the height of this tree.
-     * @return {number} the height of this tree or -1 if is empty.
-     */
-    BSTree.prototype.height = function () {
-        return this.heightAux(this.root);
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.searchNode = function (node, element) {
-        var cmp = null;
-        while (node !== null && cmp !== 0) {
-            cmp = this.compare(element, node.element);
-            if (cmp < 0) {
-                node = node.leftCh;
-            }
-            else if (cmp > 0) {
-                node = node.rightCh;
-            }
-        }
-        return node;
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.transplant = function (n1, n2) {
-        if (n1.parent === null) {
-            this.root = n2;
-        }
-        else if (n1 === n1.parent.leftCh) {
-            n1.parent.leftCh = n2;
-        }
-        else {
-            n1.parent.rightCh = n2;
-        }
-        if (n2 !== null) {
-            n2.parent = n1.parent;
-        }
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.removeNode = function (node) {
-        if (node.leftCh === null) {
-            this.transplant(node, node.rightCh);
-        }
-        else if (node.rightCh === null) {
-            this.transplant(node, node.leftCh);
-        }
-        else {
-            var y = this.minimumAux(node.rightCh);
-            if (y.parent !== node) {
-                this.transplant(y, y.rightCh);
-                y.rightCh = node.rightCh;
-                y.rightCh.parent = y;
-            }
-            this.transplant(node, y);
-            y.leftCh = node.leftCh;
-            y.leftCh.parent = y;
-        }
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.inorderTraversalAux = function (node, callback, signal) {
-        if (node === null || signal.stop) {
-            return;
-        }
-        this.inorderTraversalAux(node.leftCh, callback, signal);
-        if (signal.stop) {
-            return;
-        }
-        signal.stop = callback(node.element) === false;
-        if (signal.stop) {
-            return;
-        }
-        this.inorderTraversalAux(node.rightCh, callback, signal);
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.levelTraversalAux = function (node, callback) {
-        var queue = new Queue_1.default();
-        if (node !== null) {
-            queue.enqueue(node);
-        }
-        while (!queue.isEmpty()) {
-            node = queue.dequeue();
-            if (callback(node.element) === false) {
-                return;
-            }
-            if (node.leftCh !== null) {
-                queue.enqueue(node.leftCh);
-            }
-            if (node.rightCh !== null) {
-                queue.enqueue(node.rightCh);
-            }
-        }
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.preorderTraversalAux = function (node, callback, signal) {
-        if (node === null || signal.stop) {
-            return;
-        }
-        signal.stop = callback(node.element) === false;
-        if (signal.stop) {
-            return;
-        }
-        this.preorderTraversalAux(node.leftCh, callback, signal);
-        if (signal.stop) {
-            return;
-        }
-        this.preorderTraversalAux(node.rightCh, callback, signal);
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.postorderTraversalAux = function (node, callback, signal) {
-        if (node === null || signal.stop) {
-            return;
-        }
-        this.postorderTraversalAux(node.leftCh, callback, signal);
-        if (signal.stop) {
-            return;
-        }
-        this.postorderTraversalAux(node.rightCh, callback, signal);
-        if (signal.stop) {
-            return;
-        }
-        signal.stop = callback(node.element) === false;
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.minimumAux = function (node) {
-        while (node.leftCh !== null) {
-            node = node.leftCh;
-        }
-        return node;
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.maximumAux = function (node) {
-        while (node.rightCh !== null) {
-            node = node.rightCh;
-        }
-        return node;
-    };
-    /**
-      * @private
-      */
-    BSTree.prototype.heightAux = function (node) {
-        if (node === null) {
-            return -1;
-        }
-        return Math.max(this.heightAux(node.leftCh), this.heightAux(node.rightCh)) + 1;
-    };
-    /*
-    * @private
-    */
-    BSTree.prototype.insertNode = function (node) {
-        var parent = null;
-        var position = this.root;
-        var cmp = null;
-        while (position !== null) {
-            cmp = this.compare(node.element, position.element);
-            if (cmp === 0) {
-                return null;
-            }
-            else if (cmp < 0) {
-                parent = position;
-                position = position.leftCh;
-            }
-            else {
-                parent = position;
-                position = position.rightCh;
-            }
-        }
-        node.parent = parent;
-        if (parent === null) {
-            // tree is empty
-            this.root = node;
-        }
-        else if (this.compare(node.element, parent.element) < 0) {
-            parent.leftCh = node;
-        }
-        else {
-            parent.rightCh = node;
-        }
-        return node;
-    };
-    /**
-    * @private
-    */
-    BSTree.prototype.createNode = function (element) {
-        return {
-            element: element,
-            leftCh: null,
-            rightCh: null,
-            parent: null
-        };
-    };
-    return BSTree;
-}());
-exports.default = BSTree;
-//# sourceMappingURL=BSTree.js.map
-
-/***/ }),
-/* 277 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var Dictionary_1 = __webpack_require__(24);
-var util = __webpack_require__(10);
-/**
- * This class is used by the LinkedDictionary Internally
- * Has to be a class, not an interface, because it needs to have
- * the 'unlink' function defined.
- */
-var LinkedDictionaryPair = /** @class */ (function () {
-    function LinkedDictionaryPair(key, value) {
-        this.key = key;
-        this.value = value;
-    }
-    LinkedDictionaryPair.prototype.unlink = function () {
-        this.prev.next = this.next;
-        this.next.prev = this.prev;
-    };
-    return LinkedDictionaryPair;
-}());
-var LinkedDictionary = /** @class */ (function (_super) {
-    __extends(LinkedDictionary, _super);
-    function LinkedDictionary(toStrFunction) {
-        var _this = _super.call(this, toStrFunction) || this;
-        _this.head = new LinkedDictionaryPair(null, null);
-        _this.tail = new LinkedDictionaryPair(null, null);
-        _this.head.next = _this.tail;
-        _this.tail.prev = _this.head;
-        return _this;
-    }
-    /**
-     * Inserts the new node to the 'tail' of the list, updating the
-     * neighbors, and moving 'this.tail' (the End of List indicator) that
-     * to the end.
-     */
-    LinkedDictionary.prototype.appendToTail = function (entry) {
-        var lastNode = this.tail.prev;
-        lastNode.next = entry;
-        entry.prev = lastNode;
-        entry.next = this.tail;
-        this.tail.prev = entry;
-    };
-    /**
-     * Retrieves a linked dictionary from the table internally
-     */
-    LinkedDictionary.prototype.getLinkedDictionaryPair = function (key) {
-        if (util.isUndefined(key)) {
-            return undefined;
-        }
-        var k = '$' + this.toStr(key);
-        var pair = (this.table[k]);
-        return pair;
-    };
-    /**
-     * Returns the value to which this dictionary maps the specified key.
-     * Returns undefined if this dictionary contains no mapping for this key.
-     * @param {Object} key key whose associated value is to be returned.
-     * @return {*} the value to which this dictionary maps the specified key or
-     * undefined if the map contains no mapping for this key.
-     */
-    LinkedDictionary.prototype.getValue = function (key) {
-        var pair = this.getLinkedDictionaryPair(key);
-        if (!util.isUndefined(pair)) {
-            return pair.value;
-        }
-        return undefined;
-    };
-    /**
-     * Removes the mapping for this key from this dictionary if it is present.
-     * Also, if a value is present for this key, the entry is removed from the
-     * insertion ordering.
-     * @param {Object} key key whose mapping is to be removed from the
-     * dictionary.
-     * @return {*} previous value associated with specified key, or undefined if
-     * there was no mapping for key.
-     */
-    LinkedDictionary.prototype.remove = function (key) {
-        var pair = this.getLinkedDictionaryPair(key);
-        if (!util.isUndefined(pair)) {
-            _super.prototype.remove.call(this, key); // This will remove it from the table
-            pair.unlink(); // This will unlink it from the chain
-            return pair.value;
-        }
-        return undefined;
-    };
-    /**
-    * Removes all mappings from this LinkedDictionary.
-    * @this {collections.LinkedDictionary}
-    */
-    LinkedDictionary.prototype.clear = function () {
-        _super.prototype.clear.call(this);
-        this.head.next = this.tail;
-        this.tail.prev = this.head;
-    };
-    /**
-     * Internal function used when updating an existing KeyValue pair.
-     * It places the new value indexed by key into the table, but maintains
-     * its place in the linked ordering.
-     */
-    LinkedDictionary.prototype.replace = function (oldPair, newPair) {
-        var k = '$' + this.toStr(newPair.key);
-        // set the new Pair's links to existingPair's links
-        newPair.next = oldPair.next;
-        newPair.prev = oldPair.prev;
-        // Delete Existing Pair from the table, unlink it from chain.
-        // As a result, the nElements gets decremented by this operation
-        this.remove(oldPair.key);
-        // Link new Pair in place of where oldPair was,
-        // by pointing the old pair's neighbors to it.
-        newPair.prev.next = newPair;
-        newPair.next.prev = newPair;
-        this.table[k] = newPair;
-        // To make up for the fact that the number of elements was decremented,
-        // We need to increase it by one.
-        ++this.nElements;
-    };
-    /**
-     * Associates the specified value with the specified key in this dictionary.
-     * If the dictionary previously contained a mapping for this key, the old
-     * value is replaced by the specified value.
-     * Updating of a key that already exists maintains its place in the
-     * insertion order into the map.
-     * @param {Object} key key with which the specified value is to be
-     * associated.
-     * @param {Object} value value to be associated with the specified key.
-     * @return {*} previous value associated with the specified key, or undefined if
-     * there was no mapping for the key or if the key/value are undefined.
-     */
-    LinkedDictionary.prototype.setValue = function (key, value) {
-        if (util.isUndefined(key) || util.isUndefined(value)) {
-            return undefined;
-        }
-        var existingPair = this.getLinkedDictionaryPair(key);
-        var newPair = new LinkedDictionaryPair(key, value);
-        var k = '$' + this.toStr(key);
-        // If there is already an element for that key, we
-        // keep it's place in the LinkedList
-        if (!util.isUndefined(existingPair)) {
-            this.replace(existingPair, newPair);
-            return existingPair.value;
-        }
-        else {
-            this.appendToTail(newPair);
-            this.table[k] = newPair;
-            ++this.nElements;
-            return undefined;
-        }
-    };
-    /**
-     * Returns an array containing all of the keys in this LinkedDictionary, ordered
-     * by insertion order.
-     * @return {Array} an array containing all of the keys in this LinkedDictionary,
-     * ordered by insertion order.
-     */
-    LinkedDictionary.prototype.keys = function () {
-        var array = [];
-        this.forEach(function (key, value) {
-            array.push(key);
-        });
-        return array;
-    };
-    /**
-     * Returns an array containing all of the values in this LinkedDictionary, ordered by
-     * insertion order.
-     * @return {Array} an array containing all of the values in this LinkedDictionary,
-     * ordered by insertion order.
-     */
-    LinkedDictionary.prototype.values = function () {
-        var array = [];
-        this.forEach(function (key, value) {
-            array.push(value);
-        });
-        return array;
-    };
-    /**
-    * Executes the provided function once for each key-value pair
-    * present in this LinkedDictionary. It is done in the order of insertion
-    * into the LinkedDictionary
-    * @param {function(Object,Object):*} callback function to execute, it is
-    * invoked with two arguments: key and value. To break the iteration you can
-    * optionally return false.
-    */
-    LinkedDictionary.prototype.forEach = function (callback) {
-        var crawlNode = this.head.next;
-        while (crawlNode.next != null) {
-            var ret = callback(crawlNode.key, crawlNode.value);
-            if (ret === false) {
-                return;
-            }
-            crawlNode = crawlNode.next;
-        }
-    };
-    return LinkedDictionary;
-}(Dictionary_1.default)); // End of LinkedDictionary
-exports.default = LinkedDictionary;
-// /**
-//  * Returns true if this dictionary is equal to the given dictionary.
-//  * Two dictionaries are equal if they contain the same mappings.
-//  * @param {collections.Dictionary} other the other dictionary.
-//  * @param {function(Object,Object):boolean=} valuesEqualFunction optional
-//  * function used to check if two values are equal.
-//  * @return {boolean} true if this dictionary is equal to the given dictionary.
-//  */
-// collections.Dictionary.prototype.equals = function(other,valuesEqualFunction) {
-// 	const eqF = valuesEqualFunction || collections.defaultEquals;
-// 	if(!(other instanceof collections.Dictionary)){
-// 		return false;
-// 	}
-// 	if(this.size() !== other.size()){
-// 		return false;
-// 	}
-// 	return this.equalsAux(this.firstNode,other.firstNode,eqF);
-// }
-//# sourceMappingURL=LinkedDictionary.js.map
-
-/***/ }),
-/* 278 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
-var Dictionary_1 = __webpack_require__(24);
-var arrays = __webpack_require__(31);
-var MultiDictionary = /** @class */ (function () {
-    /**
-     * Creates an empty multi dictionary.
-     * @class <p>A multi dictionary is a special kind of dictionary that holds
-     * multiple values against each key. Setting a value into the dictionary will
-     * add the value to an array at that key. Getting a key will return an array,
-     * holding all the values set to that key.
-     * You can configure to allow duplicates in the values.
-     * This implementation accepts any kind of objects as keys.</p>
-     *
-     * <p>If the keys are custom objects a function which converts keys to strings must be
-     * provided. Example:</p>
-     *
-     * <pre>
-     * function petToString(pet) {
-       *  return pet.name;
-       * }
-     * </pre>
-     * <p>If the values are custom objects a function to check equality between values
-     * must be provided. Example:</p>
-     *
-     * <pre>
-     * function petsAreEqualByAge(pet1,pet2) {
-       *  return pet1.age===pet2.age;
-       * }
-     * </pre>
-     * @constructor
-     * @param {function(Object):string=} toStrFunction optional function
-     * to convert keys to strings. If the keys aren't strings or if toString()
-     * is not appropriate, a custom function which receives a key and returns a
-     * unique string must be provided.
-     * @param {function(Object,Object):boolean=} valuesEqualsFunction optional
-     * function to check if two values are equal.
-     *
-     * @param allowDuplicateValues
-     */
-    function MultiDictionary(toStrFunction, valuesEqualsFunction, allowDuplicateValues) {
-        if (allowDuplicateValues === void 0) { allowDuplicateValues = false; }
-        this.dict = new Dictionary_1.default(toStrFunction);
-        this.equalsF = valuesEqualsFunction || util.defaultEquals;
-        this.allowDuplicate = allowDuplicateValues;
-    }
-    /**
-    * Returns an array holding the values to which this dictionary maps
-    * the specified key.
-    * Returns an empty array if this dictionary contains no mappings for this key.
-    * @param {Object} key key whose associated values are to be returned.
-    * @return {Array} an array holding the values to which this dictionary maps
-    * the specified key.
-    */
-    MultiDictionary.prototype.getValue = function (key) {
-        var values = this.dict.getValue(key);
-        if (util.isUndefined(values)) {
-            return [];
-        }
-        return arrays.copy(values);
-    };
-    /**
-     * Adds the value to the array associated with the specified key, if
-     * it is not already present.
-     * @param {Object} key key with which the specified value is to be
-     * associated.
-     * @param {Object} value the value to add to the array at the key
-     * @return {boolean} true if the value was not already associated with that key.
-     */
-    MultiDictionary.prototype.setValue = function (key, value) {
-        if (util.isUndefined(key) || util.isUndefined(value)) {
-            return false;
-        }
-        if (!this.containsKey(key)) {
-            this.dict.setValue(key, [value]);
-            return true;
-        }
-        var array = this.dict.getValue(key);
-        if (!this.allowDuplicate) {
-            if (arrays.contains(array, value, this.equalsF)) {
-                return false;
-            }
-        }
-        array.push(value);
-        return true;
-    };
-    /**
-     * Removes the specified values from the array of values associated with the
-     * specified key. If a value isn't given, all values associated with the specified
-     * key are removed.
-     * @param {Object} key key whose mapping is to be removed from the
-     * dictionary.
-     * @param {Object=} value optional argument to specify the value to remove
-     * from the array associated with the specified key.
-     * @return {*} true if the dictionary changed, false if the key doesn't exist or
-     * if the specified value isn't associated with the specified key.
-     */
-    MultiDictionary.prototype.remove = function (key, value) {
-        if (util.isUndefined(value)) {
-            var v = this.dict.remove(key);
-            return !util.isUndefined(v);
-        }
-        var array = this.dict.getValue(key);
-        if (arrays.remove(array, value, this.equalsF)) {
-            if (array.length === 0) {
-                this.dict.remove(key);
-            }
-            return true;
-        }
-        return false;
-    };
-    /**
-     * Returns an array containing all of the keys in this dictionary.
-     * @return {Array} an array containing all of the keys in this dictionary.
-     */
-    MultiDictionary.prototype.keys = function () {
-        return this.dict.keys();
-    };
-    /**
-     * Returns an array containing all of the values in this dictionary.
-     * @return {Array} an array containing all of the values in this dictionary.
-     */
-    MultiDictionary.prototype.values = function () {
-        var values = this.dict.values();
-        var array = [];
-        for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
-            var v = values_1[_i];
-            for (var _a = 0, v_1 = v; _a < v_1.length; _a++) {
-                var w = v_1[_a];
-                array.push(w);
-            }
-        }
-        return array;
-    };
-    /**
-     * Returns true if this dictionary at least one value associatted the specified key.
-     * @param {Object} key key whose presence in this dictionary is to be
-     * tested.
-     * @return {boolean} true if this dictionary at least one value associatted
-     * the specified key.
-     */
-    MultiDictionary.prototype.containsKey = function (key) {
-        return this.dict.containsKey(key);
-    };
-    /**
-     * Removes all mappings from this dictionary.
-     */
-    MultiDictionary.prototype.clear = function () {
-        this.dict.clear();
-    };
-    /**
-     * Returns the number of keys in this dictionary.
-     * @return {number} the number of key-value mappings in this dictionary.
-     */
-    MultiDictionary.prototype.size = function () {
-        return this.dict.size();
-    };
-    /**
-     * Returns true if this dictionary contains no mappings.
-     * @return {boolean} true if this dictionary contains no mappings.
-     */
-    MultiDictionary.prototype.isEmpty = function () {
-        return this.dict.isEmpty();
-    };
-    return MultiDictionary;
-}()); // end of multi dictionary
-exports.default = MultiDictionary;
-//# sourceMappingURL=MultiDictionary.js.map
-
-/***/ }),
-/* 279 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var util = __webpack_require__(10);
-var Heap_1 = __webpack_require__(204);
-var PriorityQueue = /** @class */ (function () {
-    /**
-     * Creates an empty priority queue.
-     * @class <p>In a priority queue each element is associated with a "priority",
-     * elements are dequeued in highest-priority-first order (the elements with the
-     * highest priority are dequeued first). Priority Queues are implemented as heaps.
-     * If the inserted elements are custom objects a compare function must be provided,
-     * otherwise the <=, === and >= operators are used to compare object priority.</p>
-     * <pre>
-     * function compare(a, b) {
-     *  if (a is less than b by some ordering criterion) {
-     *     return -1;
-     *  } if (a is greater than b by the ordering criterion) {
-     *     return 1;
-     *  }
-     *  // a must be equal to b
-     *  return 0;
-     * }
-     * </pre>
-     * @constructor
-     * @param {function(Object,Object):number=} compareFunction optional
-     * function used to compare two element priorities. Must return a negative integer,
-     * zero, or a positive integer as the first argument is less than, equal to,
-     * or greater than the second.
-     */
-    function PriorityQueue(compareFunction) {
-        this.heap = new Heap_1.default(util.reverseCompareFunction(compareFunction));
-    }
-    /**
-     * Inserts the specified element into this priority queue.
-     * @param {Object} element the element to insert.
-     * @return {boolean} true if the element was inserted, or false if it is undefined.
-     */
-    PriorityQueue.prototype.enqueue = function (element) {
-        return this.heap.add(element);
-    };
-    /**
-     * Inserts the specified element into this priority queue.
-     * @param {Object} element the element to insert.
-     * @return {boolean} true if the element was inserted, or false if it is undefined.
-     */
-    PriorityQueue.prototype.add = function (element) {
-        return this.heap.add(element);
-    };
-    /**
-     * Retrieves and removes the highest priority element of this queue.
-     * @return {*} the the highest priority element of this queue,
-     *  or undefined if this queue is empty.
-     */
-    PriorityQueue.prototype.dequeue = function () {
-        if (this.heap.size() !== 0) {
-            var el = this.heap.peek();
-            this.heap.removeRoot();
-            return el;
-        }
-        return undefined;
-    };
-    /**
-     * Retrieves, but does not remove, the highest priority element of this queue.
-     * @return {*} the highest priority element of this queue, or undefined if this queue is empty.
-     */
-    PriorityQueue.prototype.peek = function () {
-        return this.heap.peek();
-    };
-    /**
-     * Returns true if this priority queue contains the specified element.
-     * @param {Object} element element to search for.
-     * @return {boolean} true if this priority queue contains the specified element,
-     * false otherwise.
-     */
-    PriorityQueue.prototype.contains = function (element) {
-        return this.heap.contains(element);
-    };
-    /**
-     * Checks if this priority queue is empty.
-     * @return {boolean} true if and only if this priority queue contains no items; false
-     * otherwise.
-     */
-    PriorityQueue.prototype.isEmpty = function () {
-        return this.heap.isEmpty();
-    };
-    /**
-     * Returns the number of elements in this priority queue.
-     * @return {number} the number of elements in this priority queue.
-     */
-    PriorityQueue.prototype.size = function () {
-        return this.heap.size();
-    };
-    /**
-     * Removes all of the elements from this priority queue.
-     */
-    PriorityQueue.prototype.clear = function () {
-        this.heap.clear();
-    };
-    /**
-     * Executes the provided function once for each element present in this queue in
-     * no particular order.
-     * @param {function(Object):*} callback function to execute, it is
-     * invoked with one argument: the element value, to break the iteration you can
-     * optionally return false.
-     */
-    PriorityQueue.prototype.forEach = function (callback) {
-        this.heap.forEach(callback);
-    };
-    return PriorityQueue;
-}()); // end of priority queue
-exports.default = PriorityQueue;
-//# sourceMappingURL=PriorityQueue.js.map
-
-/***/ }),
-/* 280 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var LinkedList_1 = __webpack_require__(60);
-var Stack = /** @class */ (function () {
-    /**
-     * Creates an empty Stack.
-     * @class A Stack is a Last-In-First-Out (LIFO) data structure, the last
-     * element added to the stack will be the first one to be removed. This
-     * implementation uses a linked list as a container.
-     * @constructor
-     */
-    function Stack() {
-        this.list = new LinkedList_1.default();
-    }
-    /**
-     * Pushes an item onto the top of this stack.
-     * @param {Object} elem the element to be pushed onto this stack.
-     * @return {boolean} true if the element was pushed or false if it is undefined.
-     */
-    Stack.prototype.push = function (elem) {
-        return this.list.add(elem, 0);
-    };
-    /**
-     * Pushes an item onto the top of this stack.
-     * @param {Object} elem the element to be pushed onto this stack.
-     * @return {boolean} true if the element was pushed or false if it is undefined.
-     */
-    Stack.prototype.add = function (elem) {
-        return this.list.add(elem, 0);
-    };
-    /**
-     * Removes the object at the top of this stack and returns that object.
-     * @return {*} the object at the top of this stack or undefined if the
-     * stack is empty.
-     */
-    Stack.prototype.pop = function () {
-        return this.list.removeElementAtIndex(0);
-    };
-    /**
-     * Looks at the object at the top of this stack without removing it from the
-     * stack.
-     * @return {*} the object at the top of this stack or undefined if the
-     * stack is empty.
-     */
-    Stack.prototype.peek = function () {
-        return this.list.first();
-    };
-    /**
-     * Returns the number of elements in this stack.
-     * @return {number} the number of elements in this stack.
-     */
-    Stack.prototype.size = function () {
-        return this.list.size();
-    };
-    /**
-     * Returns true if this stack contains the specified element.
-     * <p>If the elements inside this stack are
-     * not comparable with the === operator, a custom equals function should be
-     * provided to perform searches, the function must receive two arguments and
-     * return true if they are equal, false otherwise. Example:</p>
-     *
-     * <pre>
-     * const petsAreEqualByName (pet1, pet2) {
-     *  return pet1.name === pet2.name;
-     * }
-     * </pre>
-     * @param {Object} elem element to search for.
-     * @param {function(Object,Object):boolean=} equalsFunction optional
-     * function to check if two elements are equal.
-     * @return {boolean} true if this stack contains the specified element,
-     * false otherwise.
-     */
-    Stack.prototype.contains = function (elem, equalsFunction) {
-        return this.list.contains(elem, equalsFunction);
-    };
-    /**
-     * Checks if this stack is empty.
-     * @return {boolean} true if and only if this stack contains no items; false
-     * otherwise.
-     */
-    Stack.prototype.isEmpty = function () {
-        return this.list.isEmpty();
-    };
-    /**
-     * Removes all of the elements from this stack.
-     */
-    Stack.prototype.clear = function () {
-        this.list.clear();
-    };
-    /**
-     * Executes the provided function once for each element present in this stack in
-     * LIFO order.
-     * @param {function(Object):*} callback function to execute, it is
-     * invoked with one argument: the element value, to break the iteration you can
-     * optionally return false.
-     */
-    Stack.prototype.forEach = function (callback) {
-        this.list.forEach(callback);
-    };
-    return Stack;
-}()); // End of stack
-exports.default = Stack;
-//# sourceMappingURL=Stack.js.map
-
-/***/ }),
-/* 281 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Direction;
-(function (Direction) {
-    Direction[Direction["BEFORE"] = 0] = "BEFORE";
-    Direction[Direction["AFTER"] = 1] = "AFTER";
-    Direction[Direction["INSIDE_AT_END"] = 2] = "INSIDE_AT_END";
-    Direction[Direction["INSIDE_AT_START"] = 3] = "INSIDE_AT_START";
-})(Direction || (Direction = {}));
-var MultiRootTree = /** @class */ (function () {
-    function MultiRootTree(rootIds, nodes) {
-        if (rootIds === void 0) { rootIds = []; }
-        if (nodes === void 0) { nodes = {}; }
-        this.rootIds = rootIds;
-        this.nodes = nodes;
-        this.initRootIds();
-        this.initNodes();
-    }
-    MultiRootTree.prototype.initRootIds = function () {
-        for (var _i = 0, _a = this.rootIds; _i < _a.length; _i++) {
-            var rootId = _a[_i];
-            this.createEmptyNodeIfNotExist(rootId);
-        }
-    };
-    MultiRootTree.prototype.initNodes = function () {
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                for (var _i = 0, _a = this.nodes[nodeKey]; _i < _a.length; _i++) {
-                    var nodeListItem = _a[_i];
-                    this.createEmptyNodeIfNotExist(nodeListItem);
-                }
-            }
-        }
-    };
-    MultiRootTree.prototype.createEmptyNodeIfNotExist = function (nodeKey) {
-        if (!this.nodes[nodeKey]) {
-            this.nodes[nodeKey] = [];
-        }
-    };
-    MultiRootTree.prototype.getRootIds = function () {
-        var clone = this.rootIds.slice();
-        return clone;
-    };
-    MultiRootTree.prototype.getNodes = function () {
-        var clone = {};
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                clone[nodeKey] = this.nodes[nodeKey].slice();
-            }
-        }
-        return clone;
-    };
-    MultiRootTree.prototype.getObject = function () {
-        return {
-            rootIds: this.getRootIds(),
-            nodes: this.getNodes(),
-        };
-    };
-    MultiRootTree.prototype.toObject = function () {
-        return this.getObject();
-    };
-    MultiRootTree.prototype.flatten = function () {
-        var _this = this;
-        var extraPropsObject = [];
-        for (var i = 0; i < this.rootIds.length; i++) {
-            var rootId = this.rootIds[i];
-            extraPropsObject.push({
-                id: rootId,
-                level: 0,
-                hasParent: false,
-                childrenCount: undefined,
-            });
-            traverse(rootId, this.nodes, extraPropsObject, 0);
-        }
-        for (var _i = 0, extraPropsObject_1 = extraPropsObject; _i < extraPropsObject_1.length; _i++) {
-            var o = extraPropsObject_1[_i];
-            o.childrenCount = countChildren(o.id);
-        }
-        return extraPropsObject;
-        function countChildren(id) {
-            if (!_this.nodes[id]) {
-                return 0;
-            }
-            else {
-                var childrenCount = _this.nodes[id].length;
-                return childrenCount;
-            }
-        }
-        function traverse(startId, nodes, returnArray, level) {
-            if (level === void 0) { level = 0; }
-            if (!startId || !nodes || !returnArray || !nodes[startId]) {
-                return;
-            }
-            level++;
-            var idsList = nodes[startId];
-            for (var i = 0; i < idsList.length; i++) {
-                var id = idsList[i];
-                returnArray.push({ id: id, level: level, hasParent: true });
-                traverse(id, nodes, returnArray, level);
-            }
-            level--;
-        }
-    };
-    MultiRootTree.prototype.moveIdBeforeId = function (moveId, beforeId) {
-        return this.moveId(moveId, beforeId, Direction.BEFORE);
-    };
-    MultiRootTree.prototype.moveIdAfterId = function (moveId, afterId) {
-        return this.moveId(moveId, afterId, Direction.AFTER);
-    };
-    MultiRootTree.prototype.moveIdIntoId = function (moveId, insideId, atStart) {
-        if (atStart === void 0) { atStart = true; }
-        if (atStart) {
-            return this.moveId(moveId, insideId, Direction.INSIDE_AT_START);
-        }
-        else {
-            return this.moveId(moveId, insideId, Direction.INSIDE_AT_END);
-        }
-    };
-    MultiRootTree.prototype.swapRootIdWithRootId = function (rootId, withRootId) {
-        var leftIndex = this.findRootId(rootId);
-        var rightIndex = this.findRootId(withRootId);
-        this.swapRootPositionWithRootPosition(leftIndex, rightIndex);
-    };
-    MultiRootTree.prototype.swapRootPositionWithRootPosition = function (swapRootPosition, withRootPosition) {
-        var temp = this.rootIds[withRootPosition];
-        this.rootIds[withRootPosition] = this.rootIds[swapRootPosition];
-        this.rootIds[swapRootPosition] = temp;
-    };
-    MultiRootTree.prototype.deleteId = function (id) {
-        this.rootDeleteId(id);
-        this.nodeAndSubNodesDelete(id);
-        this.nodeRefrencesDelete(id);
-    };
-    MultiRootTree.prototype.insertIdBeforeId = function (beforeId, insertId) {
-        var foundRootIdIndex = this.findRootId(beforeId);
-        if (foundRootIdIndex > -1) {
-            this.insertIdIntoRoot(insertId, foundRootIdIndex);
-        }
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                var foundNodeIdIndex = this.findNodeId(nodeKey, beforeId);
-                if (foundNodeIdIndex > -1) {
-                    this.insertIdIntoNode(nodeKey, insertId, foundNodeIdIndex);
-                }
-            }
-        }
-    };
-    MultiRootTree.prototype.insertIdAfterId = function (belowId, insertId) {
-        var foundRootIdIndex = this.findRootId(belowId);
-        if (foundRootIdIndex > -1) {
-            this.insertIdIntoRoot(insertId, foundRootIdIndex + 1);
-        }
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                var foundNodeIdIndex = this.findNodeId(nodeKey, belowId);
-                if (foundNodeIdIndex > -1) {
-                    this.insertIdIntoNode(nodeKey, insertId, foundNodeIdIndex + 1);
-                }
-            }
-        }
-    };
-    MultiRootTree.prototype.insertIdIntoId = function (insideId, insertId) {
-        this.nodeInsertAtEnd(insideId, insertId);
-        this.nodes[insertId] = [];
-    };
-    MultiRootTree.prototype.insertIdIntoRoot = function (id, position) {
-        if (position === undefined) {
-            this.rootInsertAtEnd(id);
-        }
-        else {
-            if (position < 0) {
-                var length_1 = this.rootIds.length;
-                this.rootIds.splice((position + length_1 + 1), 0, id);
-            }
-            else {
-                this.rootIds.splice(position, 0, id);
-            }
-        }
-        this.nodes[id] = this.nodes[id] || [];
-    };
-    MultiRootTree.prototype.insertIdIntoNode = function (nodeKey, id, position) {
-        this.nodes[nodeKey] = this.nodes[nodeKey] || [];
-        this.nodes[id] = this.nodes[id] || [];
-        if (position === undefined) {
-            this.nodeInsertAtEnd(nodeKey, id);
-        }
-        else {
-            if (position < 0) {
-                var length_2 = this.nodes[nodeKey].length;
-                this.nodes[nodeKey].splice((position + length_2 + 1), 0, id);
-            }
-            else {
-                this.nodes[nodeKey].splice(position, 0, id);
-            }
-        }
-    };
-    MultiRootTree.prototype.moveId = function (moveId, beforeId, direction) {
-        var sourceId = moveId;
-        var sourceRootIndex = this.findRootId(sourceId);
-        var sourceNodeKey;
-        var sourceNodeIdIndex;
-        if (this.nodes[beforeId]) {
-            sourceNodeKey = beforeId;
-        }
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                sourceNodeIdIndex = this.findNodeId(nodeKey, beforeId);
-                break;
-            }
-        }
-        // got all
-        var targetId = beforeId;
-        var targetRootIndex = this.findRootId(targetId);
-        var targetNodeKey;
-        var targetNodeIdIndex;
-        if (this.nodes[beforeId]) {
-            targetNodeKey = beforeId;
-        }
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                targetNodeIdIndex = this.findNodeId(nodeKey, beforeId);
-                break;
-            }
-        }
-        // got all
-        if (sourceRootIndex > -1) {
-            if (targetRootIndex > -1) {
-                // moving root to root
-                // console.log(`Moving ROOT to ROOT`);
-                // console.log(`RootIds:`);
-                // console.log(this.rootIds);
-                // console.log(`TargetIndex=${targetRootIndex}, SourceIndex=${sourceRootIndex}`);
-                // console.log(`TargetId=${targetId}, SourceId=${sourceId}`);
-                this.rootDelete(sourceRootIndex); // indexes change now
-                if (targetRootIndex > sourceRootIndex) {
-                    targetRootIndex--;
-                }
-                else {
-                }
-                switch (direction) {
-                    case Direction.BEFORE:
-                        this.insertIdIntoRoot(sourceId, targetRootIndex);
-                        break;
-                    case Direction.AFTER:
-                        this.insertIdIntoRoot(sourceId, targetRootIndex + 1);
-                        break;
-                    case Direction.INSIDE_AT_START:
-                        this.nodeInsertAtStart(targetId, sourceId);
-                        break;
-                    case Direction.INSIDE_AT_END:
-                        this.nodeInsertAtEnd(targetId, sourceId);
-                        break;
-                }
-            }
-            else {
-                // moving root (source) ABOVE node (target)
-                // will remove one entry from roots
-                this.rootDelete(sourceRootIndex);
-                for (var nodeKey in this.nodes) {
-                    if (this.nodes.hasOwnProperty(nodeKey)) {
-                        var index = this.findNodeId(nodeKey, targetId);
-                        if (index > -1) {
-                            switch (direction) {
-                                case Direction.BEFORE:
-                                    this.insertIdIntoNode(nodeKey, sourceId, index);
-                                    break;
-                                case Direction.AFTER:
-                                    this.insertIdIntoNode(nodeKey, sourceId, index + 1);
-                                    break;
-                                case Direction.INSIDE_AT_START:
-                                    this.nodeInsertAtStart(targetId, sourceId);
-                                    break;
-                                case Direction.INSIDE_AT_END:
-                                    this.nodeInsertAtEnd(targetId, sourceId);
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            if (targetRootIndex > -1) {
-                // moving node (source) ABOVE root (target)
-                // delete source id from each node
-                for (var nodeKey in this.nodes) {
-                    if (this.nodes.hasOwnProperty(nodeKey)) {
-                        var index = this.findNodeId(nodeKey, sourceId);
-                        if (index > -1) {
-                            // this.nodeInsertId(nodeKey, sourceId, index);
-                            this.nodeDeleteAtIndex(nodeKey, index);
-                            break;
-                        }
-                    }
-                }
-                switch (direction) {
-                    case Direction.BEFORE:
-                        this.insertIdIntoRoot(sourceId, targetRootIndex);
-                        break;
-                    case Direction.AFTER:
-                        this.insertIdIntoRoot(sourceId, targetRootIndex + 1);
-                        break;
-                    case Direction.INSIDE_AT_START:
-                        this.nodeInsertAtStart(targetId, sourceId);
-                        break;
-                    case Direction.INSIDE_AT_END:
-                        this.nodeInsertAtEnd(targetId, sourceId);
-                        break;
-                }
-            }
-            else {
-                // moving node (source) ABOVE node (target)
-                // delete source id from each node
-                for (var nodeKey in this.nodes) {
-                    if (this.nodes.hasOwnProperty(nodeKey)) {
-                        var index = this.findNodeId(nodeKey, sourceId);
-                        if (index > -1) {
-                            this.nodeDeleteAtIndex(nodeKey, index);
-                            break;
-                        }
-                    }
-                }
-                for (var nodeKey in this.nodes) {
-                    if (this.nodes.hasOwnProperty(nodeKey)) {
-                        var index = this.findNodeId(nodeKey, targetId);
-                        if (index > -1) {
-                            switch (direction) {
-                                case Direction.BEFORE:
-                                    this.insertIdIntoNode(nodeKey, sourceId, index);
-                                    break;
-                                case Direction.AFTER:
-                                    this.insertIdIntoNode(nodeKey, sourceId, index + 1);
-                                    break;
-                                case Direction.INSIDE_AT_START:
-                                    this.nodeInsertAtStart(targetId, sourceId);
-                                    break;
-                                case Direction.INSIDE_AT_END:
-                                    this.nodeInsertAtEnd(targetId, sourceId);
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    };
-    MultiRootTree.prototype.swapArrayElements = function (arr, indexA, indexB) {
-        var temp = arr[indexA];
-        arr[indexA] = arr[indexB];
-        arr[indexB] = temp;
-        return arr;
-    };
-    MultiRootTree.prototype.rootDeleteId = function (id) {
-        var index = this.findRootId(id);
-        if (index > -1) {
-            this.rootDelete(index);
-        }
-    };
-    MultiRootTree.prototype.nodeAndSubNodesDelete = function (nodeKey) {
-        var toDeleteLater = [];
-        for (var i = 0; i < this.nodes[nodeKey].length; i++) {
-            var id = this.nodes[nodeKey][i];
-            this.nodeAndSubNodesDelete(id);
-            toDeleteLater.push(nodeKey);
-        }
-        this.nodeDelete(nodeKey);
-        for (var i = 0; i < toDeleteLater.length; i++) {
-            this.nodeDelete(toDeleteLater[i]);
-        }
-    };
-    MultiRootTree.prototype.nodeRefrencesDelete = function (id) {
-        for (var nodeKey in this.nodes) {
-            if (this.nodes.hasOwnProperty(nodeKey)) {
-                for (var i = 0; i < this.nodes[nodeKey].length; i++) {
-                    var targetId = this.nodes[nodeKey][i];
-                    if (targetId === id) {
-                        this.nodeDeleteAtIndex(nodeKey, i);
-                    }
-                }
-            }
-        }
-    };
-    MultiRootTree.prototype.nodeDelete = function (nodeKey) {
-        delete this.nodes[nodeKey];
-    };
-    MultiRootTree.prototype.findRootId = function (id) {
-        return this.rootIds.indexOf(id);
-    };
-    MultiRootTree.prototype.findNodeId = function (nodeKey, id) {
-        return this.nodes[nodeKey].indexOf(id);
-    };
-    MultiRootTree.prototype.findNode = function (nodeKey) {
-        return this.nodes[nodeKey];
-    };
-    MultiRootTree.prototype.nodeInsertAtStart = function (nodeKey, id) {
-        this.nodes[nodeKey].unshift(id);
-    };
-    MultiRootTree.prototype.nodeInsertAtEnd = function (nodeKey, id) {
-        this.nodes[nodeKey].push(id);
-    };
-    MultiRootTree.prototype.rootDelete = function (index) {
-        this.rootIds.splice(index, 1);
-    };
-    MultiRootTree.prototype.nodeDeleteAtIndex = function (nodeKey, index) {
-        this.nodes[nodeKey].splice(index, 1);
-    };
-    MultiRootTree.prototype.rootInsertAtStart = function (id) {
-        this.rootIds.unshift(id);
-    };
-    MultiRootTree.prototype.rootInsertAtEnd = function (id) {
-        this.rootIds.push(id);
-    };
-    return MultiRootTree;
-}());
-exports.default = MultiRootTree;
-//# sourceMappingURL=MultiRootTree.js.map
-
-/***/ }),
 /* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -63192,12 +63246,12 @@ exports.default = MultiRootTree;
 Object.defineProperty(exports, "__esModule", { value: true });
 var registry = __webpack_require__(14);
 var structure = __webpack_require__(4);
-var message = __webpack_require__(206);
+var message = __webpack_require__(40);
 var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
-var data = __webpack_require__(25);
+var common = __webpack_require__(10);
+var data = __webpack_require__(18);
 var sdmx = __webpack_require__(6);
-var xml = __webpack_require__(59);
+var xml = __webpack_require__(60);
 function parseXml(s) {
     var parseXml;
     parseXml = new DOMParser();
@@ -64272,9 +64326,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
-var common = __webpack_require__(11);
+var message = __webpack_require__(40);
+var common = __webpack_require__(10);
+var data = __webpack_require__(18);
 var sdmx = __webpack_require__(6);
 var moment = __webpack_require__(0);
 var ABS = (function () {
@@ -64325,6 +64381,15 @@ var ABS = (function () {
         return this.makeRequest(opts, send).then(function (a) {
             console.log("Got Data Response");
             var dm = sdmx.SdmxIO.parseData(a);
+            if (dm == null) {
+                var dm = new message.DataMessage();
+                var payload = new common.PayloadStructureType();
+                payload.setStructure(dataflow.getStructure());
+                dm.setHeader(sdmx.SdmxIO.getBaseHeader());
+                dm.getHeader().setStructures([payload]);
+                dm.setDataSet(0, new data.FlatDataSet());
+                return dm;
+            }
             var payload = new common.PayloadStructureType();
             payload.setStructure(dataflow.getStructure());
             dm.getHeader().setStructures([payload]);
@@ -64801,7 +64866,7 @@ exports.clearImmediate = clearImmediate;
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20), __webpack_require__(5)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21), __webpack_require__(5)))
 
 /***/ }),
 /* 286 */
@@ -64827,9 +64892,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var moment = __webpack_require__(0);
 var OECD = (function () {
@@ -65120,9 +65185,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var Knoema = (function () {
     function Knoema(agency, service, options) {
@@ -65353,13 +65418,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
     Copyright (C) 2016 James Gardner
 */
 var moment = __webpack_require__(0);
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
 var structure = __webpack_require__(4);
 var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
-var time = __webpack_require__(61);
+var time = __webpack_require__(62);
 function parseXml(s) {
     var parseXml;
     parseXml = new DOMParser();
@@ -65922,11 +65987,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
 var structure = __webpack_require__(4);
 var commonreferences = __webpack_require__(13);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var ILO = (function () {
     function ILO(agency, service, options) {
@@ -66220,9 +66285,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var ESTAT = (function () {
     function ESTAT(agency, service, options) {
@@ -66434,9 +66499,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
     along with sdmx-js.  If not, see <http://www.gnu.org/licenses/>.
     Copyright (C) 2016 James Gardner
 */
-var bluebird_1 = __webpack_require__(19);
+var bluebird_1 = __webpack_require__(20);
 var registry = __webpack_require__(14);
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 var sdmx = __webpack_require__(6);
 var INSEE = (function () {
     function INSEE(agency, service, options) {
@@ -66672,7 +66737,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Select_1 = __webpack_require__(18);
+var Select_1 = __webpack_require__(19);
 var structure = __webpack_require__(4);
 var Dataflows = (function (_super) {
     __extends(Dataflows, _super);
@@ -66755,11 +66820,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var _ = __webpack_require__(39);
+var _ = __webpack_require__(41);
 var structure = __webpack_require__(4);
-var data = __webpack_require__(25);
+var data = __webpack_require__(18);
 var ItemTypes_1 = __webpack_require__(207);
-var react_dnd_1 = __webpack_require__(62);
+var react_dnd_1 = __webpack_require__(63);
 var HTML5Backend = __webpack_require__(379);
 var Column_1 = __webpack_require__(407);
 var ColumnDropTarget_1 = __webpack_require__(408);
@@ -67092,11 +67157,11 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _checkDecoratorArguments = __webpack_require__(49);
+var _checkDecoratorArguments = __webpack_require__(51);
 
 var _checkDecoratorArguments2 = _interopRequireDefault(_checkDecoratorArguments);
 
-var _hoistNonReactStatics = __webpack_require__(50);
+var _hoistNonReactStatics = __webpack_require__(52);
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
@@ -67250,7 +67315,7 @@ var _reducers = __webpack_require__(305);
 
 var _reducers2 = _interopRequireDefault(_reducers);
 
-var _dragDrop = __webpack_require__(41);
+var _dragDrop = __webpack_require__(43);
 
 var dragDropActions = _interopRequireWildcard(_dragDrop);
 
@@ -67358,7 +67423,7 @@ exports.__esModule = true;
 exports.ActionTypes = undefined;
 exports['default'] = createStore;
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
@@ -67618,7 +67683,7 @@ var ActionTypes = exports.ActionTypes = {
 /* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Symbol = __webpack_require__(63);
+var Symbol = __webpack_require__(64);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -67768,7 +67833,7 @@ if (typeof self !== 'undefined') {
 
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20), __webpack_require__(30)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21), __webpack_require__(30)(module)))
 
 /***/ }),
 /* 304 */
@@ -67865,9 +67930,9 @@ var _without = __webpack_require__(211);
 
 var _without2 = _interopRequireDefault(_without);
 
-var _dragDrop = __webpack_require__(41);
+var _dragDrop = __webpack_require__(43);
 
-var _registry = __webpack_require__(48);
+var _registry = __webpack_require__(50);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68000,7 +68065,7 @@ module.exports = Hash;
 /* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(42);
+var nativeCreate = __webpack_require__(44);
 
 /**
  * Removes all key-value entries from the hash.
@@ -68186,7 +68251,7 @@ module.exports = hashDelete;
 /* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(42);
+var nativeCreate = __webpack_require__(44);
 
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
@@ -68222,7 +68287,7 @@ module.exports = hashGet;
 /* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(42);
+var nativeCreate = __webpack_require__(44);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -68251,7 +68316,7 @@ module.exports = hashHas;
 /* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var nativeCreate = __webpack_require__(42);
+var nativeCreate = __webpack_require__(44);
 
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
@@ -68337,7 +68402,7 @@ module.exports = listCacheClear;
 /* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(44);
+var assocIndexOf = __webpack_require__(46);
 
 /** Used for built-in method references. */
 var arrayProto = Array.prototype;
@@ -68378,7 +68443,7 @@ module.exports = listCacheDelete;
 /* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(44);
+var assocIndexOf = __webpack_require__(46);
 
 /**
  * Gets the list cache value for `key`.
@@ -68403,7 +68468,7 @@ module.exports = listCacheGet;
 /* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(44);
+var assocIndexOf = __webpack_require__(46);
 
 /**
  * Checks if a list cache value for `key` exists.
@@ -68425,7 +68490,7 @@ module.exports = listCacheHas;
 /* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assocIndexOf = __webpack_require__(44);
+var assocIndexOf = __webpack_require__(46);
 
 /**
  * Sets the list cache `key` to `value`.
@@ -68457,7 +68522,7 @@ module.exports = listCacheSet;
 /* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getNative = __webpack_require__(43),
+var getNative = __webpack_require__(45),
     root = __webpack_require__(32);
 
 /* Built-in method references that are verified to be native. */
@@ -68470,7 +68535,7 @@ module.exports = Map;
 /* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(46);
+var getMapData = __webpack_require__(48);
 
 /**
  * Removes `key` and its value from the map.
@@ -68515,7 +68580,7 @@ module.exports = isKeyable;
 /* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(46);
+var getMapData = __webpack_require__(48);
 
 /**
  * Gets the map value for `key`.
@@ -68537,7 +68602,7 @@ module.exports = mapCacheGet;
 /* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(46);
+var getMapData = __webpack_require__(48);
 
 /**
  * Checks if a map value for `key` exists.
@@ -68559,7 +68624,7 @@ module.exports = mapCacheHas;
 /* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getMapData = __webpack_require__(46);
+var getMapData = __webpack_require__(48);
 
 /**
  * Sets the map `key` to `value`.
@@ -68908,7 +68973,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = refCount;
 
-var _registry = __webpack_require__(48);
+var _registry = __webpack_require__(50);
 
 function refCount() {
 	var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
@@ -68933,7 +68998,7 @@ function refCount() {
 var arrayFilter = __webpack_require__(344),
     baseRest = __webpack_require__(26),
     baseXor = __webpack_require__(345),
-    isArrayLikeObject = __webpack_require__(47);
+    isArrayLikeObject = __webpack_require__(49);
 
 /**
  * Creates an array of unique values that is the
@@ -69063,9 +69128,9 @@ module.exports = arrayPush;
 /* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Symbol = __webpack_require__(63),
+var Symbol = __webpack_require__(64),
     isArguments = __webpack_require__(221),
-    isArray = __webpack_require__(22);
+    isArray = __webpack_require__(23);
 
 /** Built-in value references. */
 var spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
@@ -69089,7 +69154,7 @@ module.exports = isFlattenable;
 /* 348 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetTag = __webpack_require__(40),
+var baseGetTag = __webpack_require__(42),
     isObjectLike = __webpack_require__(33);
 
 /** `Object#toString` result references. */
@@ -69138,7 +69203,7 @@ module.exports = createSet;
 /* 350 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getNative = __webpack_require__(43),
+var getNative = __webpack_require__(45),
     root = __webpack_require__(32);
 
 /* Built-in method references that are verified to be native. */
@@ -69151,7 +69216,7 @@ module.exports = Set;
 /* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayMap = __webpack_require__(67),
+var arrayMap = __webpack_require__(68),
     baseIntersection = __webpack_require__(352),
     baseRest = __webpack_require__(26),
     castArrayLikeObject = __webpack_require__(353);
@@ -69187,12 +69252,12 @@ module.exports = intersection;
 /* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SetCache = __webpack_require__(64),
-    arrayIncludes = __webpack_require__(65),
-    arrayIncludesWith = __webpack_require__(66),
-    arrayMap = __webpack_require__(67),
-    baseUnary = __webpack_require__(68),
-    cacheHas = __webpack_require__(69);
+var SetCache = __webpack_require__(65),
+    arrayIncludes = __webpack_require__(66),
+    arrayIncludesWith = __webpack_require__(67),
+    arrayMap = __webpack_require__(68),
+    baseUnary = __webpack_require__(69),
+    cacheHas = __webpack_require__(70);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeMin = Math.min;
@@ -69267,7 +69332,7 @@ module.exports = baseIntersection;
 /* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isArrayLikeObject = __webpack_require__(47);
+var isArrayLikeObject = __webpack_require__(49);
 
 /**
  * Casts `value` to an empty array if it's not an array like object.
@@ -69317,7 +69382,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isArray = __webpack_require__(22);
+var _isArray = __webpack_require__(23);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
@@ -69556,7 +69621,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isArray = __webpack_require__(22);
+var _isArray = __webpack_require__(23);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
@@ -69564,7 +69629,7 @@ var _asap = __webpack_require__(357);
 
 var _asap2 = _interopRequireDefault(_asap);
 
-var _registry = __webpack_require__(48);
+var _registry = __webpack_require__(50);
 
 var _getNextUniqueId = __webpack_require__(359);
 
@@ -70068,7 +70133,7 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 // back into ASAP proper.
 // https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
 /* 359 */
@@ -70277,7 +70342,7 @@ var _preact = __webpack_require__(2);
 
 var _preact2 = _interopRequireDefault(_preact);
 
-var _shallowEqual = __webpack_require__(71);
+var _shallowEqual = __webpack_require__(72);
 
 var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 
@@ -70285,7 +70350,7 @@ var _shallowEqualScalar = __webpack_require__(225);
 
 var _shallowEqualScalar2 = _interopRequireDefault(_shallowEqualScalar);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
@@ -70293,11 +70358,11 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _checkDecoratorArguments = __webpack_require__(49);
+var _checkDecoratorArguments = __webpack_require__(51);
 
 var _checkDecoratorArguments2 = _interopRequireDefault(_checkDecoratorArguments);
 
-var _hoistNonReactStatics = __webpack_require__(50);
+var _hoistNonReactStatics = __webpack_require__(52);
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
@@ -70427,11 +70492,11 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
-var _checkDecoratorArguments = __webpack_require__(49);
+var _checkDecoratorArguments = __webpack_require__(51);
 
 var _checkDecoratorArguments2 = _interopRequireDefault(_checkDecoratorArguments);
 
@@ -70506,7 +70571,7 @@ var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? ob
 
 exports.__esModule = true;
 
-var _isDisposable2 = __webpack_require__(72);
+var _isDisposable2 = __webpack_require__(73);
 
 var _isDisposable3 = _interopRequireWildcard(_isDisposable2);
 
@@ -70588,7 +70653,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 exports.__esModule = true;
 
-var _isDisposable = __webpack_require__(72);
+var _isDisposable = __webpack_require__(73);
 
 var _isDisposable2 = _interopRequireWildcard(_isDisposable);
 
@@ -70695,7 +70760,7 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 exports.__esModule = true;
 
-var _isDisposable = __webpack_require__(72);
+var _isDisposable = __webpack_require__(73);
 
 var _isDisposable2 = _interopRequireWildcard(_isDisposable);
 
@@ -70813,7 +70878,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
@@ -71168,11 +71233,11 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
-var _checkDecoratorArguments = __webpack_require__(49);
+var _checkDecoratorArguments = __webpack_require__(51);
 
 var _checkDecoratorArguments2 = _interopRequireDefault(_checkDecoratorArguments);
 
@@ -71280,7 +71345,7 @@ var _invariant = __webpack_require__(7);
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _isPlainObject = __webpack_require__(21);
+var _isPlainObject = __webpack_require__(22);
 
 var _isPlainObject2 = _interopRequireDefault(_isPlainObject);
 
@@ -71559,7 +71624,7 @@ var _getEmptyImage = __webpack_require__(406);
 
 var _getEmptyImage2 = _interopRequireDefault(_getEmptyImage);
 
-var _NativeTypes = __webpack_require__(73);
+var _NativeTypes = __webpack_require__(74);
 
 var NativeTypes = _interopRequireWildcard(_NativeTypes);
 
@@ -71605,7 +71670,7 @@ var _OffsetUtils = __webpack_require__(403);
 
 var _NativeDragSources = __webpack_require__(405);
 
-var _NativeTypes = __webpack_require__(73);
+var _NativeTypes = __webpack_require__(74);
 
 var NativeTypes = _interopRequireWildcard(_NativeTypes);
 
@@ -72387,7 +72452,7 @@ module.exports = copyObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseAssignValue = __webpack_require__(230),
-    eq = __webpack_require__(45);
+    eq = __webpack_require__(47);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -72463,8 +72528,8 @@ module.exports = createAssigner;
 /* 386 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var eq = __webpack_require__(45),
-    isArrayLike = __webpack_require__(70),
+var eq = __webpack_require__(47),
+    isArrayLike = __webpack_require__(71),
     isIndex = __webpack_require__(231),
     isObject = __webpack_require__(34);
 
@@ -72501,7 +72566,7 @@ module.exports = isIterateeCall;
 
 var arrayLikeKeys = __webpack_require__(388),
     baseKeysIn = __webpack_require__(395),
-    isArrayLike = __webpack_require__(70);
+    isArrayLike = __webpack_require__(71);
 
 /**
  * Creates an array of the own and inherited enumerable property names of `object`.
@@ -72539,7 +72604,7 @@ module.exports = keysIn;
 
 var baseTimes = __webpack_require__(389),
     isArguments = __webpack_require__(221),
-    isArray = __webpack_require__(22),
+    isArray = __webpack_require__(23),
     isBuffer = __webpack_require__(390),
     isIndex = __webpack_require__(231),
     isTypedArray = __webpack_require__(392);
@@ -72688,7 +72753,7 @@ module.exports = stubFalse;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsTypedArray = __webpack_require__(393),
-    baseUnary = __webpack_require__(68),
+    baseUnary = __webpack_require__(69),
     nodeUtil = __webpack_require__(394);
 
 /* Node.js helper references. */
@@ -72720,7 +72785,7 @@ module.exports = isTypedArray;
 /* 393 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetTag = __webpack_require__(40),
+var baseGetTag = __webpack_require__(42),
     isLength = __webpack_require__(218),
     isObjectLike = __webpack_require__(33);
 
@@ -72904,7 +72969,7 @@ module.exports = nativeKeysIn;
 /* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var eq = __webpack_require__(45);
+var eq = __webpack_require__(47);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -73051,7 +73116,7 @@ exports.default = EnterLeaveCounter;
 var baseFlatten = __webpack_require__(220),
     baseRest = __webpack_require__(26),
     baseUniq = __webpack_require__(222),
-    isArrayLikeObject = __webpack_require__(47);
+    isArrayLikeObject = __webpack_require__(49);
 
 /**
  * Creates an array of unique values, in order, from all given arrays using
@@ -73427,7 +73492,7 @@ var _nativeTypesConfig;
 exports.createNativeDragSource = createNativeDragSource;
 exports.matchNativeItemType = matchNativeItemType;
 
-var _NativeTypes = __webpack_require__(73);
+var _NativeTypes = __webpack_require__(74);
 
 var NativeTypes = _interopRequireWildcard(_NativeTypes);
 
@@ -73583,7 +73648,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
 var structure = __webpack_require__(4);
-var preact_dnd_1 = __webpack_require__(62);
+var preact_dnd_1 = __webpack_require__(63);
 var ItemTypes_1 = __webpack_require__(207);
 var style = {
     border: '1px dashed gray',
@@ -73675,7 +73740,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var preact_dnd_1 = __webpack_require__(62);
+var preact_dnd_1 = __webpack_require__(63);
 var style = {
     height: '1.0rem',
     width: '1.0rem',
@@ -73806,8 +73871,8 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Dialog_1 = __webpack_require__(74);
-var Checkbox_1 = __webpack_require__(76);
+var Dialog_1 = __webpack_require__(75);
+var Checkbox_1 = __webpack_require__(77);
 var structure = __webpack_require__(4);
 var collections = __webpack_require__(17);
 var react_tiny_virtual_list_1 = __webpack_require__(423);
@@ -73996,8 +74061,8 @@ exports.default = MyDialog;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(38);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_ripple__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(39);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_ripple__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__foundation__ = __webpack_require__(412);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__util__ = __webpack_require__(414);
 /* unused harmony reexport MDCDialogFoundation */
@@ -74100,7 +74165,7 @@ class MDCDialog extends __WEBPACK_IMPORTED_MODULE_0__material_base__["a" /* MDCC
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(413);
 /**
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -74728,7 +74793,7 @@ function createIsUnavailable(elementDocument) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__ = __webpack_require__(24);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 
@@ -74764,11 +74829,11 @@ class Icon extends __WEBPACK_IMPORTED_MODULE_1__MaterialComponent__["a" /* defau
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MDCCheckbox; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_animation__ = __webpack_require__(419);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_component__ = __webpack_require__(37);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_selection_control__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_base_component__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__material_selection_control__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__foundation__ = __webpack_require__(420);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__material_ripple__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__material_ripple_util__ = __webpack_require__(57);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__material_ripple__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__material_ripple_util__ = __webpack_require__(58);
 /* unused harmony reexport MDCCheckboxFoundation */
 /**
  * @license
@@ -75082,7 +75147,7 @@ function getCorrectPropertyName(windowObj, eventType) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_base_foundation__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_selection_control__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__material_selection_control__ = __webpack_require__(78);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__adapter__ = __webpack_require__(421);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants__ = __webpack_require__(422);
 /**
@@ -75382,7 +75447,7 @@ function validDescriptor(inputPropDesc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_selection_control__ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__material_selection_control__ = __webpack_require__(78);
 /**
  * @license
  * Copyright 2016 Google Inc. All Rights Reserved.
@@ -76593,7 +76658,7 @@ module.exports = (function(){
     return result;
   };
 })();
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
 /* 428 */
@@ -76616,9 +76681,9 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Dialog_1 = __webpack_require__(74);
-var List_1 = __webpack_require__(83);
-var Checkbox_1 = __webpack_require__(76);
+var Dialog_1 = __webpack_require__(75);
+var List_1 = __webpack_require__(84);
+var Checkbox_1 = __webpack_require__(77);
 var structure = __webpack_require__(4);
 var collections = __webpack_require__(17);
 var date_picker_1 = __webpack_require__(429);
@@ -76884,7 +76949,7 @@ var _propTypes = __webpack_require__(3);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _hoistNonReactStatics = __webpack_require__(50);
+var _hoistNonReactStatics = __webpack_require__(52);
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
@@ -77489,7 +77554,7 @@ function hasOwnProperty(obj, prop) {
 /* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _curry2 = __webpack_require__(52);
+var _curry2 = __webpack_require__(54);
 
 
 /**
@@ -78897,7 +78962,7 @@ function getTransitionProperties() {
 /* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _curry3 = __webpack_require__(79);
+var _curry3 = __webpack_require__(80);
 
 
 /**
@@ -79111,7 +79176,7 @@ module.exports = (function() {
 /***/ (function(module, exports, __webpack_require__) {
 
 var _arity = __webpack_require__(246);
-var _curry2 = __webpack_require__(52);
+var _curry2 = __webpack_require__(54);
 
 
 /**
@@ -79230,7 +79295,7 @@ module.exports = _curry1(_checkForMethod('tail', slice(1, Infinity)));
 /***/ (function(module, exports, __webpack_require__) {
 
 var _checkForMethod = __webpack_require__(250);
-var _curry3 = __webpack_require__(79);
+var _curry3 = __webpack_require__(80);
 
 
 /**
@@ -79304,7 +79369,7 @@ module.exports = _curry1(function reverse(list) {
 /* 462 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var _curry2 = __webpack_require__(52);
+var _curry2 = __webpack_require__(54);
 
 
 /**
@@ -79662,7 +79727,7 @@ var _FontIcon = __webpack_require__(28);
 
 var _FontIcon2 = _interopRequireDefault(_FontIcon);
 
-var _Ripple = __webpack_require__(51);
+var _Ripple = __webpack_require__(53);
 
 var _Ripple2 = _interopRequireDefault(_Ripple);
 
@@ -79832,7 +79897,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _Ripple = __webpack_require__(51);
+var _Ripple = __webpack_require__(53);
 
 var _Ripple2 = _interopRequireDefault(_Ripple);
 
@@ -80481,22 +80546,20 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-console.log('0.1');
 var React = __webpack_require__(1);
-console.log('0.2');
 var preact_1 = __webpack_require__(2);
 console.log('0.3');
 var visual = __webpack_require__(485);
 console.log('0.4');
-var bindings = __webpack_require__(53);
+var bindings = __webpack_require__(36);
 console.log('0.5');
 var structure = __webpack_require__(4);
 console.log('0.6');
 console.log('0.7');
 console.log('0.8');
-var _ = __webpack_require__(39);
+var _ = __webpack_require__(41);
 console.log('0.9');
-var Select_1 = __webpack_require__(18);
+var Select_1 = __webpack_require__(19);
 console.log('1.0');
 var Services_1 = __webpack_require__(486);
 console.log('1.0');
@@ -80512,7 +80575,7 @@ __webpack_require__(254);
 console.log('1.5');
 __webpack_require__(255);
 console.log('1.6');
-var Button_1 = __webpack_require__(75);
+var Button_1 = __webpack_require__(76);
 console.log('1.7');
 var adapter = __webpack_require__(493);
 console.log('1.8');
@@ -80560,6 +80623,31 @@ var Editor = (function (_super) {
     };
     Editor.prototype.getState = function () { return this.state; };
     Editor.prototype.parseVisualObject = function (obj) {
+    };
+    Editor.prototype.changeAdapter = function (e) {
+        console.log("ChangeAdapter");
+        this.state.visual.setAdapter(this.state.adapters[e.selectedIndex]);
+        this.state.visual.render();
+        _super.prototype.forceUpdate.call(this);
+    };
+    Editor.prototype.listAdapters = function () {
+        var adapters = [];
+        for (var i = 0; i < adapter.AdapterRegistrySingleton.getList().length; i++) {
+            if (adapter.AdapterRegistrySingleton.getList()[i].canCreateModelFromVisual(this.state.visual)) {
+                console.log("Added");
+                var adapt = adapter.AdapterRegistrySingleton.getList()[i];
+                adapters.push(adapt);
+            }
+        }
+        this.state.adapters = adapters;
+        var options = [];
+        var index = 0;
+        _.forEach(this.state.adapters, function (item) {
+            var name = item.getName();
+            options.push(preact_1.h(Select_1.default.Item, null, name));
+            index++;
+        });
+        return options;
     };
     Editor.prototype.getVisualObject = function () {
         var obj = {};
@@ -80618,7 +80706,7 @@ var Editor = (function (_super) {
         var cn = entry.getCreateNew();
         var b = new cn(this.state.visual, concept);
         this.state.visual.setBinding(b);
-        this.forceUpdate();
+        _super.prototype.forceUpdate.call(this);
     };
     Editor.prototype.customRow = function (concept, register) {
         var _this = this;
@@ -80638,15 +80726,23 @@ var Editor = (function (_super) {
             this.customiseDialog.show();
         }
     };
+    Editor.prototype.changeVisualText = function (a) {
+        this.state.visual.setVisualId(a.text);
+    };
+    Editor.prototype.changeControlsText = function (a) {
+        this.state.visual.setControlsId(a.text);
+    };
     Editor.prototype.render = function () {
         var _this = this;
         var html = [];
-        html.push(preact_1.h(Services_1.default, { onConnect: function (q) { return _this.connect(q); } }));
+        html.push(preact_1.h(Services_1.default, { onConnect: function (q) { _this.connect(q); } }));
         html.push(preact_1.h(Dataflows_1.default, { dfs: this.getState().dataflows, selectDataflow: function (df) { return _this.selectDataflow(df); } }));
         html.push(preact_1.h(JSONResultPanel_1.default, { str: JSON.stringify(this.getVisualObject()), obj: this.getVisualObject() }));
         if (this.state.visual == null) {
             return preact_1.h("div", null, html);
         }
+        html.push((preact_1.h("label", null, "Visual Id"), preact_1.h("input", { type: "text", value: this.state.visual.getVisualId(), onChange: this.changeVisualText.bind(this) })));
+        html.push((preact_1.h("label", null, "Controls Id"), preact_1.h("input", { type: "text", value: this.state.visual.getControlsId(), onChange: this.changeControlsText.bind(this) })));
         var struct = this.state.visual.getDataStructure();
         if (struct == null) {
             console.log("Struct is null");
@@ -80666,8 +80762,8 @@ var Editor = (function (_super) {
             var concept2 = this.state.visual.getRegistry().findConcept(dim2.getConceptIdentity());
             html.push(this.customRow(concept2, bindings.TimeBindingRegister.register));
         } /*
-        if(this.state.visual.getCrossSection()!=null){
-            var dim3: structure.Component = struct.findComponentString(this.state.visual.getCrossSection().getConcept());
+if(this.state.visual.getCrossSection()!=null){
+    var dim3: structure.Component = struct.findComponentString(this.state.visual.getCrossSection().getConcept());
             var concept3 = this.state.visual.getRegistry().findConcept(dim3.getConceptIdentity());
             html.push(this.customRow(concept3,bindings.CrossSectionBindingRegister.register));
         }*/
@@ -80677,13 +80773,10 @@ var Editor = (function (_super) {
             html.push(this.customRow(concept4, bindings.MeasureBindingRegister.register));
         }
         html.push(preact_1.h(CustomiseDialog_1.default, { currentBindingObject: this.state.currentBindingObject, renderFunc: this.state.currentBindingRenderFunc, currentBindingConcept: this.state.currentBindingConcept, visual: this.state.visual, ref: function (customiseDialog) { _this.customiseDialog = customiseDialog; }, open: this.state.openCustomise }));
-        var reg = new adapter.AdapterRegistry();
-        for (var i = 0; i < reg.getList().length; i++) {
-            if (reg.getList()[i].canCreateModelFromVisual(this.state.visual)) {
-                //
-                html.push(preact_1.h(Button_1.default, { onClick: function () { reg.getList()[i].createModel(_this.state.visual, _this.state.visual.getCube()).render("render"); } }, reg.getList()[i].getName()));
-            }
-        }
+        var ad = this.state.visual.getAdapter();
+        var adps = this.listAdapters();
+        var change = this.changeAdapter.bind(this);
+        html.push(preact_1.h(Select_1.default, { value: ad != null ? ad.getName() : "", onChange: change }, adps));
         return preact_1.h("div", null, html);
     };
     return Editor;
@@ -80705,15 +80798,15 @@ console.log("0.3");
 console.log("0.4");
 console.log("0.5");
 console.log("0.6");
-var data = __webpack_require__(25);
+var data = __webpack_require__(18);
 console.log("0.7");
-var common = __webpack_require__(11);
+var common = __webpack_require__(10);
 console.log("0.8");
 var structure = __webpack_require__(4);
 console.log("0.9");
 var commonreferences = __webpack_require__(13);
 console.log("1.0");
-var bindings = __webpack_require__(53);
+var bindings = __webpack_require__(36);
 console.log("1.1");
 console.log('17');
 var Visual = (function () {
@@ -80734,6 +80827,8 @@ var Visual = (function () {
         this.structureVersion = "";
         // Derived from above fields   
         this.df = null;
+        this.visualId = "#render";
+        this.controlsId = "#controls";
         this.requery = true;
         this.dirty = true;
         this.dataMessage = null;
@@ -80795,6 +80890,7 @@ var Visual = (function () {
         return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length;
     };
     Visual.prototype.init = function () {
+        this.query = new data.Query(this.df, this.queryable.getRemoteRegistry().getLocalRegistry());
         this.bindings = [];
         this.bindingsColumnMapper = new data.FlatColumnMapper();
         for (var i = 0; i < this.dimSize(); i++) {
@@ -80815,11 +80911,23 @@ var Visual = (function () {
             //this.crossSection=b4;
         }
     };
+    Visual.prototype.isDirty = function () { return this.dirty; };
     Visual.prototype.setDirty = function (dirty) {
         this.dirty = dirty;
     };
     Visual.prototype.setRequery = function (requery) {
         this.requery = requery;
+    };
+    Visual.prototype.getCube = function () {
+        if (this.isDirty() && this.dataMessage != null) {
+            this.doCube();
+            return this.cube;
+        }
+        if (this.isRequery()) {
+            this.doQuery();
+            return this.doUpdate();
+        }
+        return this.cube;
     };
     Visual.prototype.findBinding = function (concept) {
         for (var i = 0; i < this.bindings.length; i++) {
@@ -80876,11 +80984,9 @@ var Visual = (function () {
     Visual.prototype.doQuery = function () {
         return this.dataMessage = this.getQueryable().getRepository().query(this.query);
     };
-    Visual.prototype.update = function () {
-        this.doCube();
-        this.cube.dump();
-    };
     Visual.prototype.doCube = function () {
+        this.model = null;
+        this.dirty = false;
         this.cube = new data.Cube(this.getDataStructure(), this.getRegistry());
         for (var i = 0; i < this.dataMessage.getDataSet(0).size(); i++) {
             this.cube.putObservation(null, this.dataMessage.getDataSet(0).getColumnMapper(), this.dataMessage.getDataSet(0).getFlatObs(i));
@@ -80892,18 +80998,13 @@ var Visual = (function () {
         var p = null;
         if (this.model == null || this.isRequery() || this.cube == null || this.cube.getRootCubeDimension() == null) {
             p = this.doQuery();
-            p.then(function (msg) {
+            return p.then(function (msg) {
                 this.setDirty(true);
-                this.update();
-            });
-            return p;
+                this.setRequery(false);
+                this.dataMessage = msg;
+                return this.doCube();
+            }.bind(this));
         }
-    };
-    /**
-     * @return the dirty
-     */
-    Visual.prototype.isDirty = function () {
-        return this.dirty;
     };
     /**
      * @return the adapter
@@ -80956,8 +81057,11 @@ var Visual = (function () {
         if (this.query.getQueryKey(concept).getValues().length > 0) {
             return data.ValueTypeResolver.resolveCode(this.queryable.getRemoteRegistry().getLocalRegistry(), this.getDataStructure(), concept, this.query.getQueryKey(concept).getValues()[0]);
         }
-        else
+        else {
+            console.log(this.query);
+            console.log("Returning null from " + concept);
             return null;
+        }
     };
     Visual.prototype.addBindingCurrentValue = function (concept, value) {
         this.setRequery(true);
@@ -80987,6 +81091,122 @@ var Visual = (function () {
     Visual.prototype.getValues = function () {
         return this.values;
     };
+    Visual.prototype.clearTime = function () { };
+    /*
+    public getCrossSection():bindings.BoundToCrossSection {
+        return this.crossSection;
+    }
+    */
+    Visual.prototype.getBindings = function () { return this.bindings; };
+    Visual.prototype.getVisualId = function () { return this.visualId; };
+    Visual.prototype.getControlsId = function () { return this.controlsId; };
+    Visual.prototype.setVisualId = function (s) { this.visualId = s; };
+    Visual.prototype.setControlsId = function (s) { this.controlsId = s; };
+    Visual.prototype.setAdapter = function (ad) {
+        if (ad.canCreateModelFromVisual(this)) {
+            this.adapter = ad;
+            this.render();
+        }
+    };
+    Visual.prototype.render = function () {
+        console.log(this.query);
+        var p = null;
+        if (this.isRequery()) {
+            this.model = null;
+            p = this.doUpdate();
+        }
+        if (this.isDirty()) {
+            this.model = null;
+            if (p != null) {
+                p = p.then(function (msg) { return this.doCube(); }.bind(this));
+            }
+            else {
+                doCube();
+            }
+        }
+        if (this.model != null) {
+            return this.model;
+        }
+        if (p != null) {
+            p = p.then(function (cube) { this.model = this.adapter.createModel(this, this.cube); this.model.render(this.visualId, this.controlsId); }.bind(this));
+        }
+        else {
+            this.model = this.adapter.createModel(this, this.cube);
+            this.model.render(this.visualId, this.controlsId);
+        }
+    };
+    Visual.prototype.renderVisual = function () {
+        var p = null;
+        if (this.isRequery()) {
+            if (this.model != null) {
+                this.model.unrender(this.visualId, null);
+                this.model = null;
+                p = this.doUpdate();
+            }
+            if (this.isDirty()) {
+                if (this.model != null) {
+                    this.model.unrender(this.visualId, null);
+                    this.model = null;
+                    if (p != null) {
+                        p = p.then(function (msg) { return this.doCube(); }.bind(this));
+                    }
+                    else {
+                        doCube();
+                    }
+                }
+                if (this.model != null) {
+                    return this.model;
+                }
+                if (p != null) {
+                    p = p.then(function (cube) {
+                        this.model = this.adapter.createModel(this, this.cube);
+                        console.log(this.query);
+                        this.model.render(this.visualId, null);
+                    }.bind(this));
+                }
+                else {
+                    this.model = this.adapter.createModel(this, this.cube);
+                    this.model.render(this.visualId, null);
+                }
+            }
+        }
+    };
+    Visual.prototype.getPercentOf = function () {
+        for (var i = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getPercentOf != null && this.bindings[i].getPercentOf() != null) {
+                return this.bindings[i];
+            }
+        }
+        if (this.time != null && this.time.getPercentOf != null && this.time.getPercentOf() != null) {
+            return this.time;
+        }
+        for (var i = 0; i < this.values.length; i++) {
+            if (this.values[i].getPercentOf != null && this.values[i].getPercentOf() != null) {
+                return this.values[i];
+            }
+        }
+    };
+    Visual.prototype.getPrimaryMeasure = function () {
+        return this.findBinding(this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
+    };
+    Visual.prototype.getSeries = function () {
+        for (var i = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SERIES) {
+                return this.bindings[i];
+            }
+        }
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_TIME_SERIES)
+            ;
+        {
+            return this.time;
+        }
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_MEASURES_SERIES)
+            ;
+        {
+            return this.crossSection;
+        }
+        return null;
+    };
     return Visual;
 }());
 exports.Visual = Visual;
@@ -81013,7 +81233,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Select_1 = __webpack_require__(18);
+var Select_1 = __webpack_require__(19);
 var sdmx = __webpack_require__(6);
 console.log('3');
 var Services = (function (_super) {
@@ -81093,7 +81313,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Select_1 = __webpack_require__(18);
+var Select_1 = __webpack_require__(19);
 var structure = __webpack_require__(4);
 console.log('4');
 var Dataflows = (function (_super) {
@@ -81207,12 +81427,12 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var preact_1 = __webpack_require__(2);
-var Dialog_1 = __webpack_require__(74);
-var Select_1 = __webpack_require__(18);
-var Button_1 = __webpack_require__(75);
-var _ = __webpack_require__(39);
+var Dialog_1 = __webpack_require__(75);
+var Select_1 = __webpack_require__(19);
+var Button_1 = __webpack_require__(76);
+var _ = __webpack_require__(41);
 var structure = __webpack_require__(4);
-var bindings = __webpack_require__(53);
+var bindings = __webpack_require__(36);
 __webpack_require__(253);
 __webpack_require__(254);
 __webpack_require__(255);
@@ -81390,22 +81610,18 @@ exports.locals = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(System) {
 Object.defineProperty(exports, "__esModule", { value: true });
+//import * as collections from 'collections';
+var React = __webpack_require__(1);
+var preact_1 = __webpack_require__(2);
+var sdmxdata = __webpack_require__(18);
+var commonreferences = __webpack_require__(13);
 var structure = __webpack_require__(4);
-var sdmxtime = __webpack_require__(61);
-var bindings = __webpack_require__(53);
-var Chartist = __webpack_require__(494);
-console.log('13');
-var AdapterRegistry = (function () {
-    function AdapterRegistry() {
-        this.adapters = [];
-        this.adapters.push(new SparklineAdapter());
-    }
-    AdapterRegistry.prototype.getList = function () { return this.adapters; };
-    return AdapterRegistry;
-}());
-exports.AdapterRegistry = AdapterRegistry;
+var sdmxtime = __webpack_require__(62);
+var bindings = __webpack_require__(36);
+var Chartist = __webpack_require__(495);
+var controls_1 = __webpack_require__(496);
 var SparklineAdapter = (function () {
     function SparklineAdapter() {
         this.singleValues = null;
@@ -81418,9 +81634,36 @@ var SparklineAdapter = (function () {
     }
     SparklineAdapter.prototype.createModel = function (visual, cube) {
         this.visual = visual;
+        this.model = new ChartistSparklineModel();
+        this.model.setVisual(visual);
         this.min = null;
         this.max = null;
-        return true;
+        this.minDate = null;
+        this.maxDate = null;
+        if (cube.then != null) {
+            return cube.then(function (cube2) {
+                var cu = new CubeWalkUtils();
+                cu.visitRoot(cube2, visual, this);
+                if (visual.getValues()[0].getSharedMaximum()) {
+                    this.model.setHigh(this.max);
+                }
+                if (visual.getValues()[0].getZeroOrigin()) {
+                    this.model.setLow(this.min);
+                }
+                return this.model;
+            }.bind(this));
+        }
+        else {
+            var cu = new CubeWalkUtils();
+            cu.visitRoot(cube, visual, this);
+            if (visual.getValues()[0].getSharedMaximum()) {
+                this.model.setHigh(this.max);
+            }
+            if (visual.getValues()[0].getZeroOrigin()) {
+                this.model.setLow(this.min);
+            }
+            return this.model;
+        }
     };
     SparklineAdapter.prototype.canCreateModelFromVisual = function (visual) {
         var singleBinds = 0;
@@ -81436,9 +81679,6 @@ var SparklineAdapter = (function () {
             }
             else {
                 singleBinds++;
-            }
-            if (b.getBoundTo() == bindings.BoundTo.BOUND_TIME_X) {
-                time = 1;
             }
             if (b instanceof bindings.BoundToTimeSeries) {
                 series++;
@@ -81457,6 +81697,9 @@ var SparklineAdapter = (function () {
                 return false;
             }
         }
+        if (visual.getTime() != null && visual.getTime() instanceof bindings.BoundToTimeX) {
+            time = 1;
+        }
         if (time == 1 && visual.getValues().length == 1) {
             return true;
         }
@@ -81471,7 +81714,7 @@ var SparklineAdapter = (function () {
     SparklineAdapter.prototype.addSingleDataPoint = function (key) {
         var time = this.visual.getTime().getConcept();
         var val = this.visual.getPrimaryMeasure().getConcept();
-        var timeVal = key.getComponent(time);
+        var timeVal = structure.NameableType.toIDString(key.getComponent(time));
         var v1 = parseFloat(key.getComponent(val));
         if (this.min == null || v1 < this.min) {
             this.min = v1;
@@ -81515,12 +81758,25 @@ var SparklineAdapter = (function () {
 exports.SparklineAdapter = SparklineAdapter;
 var ChartistSparklineModel = (function () {
     function ChartistSparklineModel() {
+        this.visual = null;
+        this.chartist = null;
+        this.controls = null;
         this.data = {
             labels: [],
             series: []
         };
         this.options = {
-            axisX: {}
+            width: "700px",
+            height: "700px",
+            lineSmooth: Chartist.Interpolation.cardinal({
+                tension: 0.2
+            }),
+            fullWidth: true,
+            chartPadding: {
+                right: 40
+            },
+            high: 100,
+            low: 0
         };
     }
     ChartistSparklineModel.prototype.addPoint = function (x, y) {
@@ -81530,18 +81786,517 @@ var ChartistSparklineModel = (function () {
         }
         this.data.series[0].data.push(y);
     };
-    ChartistSparklineModel.prototype.render = function (s) {
-        new Chartist.Line(s, this.data, this.options, {});
+    ChartistSparklineModel.prototype.render = function (s, c) {
+        if (s != null) {
+            this.chartist = new Chartist.Line(s, this.data, this.options, {});
+        }
+        if (c != null) {
+            React.render(preact_1.h(controls_1.default, { visual: this.visual }), document.querySelector(c));
+        }
     };
-    ChartistSparklineModel.prototype.unrender = function (s) {
+    ChartistSparklineModel.prototype.unrender = function (s, c) {
+        if (s != null) {
+            if (this.chartist != null) {
+                this.chartist.detach();
+            }
+            //document.querySelector(s).html="";
+        }
+        if (c != null) {
+            document.querySelector(c).html = "";
+        }
+    };
+    ChartistSparklineModel.prototype.setVisual = function (v) {
+        this.visual = v;
+    };
+    ChartistSparklineModel.prototype.setHigh = function (n) {
+        this.options.high = n;
+    };
+    ChartistSparklineModel.prototype.setLow = function (n) {
+        this.options.low = n;
     };
     return ChartistSparklineModel;
-}());
-exports.ChartistSparklineModel = ChartistSparklineModel;
+}()); /*
+export class SeriesSparklineAdapter implements Adapter {
+    private singleValues: sdmxdata.PartialKey = null;
+    private visual: visual.Visual = null;
+    private min: number = null;
+    private max: number = null;
+    private minDate: Date = null;
+    private maxDate: Date = null;
+    private model = new ChartistSeriesSparklineModel();
+    constructor() {
+    }
 
+    public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
+        this.visual = visual;
+        this.model = new ChartistSeriesSparklineModel();
+        this.model.setVisual(visual);
+        this.min = null;
+        this.max = null;
+        this.minDate = null;
+        this.maxDate = null;
+        if (cube.then != null) {
+            return cube.then(function(cube2) {
+                var cu: CubeWalkUtils = new CubeWalkUtils();
+                cu.visitRoot(cube2, visual, this);
+                if (visual.getValues()[0].getSharedMaximum()) {
+                    this.model.setHigh(this.max);
+                }
+                if (visual.getValues()[0].getZeroOrigin()) {
+                    this.model.setLow(this.min);
+                }
+                return this.model;
+            }.bind(this));
+        } else {
+            var cu: CubeWalkUtils = new CubeWalkUtils();
+            cu.visitRoot(cube, visual, this);
+            if (visual.getValues()[0].getSharedMaximum()) {
+                this.model.setHigh(this.max);
+            }
+            if (visual.getValues()[0].getZeroOrigin()) {
+                this.model.setLow(this.min);
+            }
+            return this.model;
+        }
+    }
+
+    public canCreateModelFromVisual(visual: visual.Visual): boolean {
+        var singleBinds: number = 0;
+        var multiBinds: number = 0;
+        var continuousBinds: number = 0;
+        var time: number = 0;
+        var series: number = 0;
+        var list: number = 0;
+        for (var i: number = 0; i < visual.size(); i++) {
+            var b = visual.getBinding(i);
+            if (b.expectValues() > 1) {
+                multiBinds++;
+            } else {
+                singleBinds++;
+            }
+            if (b instanceof bindings.BoundToTimeSeries) {
+                series++;
+                return false;
+            }
+            if (b instanceof bindings.BoundToTimeList) {
+                list++;
+                return false;
+            }
+            if (b instanceof bindings.BoundToSeries) {
+                series++;
+            }
+            if (b instanceof bindings.BoundToList) {
+                list++;
+                return false;
+            }
+        }
+        if (visual.getTime() != null && visual.getTime() instanceof bindings.BoundToTimeX) {
+            time = 1;
+        }
+        if (time == 1 && visual.getValues().length == 1 && series == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public getName(): string {
+        return "SeriesSparkline";
+    }
+
+    public setSingleValues(key: sdmxdata.PartialKey): void {
+        this.singleValues = key;
+    }
+
+    public addSingleDataPoint(key: sdmxdata.PartialKey): void {
+        var time: string = this.visual.getTime().getConcept();
+        var val: string = this.visual.getPrimaryMeasure().getConcept();
+        var timeVal: string = structure.NameableType.toIDString(key.getComponent(time));
+        var v1: number = parseFloat(key.getComponent(val));
+        var ser: string = key.getComponent(this.visual.getSeries().getConcept());
+        if (this.min == null || v1 < this.min) {
+            this.min = v1;
+        }
+        if (this.max == null || v1 > this.max) {
+            this.max = v1;
+        }
+        var s: string = structure.NameableType.toIDString(timeVal);
+        var freq: string = structure.NameableType.toString(this.singleValues.getComponent("FREQ"));
+        if (freq == null || "" == freq) {
+            freq = structure.NameableType.toString(this.singleValues.getComponent("FREQUENCY"));
+        }
+        if (freq == null || "" == freq) {
+            freq = structure.NameableType.toString(this.singleValues.getComponent("TIME_FORMAT"));
+        }
+        if (freq == null || "" == freq) {
+            freq = structure.NameableType.toString(key.getComponent("FREQ"));
+        }
+        if (freq == null || "" == freq) {
+            freq = structure.NameableType.toString(key.getComponent("FREQUENCY"));
+        }
+        if (freq == null || "" == freq) {
+            freq = structure.NameableType.toString(key.getComponent("TIME_FORMAT"));
+        }
+        var rtd: sdmxtime.RegularTimePeriod = sdmxtime.TimeUtil.parseTime(freq, s);
+        if (rtd != null) {
+            var d: Date = new Date(rtd.getFirstMillisecond());
+            if (this.minDate == null || this.minDate.getTime() > d.getTime()) {
+                this.minDate = d;
+            }
+            if (this.maxDate == null || this.maxDate.getTime() < d.getTime()) {
+                this.maxDate = d;
+            }
+        }
+        this.model.addPoint(ser, timeVal, v1);
+    }
+
+    addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void {
+
+    }
+
+}
+
+export class ChartistSeriesSparklineModel implements Model {
+    private visual: visual.Visual = null;
+    private chartist = null;
+    private controls = null;
+    private data = {
+        labels: [],
+        series: []
+    };
+    private options = {
+        width: "700px",
+        height: "700px",
+        lineSmooth: Chartist.Interpolation.cardinal({
+            tension: 0.2
+        }),
+        fullWidth: true,
+        chartPadding: {
+            right: 40
+        },
+        high: 100,
+        low: 0
+    };
+    public addPoint(ser: string, x: string, y: number) {
+        if (!collections.arrays.contains(this.data.labels, x)) {
+            this.data.labels.push(x);
+        }
+        if (this.data.series[ser] == null) {
+            this.data.series[ser] = { data: [] };
+        }
+        this.data.series[ser].data.push(y);
+    }
+    public render(s: string, c: string) {
+        if (s != null) {
+            this.chartist = new Chartist.Line(s, this.data, this.options, {} as any);
+        }
+        if (c != null) { React.render(<Controls visual={this.visual} />, document.querySelector(c)); }
+    }
+    public unrender(s: string, c: string) {
+        if (s != null) {
+            if (this.chartist != null) {
+                this.chartist.detach();
+            }
+            //document.querySelector(s).html="";
+        }
+        if (c != null) { document.querySelector(c).html = ""; }
+    }
+    private setVisual(v: visual.Visual) {
+        this.visual = v;
+    }
+    public setHigh(n: number) {
+        this.options.high = n;
+    }
+    public setLow(n: number) {
+        this.options.low = n;
+    }
+}*/
+exports.ChartistSparklineModel = ChartistSparklineModel;
+/*
+ 
+ export class SeriesSparklineAdapter implements Adapter {
+ 
+ 
+ }
+ export class ListSparklineAdapter implements Adapter {
+ 
+ 
+ }
+ */
+var CubeWalkUtils = (function () {
+    function CubeWalkUtils() {
+        this.clearedTime = false;
+        /*
+         public visitCrossSection(cube: sdmxdata.Cube, visual: visual.Visual, dim: sdmxdata.CubeObservation, adapter: Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey, crossSections: collections.Dictionary) {
+         //System.out.println("Visit:" + dim.getConcept());
+         if (dim.getCrossSection() != null) {
+         //System.out.println("Cross" + dim.getConcept() + ":" + dim.getCrossSection());
+         var crossSection: bindings.BoundTo = visual.findBinding(dim.getConcept());
+         if (!crossSection.isInCurrentValues(dim.getCrossSection())) {
+         //     System.out.println("Cross Section not in current values, returning");
+         return;
+         }
+         multiples.setComponent(dim.getConcept(), CubeWalkUtils.getComponent(binds, dim.getConcept(), dim.getCrossSection()));
+         }
+         multiples.clearAttributes();
+         var concept: string = dim.getObservationConcept();
+         multiples.setComponent(concept, dim.getValue());
+         for (var a: number = 0; a & lt; dim.listAttributes().length; a++) {
+         var att: sdmxdata.CubeAttribute = dim.listAttributes()[a];
+         multiples.setAttribute(att.getConcept(), getComponent(visual, att.getConcept(), att.getValue()));
+         }
+         crossSections.put(dim.getCrossSection(), dim.getValue());
+         }*/
+    }
+    CubeWalkUtils.prototype.visitRoot = function (cube, visual, adapter) {
+        var singles = new sdmxdata.PartialKey();
+        var multiples = new sdmxdata.PartialKey();
+        if (cube == null) {
+            return;
+        }
+        var current = cube.getRootCubeDimension();
+        // No Observations!!
+        if (current.getSubDimension() == null) {
+            return;
+        }
+        this.clearedTime = false;
+        var innerbd = visual.findBinding(current.getSubDimension());
+        if (innerbd.isClientSide()) {
+            innerbd.getPossibleValues().clear();
+            for (var i = 0; i < current.listSubDimensions().length;) {
+                var it = current.listSubDimensions()[i];
+                var inCurrentValue = false;
+                var dim = it;
+                if (innerbd.isInCurrentValues(dim.getValue())) {
+                    inCurrentValue = true;
+                }
+                var itm2 = this.getComponent(visual, dim.getConcept(), dim.getValue());
+                innerbd.getPossibleValues().push(itm2);
+            }
+            if (!inCurrentValue) {
+                if (innerbd.getPossibleValues().size() > 0) {
+                    //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
+                    innerbd.setCurrentValue(innerbd.getPossibleValues()[0]);
+                }
+            }
+        }
+        for (var i = 0; i < current.listSubDimensions().length; i++) {
+            var dim = current.listSubDimensions()[i];
+            this.visit(cube, visual, dim, adapter, singles, multiples);
+        }
+    };
+    CubeWalkUtils.prototype.getComponent = function (visual, concept, val) {
+        var b = visual.findBinding(concept);
+        if (b == null) {
+            var itm = sdmxdata.ValueTypeResolver.resolveCode(visual.getQueryable().getRemoteRegistry().getLocalRegistry(), visual.getDataStructure(), concept, val);
+            return itm;
+        }
+        else if (b.isDiscrete()) {
+            var itm = sdmxdata.ValueTypeResolver.resolveCode(visual.getQueryable().getRemoteRegistry().getLocalRegistry(), visual.getDataStructure(), concept, val);
+            if (itm == null) {
+                return val;
+            }
+            return itm;
+        }
+        else {
+            //System.out.println("Returning val:"+concept+":"+val);
+            return val;
+        }
+    };
+    CubeWalkUtils.prototype.visit = function (cube, visual, current, adapter, singles, multiples) {
+        var concept = current.getConcept();
+        var val = current.getValue();
+        //System.out.println("Visit:"+concept+":"+val);
+        var bd = visual.findBinding(concept);
+        if (bd.isInCurrentValues(val)) {
+            var itm = this.getComponent(visual, bd.getConcept(), val);
+            if (bd.expectValues() == 1) {
+                singles.setComponent(concept, itm);
+            }
+            else {
+                multiples.setComponent(concept, itm);
+            }
+            var innerbd = visual.findBinding(current.getSubDimension());
+            if (innerbd.isClientSide()) {
+                innerbd.getPossibleValues().clear();
+                for (var i = 0; i < current.listSubDimensions().length;) {
+                    var it = current.listSubDimensions()[i];
+                    var inCurrentValue = false;
+                    var dim = it;
+                    if (innerbd.isInCurrentValues(dim.getValue())) {
+                        inCurrentValue = true;
+                    }
+                    var itm2 = this.getComponent(visual, dim.getConcept(), dim.getValue());
+                    innerbd.getPossibleValues().push(itm2);
+                }
+                if (!inCurrentValue) {
+                    if (innerbd.getPossibleValues().size() > 0) {
+                        //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
+                        innerbd.setCurrentValue(innerbd.getPossibleValues()[0]);
+                    }
+                }
+            }
+            var latest = null;
+            var latestTime = null;
+            var freq = structure.NameableType.toIDString(singles.getComponent("FREQ"));
+            if (freq == null) {
+                freq = structure.NameableType.toIDString(singles.getComponent("TIME_FORMAT"));
+            }
+            if (freq == null) {
+                freq = structure.NameableType.toIDString(multiples.getComponent("FREQ"));
+            }
+            if (freq == null) {
+                freq = structure.NameableType.toIDString(multiples.getComponent("TIME_FORMAT"));
+            }
+            for (var k = 0; k < current.listSubDimensions().length; k++) {
+                var inner = current.listSubDimensions()[k];
+                var innerbd = visual.findBinding(inner.getConcept());
+                if (inner instanceof sdmxdata.TimeCubeDimension) {
+                    if (innerbd.isSingleLatestTime()) {
+                        if (latest == null) {
+                            latest = inner;
+                            latestTime = sdmxtime.TimeUtil.parseTime(freq, structure.NameableType.toIDString(inner.getValue()));
+                        }
+                        var timePeriod = sdmxtime.TimeUtil.parseTime(structure.NameableType.toIDString(inner.getValue()));
+                        if (timePeriod.getStart().after(latestTime.getStart())) {
+                            latestTime = timePeriod;
+                            latest = inner;
+                        }
+                    }
+                    else {
+                        this.visitTime(cube, visual, inner, adapter, singles, multiples);
+                    }
+                }
+                else {
+                    this.visit(cube, visual, inner, adapter, singles, multiples);
+                }
+            }
+        }
+    };
+    CubeWalkUtils.prototype.visitTime = function (cube, visual, dim, adapter, singles, multiples) {
+        var concept = dim.getConcept();
+        var val = dim.getValue();
+        // This is for time drop down list
+        // clearedTime clears all the time's possible values
+        //System.out.println("Visit:"+concept+":"+val);
+        if (!this.clearedTime) {
+            visual.clearTime();
+            this.clearedTime = true;
+        }
+        // This code adds the current time to the possible values
+        if (visual.getTime() != null) {
+            if (!visual.getTime().isDiscrete()) {
+                // Time has Codelist
+                visual.getTime().addTime(sdmxdata.ValueTypeResolver.resolveCode(visual.getQueryable().getRemoteRegistry().getLocalRegistry(), visual.getDataStructure(), concept, val));
+            }
+            else {
+                // Time has no codelist
+                var t = new structure.CodeType();
+                t.setId(new commonreferences.ID(val));
+                visual.getTime().addTime(t);
+            }
+        }
+        var bd = visual.findBinding(concept);
+        var itm = this.getComponent(visual, bd.getConcept(), val);
+        if (bd.isInCurrentValues(val)) {
+            if (bd.expectValues() == 1) {
+                singles.setComponent(concept, itm);
+            }
+            else {
+                multiples.setComponent(concept, itm);
+            }
+        }
+        if (visual.getValues().length > 1) {
+            /*
+             var cross:bindings.BoundTo = bindings.getCrossSection();
+             if (cross != null && cross.getBoundTo() == BoundTo.BOUND_MEASURES_INDIVIDUAL) {
+             HashMap < String, String > crossSections = new HashMap < String, String > ();
+             Collection < CubeObservation > obsList = dim.listObservations();
+             Iterator < CubeObservation > it = obsList.iterator();
+             while (it.hasNext()) {
+             CubeObservation ob = it.next();
+             visit(cube, bindings, ob, adapter, singles, multiples, crossSections);
+             */
+            //adapter.setSingleValues(singles);
+            //adapter.addSingleDataPoint(multiples);
+        }
+        var obsList = dim.listObservations();
+        for (var l = 0; l < obsList.length; l++) {
+            var ob = obsList[l];
+            this.visitObservation(cube, visual, ob, adapter, singles, multiples);
+        }
+    };
+    CubeWalkUtils.prototype.visitObservation = function (cube, visual, dim, adapter, singles, multiples) {
+        if (cube === void 0) {
+            cube = cube;
+        }
+        //System.out.println("Visit:" + dim.getConcept());
+        if (dim.getCrossSection() != null) {
+            /*
+             //System.out.println("Cross" + dim.getConcept() + ":" + dim.getCrossSection());
+             BoundTo crossSection = visual.findBinding(dim.getConcept());
+             if (!crossSection.isInCurrentValues(dim.getCrossSection())) {
+             return;
+             */
+        }
+        multiples.setComponent(dim.getConcept(), this.getComponent(visual, dim.getConcept(), dim.getCrossSection()));
+        multiples.clearAttributes();
+        var concept = dim.getObservationConcept();
+        multiples.setComponent(concept, dim.getValue());
+        for (var a = 0; a < dim.listAttributes().length; a++) {
+            var att = dim.listAttributes()[a];
+            multiples.setAttribute(att.getConcept(), this.getComponent(visual, att.getConcept(), att.getValue()));
+        }
+        if (visual.getPercentOf() != null) {
+            var percentOf = visual.getPercentOf();
+            if (percentOf.getPercentOfItemType() != null) {
+                var key = new sdmxdata.FullKey(multiples);
+                key.getDict().putAll(singles.getDict());
+                key.setComponent(percentOf.getConcept(), percentOf.getPercentOfItemType());
+                var obs = cube.findObservation(key);
+                if (obs == null) {
+                    System.out.println("Can't Find Percent Of Observation for key:" + key.toString());
+                    return;
+                }
+                else {
+                    var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue());
+                    percent *= 100;
+                    multiples.setComponent(concept, percent.toString());
+                }
+            }
+        }
+        adapter.setSingleValues(singles);
+        adapter.addSingleDataPoint(multiples);
+    };
+    return CubeWalkUtils;
+}());
+exports.CubeWalkUtils = CubeWalkUtils;
+exports.adapters = [];
+this.adapters.push(new SparklineAdapter());
+var AdapterRegistrySingleton = (function () {
+    function AdapterRegistrySingleton() {
+    }
+    AdapterRegistrySingleton.getList = function () { return exports.adapters; };
+    return AdapterRegistrySingleton;
+}());
+exports.AdapterRegistrySingleton = AdapterRegistrySingleton;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(494)))
 
 /***/ }),
 /* 494 */
+/***/ (function(module, exports) {
+
+// Provide a "System" global.
+module.exports = {
+	// Make sure import is only used as "System.import"
+	import: function() {
+		throw new Error("System.import cannot be used indirectly");
+	}
+};
+
+
+/***/ }),
+/* 495 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -86036,7 +86791,80 @@ return Chartist;
 
 
 /***/ }),
-/* 495 */
+/* 496 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b)
+            if (b.hasOwnProperty(p))
+                d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = __webpack_require__(1);
+var preact_1 = __webpack_require__(2);
+var structure = __webpack_require__(4);
+var bindings = __webpack_require__(36);
+var Controls = (function (_super) {
+    __extends(Controls, _super);
+    function Controls(props, state) {
+        var _this = this;
+        _this.props = {};
+        _this.state = {};
+        _this.props = props;
+        _this.state = state;
+        console.log("create");
+        return _this;
+    }
+    Controls.prototype.listDropDown = function (c, val) {
+        var options = [];
+        this.props.visual.findBinding(c).getAllValues().forEach(function (item) {
+            var val2 = structure.NameableType.toString(item);
+            var sel = val == val2 ? "true" : "false";
+            options.push(preact_1.h("option", { selected: sel }, val2));
+        });
+        return options;
+    };
+    Controls.prototype.changeDropDown = function (e) {
+        var c = e.target.title;
+        var item = this.props.visual.findBinding(c).getAllValues()[e.target.selectedIndex];
+        this.props.visual.findBinding(c).setCurrentValue(item);
+        this.props.visual.renderVisual();
+        _super.prototype.forceUpdate.call(this);
+    };
+    Controls.prototype.render = function (props, state) {
+        this.props = props;
+        this.state = state;
+        var html = [];
+        var visual = this.props.visual;
+        for (var i = 0; i < visual.getBindings().length; i++) {
+            var b = visual.getBinding(i);
+            if (b instanceof bindings.BoundToDropdown) {
+                var cnc = b.getConceptName();
+                var val = structure.NameableType.toString(b.getCurrentValue());
+                html.push(preact_1.h("div", null, cnc));
+                var o = preact_1.h("select", { title: b.getConcept(), value: val, onChange: this.changeDropDown.bind(this) }, this.listDropDown(b.getConcept(), val));
+                html.push(o);
+                html.push(preact_1.h("br", null));
+            }
+        }
+        return (preact_1.h("div", null, html));
+    };
+    return Controls;
+}(React.Component));
+exports.default = Controls;
+
+
+/***/ }),
+/* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!

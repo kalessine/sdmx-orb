@@ -108,6 +108,21 @@ export class SdmxIO {
         var reference: commonreferences.Reference = new commonreferences.Reference(ref, null);
         return reference;
     }
+  public static getBaseHeader():message.Header {
+        var header:message.Header = new message.Header();
+        header.setId("none");
+        header.setTest(false);
+        var sender:message.Sender = new message.Sender();
+        sender.setId(new commonreferences.ID("Sdmx-Sax"));
+        header.setSender(sender);
+        var receiver:message.PartyType  = new message.PartyType();
+        receiver.setId(new commonreferences.ID("You"));
+        header.setReceivers([receiver]);
+        //var htt:message.HeaderTimeType = new message.HeaderTimeType();
+        //htt.setDate(DateTime.now());
+        //header.setPrepared(htt);
+        return header;
+    }
 }
 SdmxIO.registerParserProvider(new sdmx20.Sdmx20StructureParser());
 SdmxIO.registerParserProvider(new sdmx21.Sdmx21StructureParser());

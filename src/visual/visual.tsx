@@ -40,6 +40,9 @@ export class Visual {
     // Derived from above fields   
     private df: structure.Dataflow = null;
 
+    private visualId:string = "#render";
+    private controlsId:string = "#controls";
+
 
     private requery: boolean = true;
     private dirty: boolean = true;
@@ -107,6 +110,7 @@ export class Visual {
         return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length;
     }
     public init() {
+        this.query = new data.Query(this.df,this.queryable.getRemoteRegistry().getLocalRegistry());
         this.bindings = [];
         this.bindingsColumnMapper = new data.FlatColumnMapper();
         for (var i: number = 0; i < this.dimSize(); i++) {
@@ -127,12 +131,26 @@ export class Visual {
             //this.crossSection=b4;
         }
     }
+    public isDirty() { return this.dirty; }
     public setDirty(dirty: boolean) {
         this.dirty = dirty;
     }
     public setRequery(requery: boolean) {
         this.requery = requery;
     }
+
+   public getCube(){
+       if(this.isDirty()&&this.dataMessage!=null){
+           this.doCube();
+           return this.cube;
+       }
+       if(this.isRequery()){
+           this.doQuery();
+           return this.doUpdate();
+       }
+       return this.cube;
+   }
+
 
     public findBinding(concept: string): bindings.BoundTo {
         for (var i: number = 0; i < this.bindings.length; i++) {
@@ -192,11 +210,9 @@ export class Visual {
         return this.dataMessage = this.getQueryable().getRepository().query(this.query);
     }
 
-    public update() {
-        this.doCube();
-        this.cube.dump();
-    }
     public doCube() {
+        this.model=null;
+        this.dirty=false;
         this.cube = new data.Cube(this.getDataStructure(), this.getRegistry());
         for (var i: number = 0; i < this.dataMessage.getDataSet(0).size(); i++) {
             this.cube.putObservation(null, this.dataMessage.getDataSet(0).getColumnMapper(), this.dataMessage.getDataSet(0).getFlatObs(i));
@@ -209,19 +225,13 @@ export class Visual {
         var p: Promise<message.DataMessage> = null;
         if (this.model == null || this.isRequery() || this.cube == null || this.cube.getRootCubeDimension() == null) {
             p = this.doQuery();
-            p.then(function (msg: message.DataMessage) {
+            return p.then(function (msg: message.DataMessage) {
                 this.setDirty(true);
-                this.update();
-            });
-            return p;
+                this.setRequery(false);
+                this.dataMessage=msg;
+                return this.doCube();
+            }.bind(this));
         }
-    }
-
-    /**
-     * @return the dirty
-     */
-    public isDirty(): boolean {
-        return this.dirty;
     }
 
     /**
@@ -276,7 +286,12 @@ export class Visual {
     public getBindingCurrentValue(concept: string): structure.ItemType {
         if (this.query.getQueryKey(concept).getValues().length > 0) {
             return data.ValueTypeResolver.resolveCode(this.queryable.getRemoteRegistry().getLocalRegistry(), this.getDataStructure(), concept, this.query.getQueryKey(concept).getValues()[0]);
-        } else return null;
+        } else {
+        console.log(this.query);
+        console.log("Returning null from "+concept);
+        
+            return null;
+        }
     }
     public addBindingCurrentValue(concept: string, value: string) {
         this.setRequery(true);
@@ -307,9 +322,92 @@ export class Visual {
     public getValues():Array<bindings.BoundToContinuous> {
         return this.values;
     }
+    public clearTime(){}
     /*
     public getCrossSection():bindings.BoundToCrossSection {
         return this.crossSection;
     }
     */
+   public getBindings() { return this.bindings; }
+   public getVisualId(){  return this.visualId; }
+   public getControlsId() { return this.controlsId; }
+   public setVisualId(s:string) { this.visualId=s; }
+   public setControlsId(s:string) { this.controlsId=s; }
+   public setAdapter(ad:adapters.Adapter) {
+       if(ad.canCreateModelFromVisual(this) ) {
+           this.adapter=ad;
+           this.render();
+       }
+   }
+   public render() {
+       console.log(this.query);
+       var p = null;
+       if(this.isRequery()) {
+           this.model=null;
+           p=this.doUpdate();
+       }
+       if(this.isDirty()){
+           this.model=null;
+           if(p!=null){
+               p=p.then(function(msg){return this.doCube();}.bind(this));
+           }else{
+               doCube();
+           }
+       }
+       if(this.model!=null ) {return this.model;}
+       if(p!=null){
+          p=p.then(function(cube){this.model=this.adapter.createModel(this,this.cube);this.model.render(this.visualId,this.controlsId) }.bind(this));
+       }
+       else{
+          this.model=this.adapter.createModel(this,this.cube);
+          this.model.render(this.visualId,this.controlsId)
+       }
+   }
+   public renderVisual() {
+       
+       var p = null;
+       if(this.isRequery()) {
+           if(this.model!=null){this.model.unrender(this.visualId,null);
+           this.model=null;
+           p=this.doUpdate();
+       }
+       if(this.isDirty()){
+           if(this.model!=null){this.model.unrender(this.visualId,null);
+           this.model=null;
+           if(p!=null){
+               p=p.then(function(msg){return this.doCube();}.bind(this));
+           }else{
+               doCube();
+           }
+       }
+       if(this.model!=null ) {return this.model;}
+       if(p!=null){
+          p=p.then(function(cube){this.model=this.adapter.createModel(this,this.cube);
+              console.log(this.query);this.model.render(this.visualId,null) }.bind(this));
+       }
+       else{
+          this.model=this.adapter.createModel(this,this.cube);
+          this.model.render(this.visualId,null)
+       }
+   }
+   public getPercentOf() {
+       for(var i:number = 0; i<this.bindings.length;i++) {
+           if( this.bindings[i].getPercentOf!=null&&this.bindings[i].getPercentOf()!=null){ return this.bindings[i];}
+       }
+       if( this.time!=null&&this.time.getPercentOf!=null&&this.time.getPercentOf()!=null ){ return this.time;}
+       for(var i:number = 0; i<this.values.length;i++) {
+           if( this.values[i].getPercentOf!=null&&this.values[i].getPercentOf()!=null){ return this.values[i];}
+       }
+   }
+   public getPrimaryMeasure() {
+       return this.findBinding(this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
+   }
+   public getSeries():bindings.BoundTo {
+       for(var i:number = 0; i<this.bindings.length;i++) {
+           if( this.bindings[i].getBoundTo()==bindings.BoundTo.BOUND_DISCRETE_SERIES){ return this.bindings[i];}
+       }
+       if( this.time!=null&&this.time.getBoundTo()==bindings.BoundTo.BOUND_TIME_SERIES) ){ return this.time;}
+       if( this.crossSection!=null&&this.crossSection.getBoundTo()==bindings.BoundTo.BOUND_MEASURES_SERIES) ){ return this.crossSection;}
+       return null;
+   }
 }

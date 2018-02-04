@@ -329,6 +329,7 @@ export class AttachmentLevel {
 }
 export class AbstractKey {
     private dict = new collections.Dictionary<string, string>();
+    private attributes = new collections.Dictionary<string, string>();
     constructor() {
 
     }
@@ -339,9 +340,19 @@ export class AbstractKey {
     setComponent(s: string, v: string) {
         this.dict.setValue(s, v);
     }
+    getAttribute(s: string): string {
+        return this.attributes.getValue(s);
+    }
+    setAttribute(s: string, v: string) {
+        this.attributes.setValue(s, v);
+    }
+    clearAttributes() {
+        this.attributes.clear();
+    }
     toString() {
         return this.dict.values().join(":");
     }
+    public getDict() { return this.dict; }
 }
 export class PartialKey extends AbstractKey {
 }

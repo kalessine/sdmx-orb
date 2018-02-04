@@ -62,8 +62,18 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
         opts.url = urlString;
         opts.method = "POST";
         return this.makeRequest(opts,send).then(function (a) {
+
             console.log("Got Data Response");
             var dm = sdmx.SdmxIO.parseData(a);
+            if(dm==null) {
+                var dm = new message.DataMessage();
+                var payload = new common.PayloadStructureType();
+                payload.setStructure(dataflow.getStructure());
+                dm.setHeader(sdmx.SdmxIO.getBaseHeader());
+                dm.getHeader().setStructures([payload]);
+                dm.setDataSet(0,new data.FlatDataSet());
+                return dm;
+            }
             var payload = new common.PayloadStructureType();
             payload.setStructure(dataflow.getStructure());
             dm.getHeader().setStructures([payload]);

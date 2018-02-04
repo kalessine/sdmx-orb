@@ -200,7 +200,12 @@ export class NameableType extends IdentifiableType {
     }
 
     public static toIDString(named: NameableType): string {
-        return named.getId().toString();
+        if( named instanceof NameableType ) {
+           return named.getId().toString();
+        }else{
+           if( named!=null ){ return named.toString();}
+           else{ return "";}
+        }
     }
 
     public static sanitise(s: string): string {

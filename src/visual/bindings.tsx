@@ -9,41 +9,41 @@ import Select from 'preact-material-components/Select';
 console.log('14');
 export class BoundTo {
 
-    public static NOT_BOUND: number = -1;
-    public static BOUND_CONTINUOUS_X: number = 0;
-    public static BOUND_DISCRETE_X: number = 1;
-    public static BOUND_CONTINUOUS_Y: number = 2;
-    public static BOUND_DISCRETE_Y: number = 3;
-    public static BOUND_AREA: number = 4;
-    public static BOUND_CONTINUOUS_COLOUR: number = 5;
-    public static BOUND_DISCRETE_COLOUR: number = 6;
-    public static BOUND_CONTINUOUS_SIZE: number = 7;
-    public static BOUND_DISCRETE_SIZE: number = 8;
+    static NOT_BOUND: number = -1;
+    static BOUND_CONTINUOUS_X: number = 0;
+    static BOUND_DISCRETE_X: number = 1;
+    static BOUND_CONTINUOUS_Y: number = 2;
+    static BOUND_DISCRETE_Y: number = 3;
+    static BOUND_AREA: number = 4;
+    static BOUND_CONTINUOUS_COLOUR: number = 5;
+    static BOUND_DISCRETE_COLOUR: number = 6;
+    static BOUND_CONTINUOUS_SIZE: number = 7;
+    static BOUND_DISCRETE_SIZE: number = 8;
     public static BOUND_TOOLTIP: number = 9;
 
-    public static BOUND_DISCRETE_DROPDOWN: number = 10;
-    public static BOUND_DISCRETE_LIST: number = 11;
-    public static BOUND_DISCRETE_SLIDER: number = 12;
-    public static BOUND_DISCRETE_STATIC: number = 13;
-    public static BOUND_DISCRETE_SERIES: number = 14;
+    static BOUND_DISCRETE_DROPDOWN: number = 10;
+    static BOUND_DISCRETE_LIST: number = 11;
+    static BOUND_DISCRETE_SLIDER: number = 12;
+    static BOUND_DISCRETE_STATIC: number = 13;
+    static BOUND_DISCRETE_SERIES: number = 14;
 
-    public static BOUND_CONTINUOUS_BETWEEN: number = 15;
-    public static BOUND_CONTINUOUS_GREATERTHAN: number = 16;
-    public static BOUND_CONTINUOUS_LESSTHAN: number = 17;
+    static BOUND_CONTINUOUS_BETWEEN: number = 15;
+    static BOUND_CONTINUOUS_GREATERTHAN: number = 16;
+    static BOUND_CONTINUOUS_LESSTHAN: number = 17;
 
-    public static BOUND_TIME_X: number = 18;
-    public static BOUND_TIME_Y: number = 19;
-    public static BOUND_TIME_DROPDOWN: number = 20;
-    public static BOUND_TIME_LIST: number = 27;
-    public static BOUND_TIME_SERIES: number = 27;
+    static BOUND_TIME_X: number = 18;
+    static BOUND_TIME_Y: number = 19;
+    static BOUND_TIME_DROPDOWN: number = 20;
+    static BOUND_TIME_LIST: number = 27;
+    static BOUND_TIME_SERIES: number = 27;
 
-    public static BOUND_MEASURES_DROPDOWN: number = 21;
-    public static BOUND_MEASURES_LIST: number = 22;
-    public static BOUND_MEASURES_INDIVIDUAL: number = 23;
-    public static BOUND_MEASURES_SERIES: number = 24;
+    static BOUND_MEASURES_DROPDOWN: number = 21;
+    static BOUND_MEASURES_LIST: number = 22;
+    static BOUND_MEASURES_INDIVIDUAL: number = 23;
+    static BOUND_MEASURES_SERIES: number = 24;
     
-    public static BOUND_DISCRETE_SINGLE: number = 25;
-    public static BOUND_DISCRETE_ALL: number = 26;
+    static BOUND_DISCRETE_SINGLE: number = 25;
+    static BOUND_DISCRETE_ALL: number = 26;
 
     private concept: string;
     private boundTo: number = BoundTo.NOT_BOUND;
@@ -55,22 +55,22 @@ export class BoundTo {
     private measureDescriptor: boolean = false;
     private visual: visual.Visual = null;
 
-    public static DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    public static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    public static MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
-    public static MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
+    static DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    static MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
+    static MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
 
     constructor(visual: visual.Visual, concept: string) {
         this.concept = concept;
         this.visual = visual;
     }
-    public static escape(s: string): string {
+    static escape(s: string): string {
         if (s.indexOf("'") != -1) {
             s = s.replace("'", "\\'");
         }
         return s;
     }
-    public static stripCRLFs(s: string) {
+    static stripCRLFs(s: string) {
         if (s.indexOf("\r") != -1) {
             s = s.replace("\r", "");
         }
@@ -197,22 +197,9 @@ export class BoundTo {
     }
 
     public setCurrentValue(itm: structure.ItemType) {
-        if (itm != null) {
-            var vals: Array<structure.ItemType> = this.getCurrentValues();
-            vals.splice(0, vals.length);
-            if (this.isClientSide()) {
-                this.visual.setDirty(true);
-            } else {
-                this.visual.setRequery(true);
-            }
-        } else {
-            this.getCurrentValues().length = 0;
-            if (this.isClientSide()) {
-                this.visual.setDirty(true);
-            } else {
-                this.visual.setRequery(true);
-            }
-        }
+        var vals: Array<structure.ItemType> = [];
+        if(itm!=null){vals.push(itm);}
+        this.setCurrentValues(vals);
     }
 
     public getCurrentValue(): structure.ItemType {
@@ -262,8 +249,16 @@ export class BoundTo {
      * @param currentValues the currentValues to set
      */
     public setCurrentValues(currentValues: Array<structure.ItemType>) {
+        if(currentValues.length==0){
+            throw new Error("Error");
+        }
         var currentValues: Array<structure.ItemType> = this.removeDuplicates(currentValues);
         this.visual.setBindingCurrentValues(this.concept, currentValues);
+            if (this.isClientSide()) {
+                this.visual.setDirty(true);
+            } else {
+                this.visual.setRequery(true);
+            }
     }
 
 
@@ -436,30 +431,46 @@ export class BoundToAllValues extends BoundToDiscrete {
     }
 }
 export class BoundToTime extends BoundTo {
+    private singleLatesTime:boolean = false;
+    
+    
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
+        super.setWalkAll(true);
     }
     public getBoundTo(): number {
         return BoundTo.NOT_BOUND;
     }
+    public isSingleLatestTime():boolean { return this.singleLatestTime; }
+    public setSingleLatestTime(b:boolean):void{ this.singleLatestTime=b; }
+    public addTime(c:ItemType) {
+        super.getPossibleValues().push(c);
+    }
+    public expectValues() { return 2; }
 }
-export class BoundToTimeX extends BoundTo {
+export class BoundToTimeX extends BoundToTime {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
+        super.setWalkAll(true);
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_TIME_X;
     }
+    public expectValues() { return 2; }
 }
 export class BoundToTimeY extends BoundTo {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
+        super.setWalkAll(true);
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_TIME_Y;
     }
+    public expectValues() { return 2; }
 }
 export class BoundToContinuous extends BoundTo {
+    private zeroOrigin = true;
+    private sharedMaximum = true;
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setContinuous(true);
@@ -470,6 +481,10 @@ export class BoundToContinuous extends BoundTo {
     public getBoundToString() {
         return "Continuous";
     }
+    public getZeroOrigin() { return this.zeroOrigin; }
+    public setZeroOrigin(b:boolean) { this.zeroOrigin=b; }
+    public setSharedMaximum(b:boolean) { this.sharedMaximum=b; }
+    public getSharedMaximum() { return this.sharedMaximum; }
 }
 export class BoundToDiscreteX extends BoundToDiscrete {
     constructor(visual: visual.Visual, concept: string) {
@@ -598,8 +613,9 @@ export class BoundToDropdown extends BoundToDiscrete {
     public perCentId: string = null;
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
-        super.setQueryAll(true);
+        super.setQueryAll(false);
         super.setWalkAll(true);
+        super.setCurrentValue(super.getAllValues()[0]);
     }
     public expectValues(): number {
         return 1;
@@ -692,43 +708,43 @@ export class BindingRegister {
     public getList() {return this.list;}
 }
 export class DimensionBindingRegister extends BindingRegister {
-    public static register: DimensionBindingRegister = new DimensionBindingRegister();
-    public static registerState(be: BindingEntry) {
+    static register: DimensionBindingRegister = new DimensionBindingRegister();
+    static registerState(be: BindingEntry) {
         DimensionBindingRegister.register.register(be);
     }
-    public static getList(): Array<BindingEntry> {
+    static getList(): Array<BindingEntry> {
         return DimensionBindingRegister.register.getList();
     }
 }
 export class TimeBindingRegister extends BindingRegister {
-    public static register: TimeBindingRegister = new TimeBindingRegister();
-    public static registerState(be: BindingEntry) {
+    static register: TimeBindingRegister = new TimeBindingRegister();
+    static registerState(be: BindingEntry) {
         TimeBindingRegister.register.register(be);
     }
-    public static getList(): Array<BindingEntry> {
+    static getList(): Array<BindingEntry> {
         return TimeBindingRegister.register.getList();
     }
 }
 export class CrossSectionBindingRegister extends BindingRegister {
-    public static register: CrossSectionBindingRegister = new CrossSectionBindingRegister();
-    public static registerState(be: BindingEntry) {
+    static register: CrossSectionBindingRegister = new CrossSectionBindingRegister();
+    static registerState(be: BindingEntry) {
         CrossSectionBindingRegister.register.register(be);
     }
-    public static getList(): Array<BindingEntry> {
+    static getList(): Array<BindingEntry> {
         return CrossSectionBindingRegister.register.getList();
     }
 }
 export class MeasureBindingRegister extends BindingRegister {
-    public static register: MeasureBindingRegister = new MeasureBindingRegister();
-    public static registerState(be: BindingEntry) {
+    static register: MeasureBindingRegister = new MeasureBindingRegister();
+    static registerState(be: BindingEntry) {
         MeasureBindingRegister.register.register(be);
     }
-    public static getList(): Array<BindingEntry> {
+    static getList(): Array<BindingEntry> {
         return MeasureBindingRegister.register.getList();
     }
 }
 export class BindingRegisterUtil {
-    public static findBindingEntry(i: number): BindingEntry {
+    static findBindingEntry(i: number): BindingEntry {
         var list = DimensionBindingRegister.getList();
         for (var j: number = 0; j < list.length; j++) {
             if (list[j].getId() == i) {
