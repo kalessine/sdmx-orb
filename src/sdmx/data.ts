@@ -26,6 +26,7 @@ import * as commonreferences from '../sdmx/commonreferences';
 import * as common from '../sdmx/common';
 import * as sdmx from '../sdmx';
 import * as timepack from '../sdmx/time';
+import * as _ from 'lodash';
 export class Query {
     private flow: structure.Dataflow = null;
     private structRef: commonreferences.Reference = null;
@@ -155,6 +156,7 @@ export class QueryKey {
     private registry: interfaces.LocalRegistry = null;
     private name: string = null;
     private values: Array<string> = [];
+    private possibleValues:Array<structure.ItemType> = [];
     constructor(structRef: commonreferences.Reference, registry: interfaces.LocalRegistry, s: string) {
         this.structRef = structRef;
         this.registry = registry;
@@ -199,30 +201,19 @@ export class QueryKey {
     public setAll(b: boolean) {
         this.all = b;
     }
-    public possibleValues(): Array<string> {
+    public possibleValuesString(): Array<string> {
         var result = [];
-        var itemScheme: structure.ItemSchemeType = this.getItemScheme();
-        if (itemScheme == null) {
-            alert(this.name + " has null itemscheme");
-
+        for(var i:number=0;i<this.possibleValues.length;i++) {
+            result.push(structure.NameableType.toString(this.possibleValues[i]));
         }
-        for (var i: number = 0; i < itemScheme.size(); i++) {
-            var itm: structure.ItemType = itemScheme.getItem(i);
-            result.push(itm.getId().toString());
-        }
-        return result;;
+        return result;
     }
-    public possibleValuesItems(): Array<structure.ItemType> {
-        var result = [];
-        var itemScheme: structure.ItemSchemeType = this.getItemScheme();
-        if (itemScheme == null) {
-            return [];
-        }
-        for (var i: number = 0; i < itemScheme.size(); i++) {
-            var itm: structure.ItemType = itemScheme.getItem(i);
-            result.push(itm);
-        }
-        return result;;
+    public getPossibleValues(): Array<structure.ItemType> {
+        this.possibleValues=this.removeDuplicates(this.possibleValues);
+        return this.possibleValues;
+    }
+    public setPossibleValues(list:Array<structure.ItemType){
+        this.possibleValues=list;
     }
     getQueryString() {
         if (this.isAll()) {
@@ -246,6 +237,11 @@ export class QueryKey {
     }
     public clear() {
         this.values = [];
+    }
+    public removeDuplicates(list: Array<structure.ItemType>): Array<structure.ItemType> {
+    return _.uniq(list, function (e) {
+        return e.getId().toString();
+        });
     }
 }
 

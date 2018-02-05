@@ -1,16 +1,17 @@
-//import * as collections from 'collections';
+import * as collections from 'typescript-collections';
 import * as React from 'preact-compat';
 import { h } from 'preact';
 import * as visual from './visual';
 import * as sdmxdata from '../sdmx/data';
 import * as commonreferences from '../sdmx/commonreferences';
 import * as structure from '../sdmx/structure';
-
+import * as _ from 'lodash';
 import * as model from 'model';
 import * as sdmxtime from '../sdmx/time';
 import * as bindings from './bindings';
-import * as Chartist from '../chartist';
+import * as colors from 'color-ts';
 import Controls from './controls';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 
 
 export interface Model {
@@ -25,21 +26,23 @@ export interface Adapter {
     addSingleDataPoint(key: data.PartialKey): void;
     addCrossSectionalDataPoint(key: data.PartialKey, crossSections: collections.Dictionary): void;
 }
-export class SparklineAdapter implements Adapter {
+export class RechartsSparklineAdapter implements Adapter {
     private singleValues: sdmxdata.PartialKey = null;
     private visual: visual.Visual = null;
     private min: number = null;
     private max: number = null;
     private minDate: Date = null;
     private maxDate: Date = null;
-    private model = new ChartistSparklineModel();
+    private model = new RechartsSparklineModel();
     constructor() {
     }
 
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
-        this.model = new ChartistSparklineModel();
+        this.model = new RechartsSparklineModel();
         this.model.setVisual(visual);
+        this.model.setXLabel(visual.getX().getConceptName());
+        this.model.setYLabel(visual.getValues()[0].getConceptName());
         this.min = null;
         this.max = null;
         this.minDate = null;
@@ -110,7 +113,7 @@ export class SparklineAdapter implements Adapter {
     }
 
     public getName(): string {
-        return "SingleSparkline";
+        return "RechartsSingleSparkline";
     }
 
     public setSingleValues(key: sdmxdata.PartialKey): void {
@@ -118,7 +121,7 @@ export class SparklineAdapter implements Adapter {
     }
 
     public addSingleDataPoint(key: sdmxdata.PartialKey): void {
-        var time: string = this.visual.getTime().getConcept();
+        var time: string = this.visual.getX().getConcept();
         var val: string = this.visual.getPrimaryMeasure().getConcept();
         var timeVal: string = structure.NameableType.toIDString(key.getComponent(time));
         var v1: number = parseFloat(key.getComponent(val));
@@ -164,74 +167,77 @@ export class SparklineAdapter implements Adapter {
 
 }
 
-export class ChartistSparklineModel implements Model {
+export class RechartsSparklineModel implements Model {
+    private data = [];
+    private xAxisLabel = "Time";
+    private yAxisLabel = "Amount";
     private visual: visual.Visual = null;
-    private chartist = null;
+    private title = null;
+    private chart = null;
     private controls = null;
-    private data = {
-        labels: [],
-        series: []
-    };
-    private options = {
-        width: "700px",
-        height: "700px",
-        lineSmooth: Chartist.Interpolation.cardinal({
-            tension: 0.2
-        }),
-        fullWidth: true,
-        chartPadding: {
-            right: 40
-        },
-        high: 100,
-        low: 0
-    };
+    private min = null;
+    private max = null;
     public addPoint(x: string, y: number) {
-        this.data.labels.push(x);
-        if (this.data.series.length == 0) {
-            this.data.series.push({ data: [] });
-        }
-        this.data.series[0].data.push(y);
+        var dat = {};
+        dat['x']=x;
+        dat['y']=y;
+        //dat['series']='series';
+        this.data.push(dat);
     }
     public render(s: string, c: string) {
-        if (s != null) {
-            this.chartist = new Chartist.Line(s, this.data, this.options, {} as any);
+        if(s!=null) {
+            console.log(this.data);
+        this.chart =React.render(<LineChart width={600} height={300} data={this.data}
+            margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+       <XAxis dataKey='x'/>
+       <YAxis max={this.max}/>
+       <CartesianGrid strokeDasharray="3 3"/>
+       <Tooltip/>
+       <Legend />
+       <Line type="monotone" dataKey='y' stroke="#8884d8" activeDot={{r: 8}}/>
+      </LineChart>,document.querySelector(s));
         }
         if (c != null) { React.render(<Controls visual={this.visual} />, document.querySelector(c)); }
     }
     public unrender(s: string, c: string) {
-        if (s != null) {
-            if (this.chartist != null) {
-                this.chartist.detach();
-            }
-            //document.querySelector(s).html="";
-        }
-        if (c != null) { document.querySelector(c).html = ""; }
+        if(s!=null){React.unmountComponentAtNode(document.querySelector(s));}
+        if(c!=null){React.unmountComponentAtNode(document.querySelector(c));}
     }
-    private setVisual(v: visual.Visual) {
+    public setVisual(v: visual.Visual) {
         this.visual = v;
     }
     public setHigh(n: number) {
-        this.options.high = n;
+        this.high = n;
     }
     public setLow(n: number) {
-        this.options.low = n;
+        this.low = n;
     }
-}/*
-export class SeriesSparklineAdapter implements Adapter {
+    public setTitle(s: string) {
+        this.title=s;
+    }
+    public setXLabel(s: string) {
+        this.xAxisLabel = s;
+    }
+    public setYLabel(s: string) {
+        this.yAxisLabel = s;
+    }
+}export class RechartsSeriesSparklineAdapter implements Adapter {
     private singleValues: sdmxdata.PartialKey = null;
     private visual: visual.Visual = null;
     private min: number = null;
     private max: number = null;
     private minDate: Date = null;
     private maxDate: Date = null;
-    private model = new ChartistSeriesSparklineModel();
+    private model = new RechartsSeriesSparklineModel();
     constructor() {
     }
 
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
-        this.model = new ChartistSeriesSparklineModel();
+        this.model = new RechartsSeriesSparklineModel();
         this.model.setVisual(visual);
+        this.model.setXLabel(visual.getX().getConceptName());
+        this.model.setYLabel(visual.getValues()[0].getConceptName());
         this.min = null;
         this.max = null;
         this.minDate = null;
@@ -277,7 +283,6 @@ export class SeriesSparklineAdapter implements Adapter {
             }
             if (b instanceof bindings.BoundToTimeSeries) {
                 series++;
-                return false;
             }
             if (b instanceof bindings.BoundToTimeList) {
                 list++;
@@ -294,14 +299,14 @@ export class SeriesSparklineAdapter implements Adapter {
         if (visual.getTime() != null && visual.getTime() instanceof bindings.BoundToTimeX) {
             time = 1;
         }
-        if (time == 1 && visual.getValues().length == 1 && series == 1) {
+        if (time == 1 && visual.getValues().length == 1) {
             return true;
         }
         return false;
     }
 
     public getName(): string {
-        return "SeriesSparkline";
+        return "RechartsSeriesSparkline";
     }
 
     public setSingleValues(key: sdmxdata.PartialKey): void {
@@ -309,11 +314,13 @@ export class SeriesSparklineAdapter implements Adapter {
     }
 
     public addSingleDataPoint(key: sdmxdata.PartialKey): void {
-        var time: string = this.visual.getTime().getConcept();
+        var time: string = this.visual.getX().getConcept();
+        
         var val: string = this.visual.getPrimaryMeasure().getConcept();
         var timeVal: string = structure.NameableType.toIDString(key.getComponent(time));
         var v1: number = parseFloat(key.getComponent(val));
-        var ser: string = key.getComponent(this.visual.getSeries().getConcept());
+        var serName = this.visual.getSeries().getConceptName();
+        var ser:string = structure.NameableType.toString(key.getComponent(this.visual.getSeries().getConcept()));
         if (this.min == null || v1 < this.min) {
             this.min = v1;
         }
@@ -347,7 +354,7 @@ export class SeriesSparklineAdapter implements Adapter {
                 this.maxDate = d;
             }
         }
-        this.model.addPoint(ser, timeVal, v1);
+        this.model.addPoint(ser,timeVal, v1);
     }
 
     addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void {
@@ -356,61 +363,90 @@ export class SeriesSparklineAdapter implements Adapter {
 
 }
 
-export class ChartistSeriesSparklineModel implements Model {
+export class RechartsSeriesSparklineModel implements Model {
+    
+    private seriesLabels = [];
+    private data = [];
+    private xAxisLabel = "Time";
+    private yAxisLabel = "Amount";
     private visual: visual.Visual = null;
-    private chartist = null;
+    private title = null;
+    private chart = null;
     private controls = null;
-    private data = {
-        labels: [],
-        series: []
-    };
-    private options = {
-        width: "700px",
-        height: "700px",
-        lineSmooth: Chartist.Interpolation.cardinal({
-            tension: 0.2
-        }),
-        fullWidth: true,
-        chartPadding: {
-            right: 40
-        },
-        high: 100,
-        low: 0
-    };
-    public addPoint(ser: string, x: string, y: number) {
-        if (!collections.arrays.contains(this.data.labels, x)) {
-            this.data.labels.push(x);
+    private min = null;
+    private max = null;
+    private colours:collections.Dictionary<string,Array>=null;
+    public addPoint(ser:string,x: string, y: number) {
+        var dat = {};
+        var n = true;
+        for(var i:number=0;i<this.data.length;i++) {
+            if( this.data[i][this.xAxisLabel]==x){
+                dat=this.data[i];
+                n=false;
+            }
         }
-        if (this.data.series[ser] == null) {
-            this.data.series[ser] = { data: [] };
+        dat[this.xAxisLabel]=x;
+        dat[ser]=y;
+        if(n){this.data.push(dat);}
+        for(var i:number=0;i<this.seriesLabels.length;i++) {
+                    if(this.seriesLabels[i]==ser){
+                        return;
+                    }
         }
-        this.data.series[ser].data.push(y);
+        this.seriesLabels.push(ser);
     }
     public render(s: string, c: string) {
-        if (s != null) {
-            this.chartist = new Chartist.Line(s, this.data, this.options, {} as any);
+        if(s!=null) {
+            console.log(this.data);
+        this.chart =React.render(<LineChart width={600} height={300} data={this.data}
+            margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+       <XAxis dataKey={this.xAxisLabel}/>
+       <YAxis max={this.max}/>
+       <CartesianGrid strokeDasharray="3 3"/>
+       <Tooltip/>
+       <Legend />
+       {this.getLines()}
+      </LineChart>,document.querySelector(s));
         }
         if (c != null) { React.render(<Controls visual={this.visual} />, document.querySelector(c)); }
     }
-    public unrender(s: string, c: string) {
-        if (s != null) {
-            if (this.chartist != null) {
-                this.chartist.detach();
-            }
-            //document.querySelector(s).html="";
+    public getLines() {
+        var html = [];
+        var series = this.visual.getSeries();
+        for(var i:number=0;i<series.getPossibleValues().length;i++) {
+            var itm = series.getPossibleValues()[i];
+            var col = colors.rgbToHtml(series.getColours().getValue(structure.NameableType.toIDString(itm)));
+            html.push(<Line type="monotone" dataKey={structure.NameableType.toString(itm)} stroke={col} activeDot={{r: 8}}/>);
         }
-        if (c != null) { document.querySelector(c).html = ""; }
+        return html;
     }
-    private setVisual(v: visual.Visual) {
+    public unrender(s: string, c: string) {
+        if(s!=null){React.unmountComponentAtNode(document.querySelector(s));}
+        if(c!=null){React.unmountComponentAtNode(document.querySelector(c));}
+    }
+    public setVisual(v: visual.Visual) {
         this.visual = v;
     }
     public setHigh(n: number) {
-        this.options.high = n;
+        this.high = n;
     }
     public setLow(n: number) {
-        this.options.low = n;
+        this.low = n;
     }
-}*/
+    public setTitle(s: string) {
+        this.title=s;
+    }
+    public setXLabel(s: string) {
+        this.xAxisLabel = s;
+    }
+    public setYLabel(s: string) {
+        this.yAxisLabel = s;
+    }
+    public setColours(c:collections.Dictionary<string,Array>) {
+        
+            
+    }
+}
 /*
  
  export class SeriesSparklineAdapter implements Adapter {
@@ -423,8 +459,12 @@ export class ChartistSeriesSparklineModel implements Model {
  }
  */
 export class CubeWalkUtils {
+    private clearedPossibles:collections.Dictionary<bindings.BoundTo,boolean> = new collections.Dictionary<bindings.BoundTo,boolean>();
     private clearedTime: boolean = false;
     visitRoot(cube: sdmxdata.Cube, visual: visual.Visual, adapter: Adapter) {
+        //console.log("visitRoot");
+        // Comment this our for weird shit to happen
+        this.clearedPossibles = new collections.Dictionary<bindings.BoundTo,boolean>();
         var singles = new sdmxdata.PartialKey();
         var multiples = new sdmxdata.PartialKey();
         if (cube == null) {
@@ -437,9 +477,12 @@ export class CubeWalkUtils {
         }
         this.clearedTime = false;
         var innerbd: bindings.BoundTo = visual.findBinding(current.getSubDimension());
-        if (innerbd.isClientSide()) {
-            innerbd.getPossibleValues().clear();
-            for (var i: number = 0; i < current.listSubDimensions().length) {
+            if(this.clearedPossibles.getValue(innerbd)==null){
+                innerbd.setPossibleValues([]);
+                this.clearedPossibles.setValue(innerbd,true);
+                console.log("Cleared"+innerbd.getConcept());
+            }
+            for (var i: number = 0; i < current.listSubDimensions().length;i++) {
                 var it = current.listSubDimensions()[i];
                 var inCurrentValue: boolean = false;
                 var dim: sdmxdata.CubeDimension = it;
@@ -449,6 +492,7 @@ export class CubeWalkUtils {
                 var itm2: structure.ItemType = this.getComponent(visual, dim.getConcept(), dim.getValue()) as structure.ItemType;
                 innerbd.getPossibleValues().push(itm2);
             }
+            if (innerbd.isClientSide()) {
             if (!inCurrentValue) {
                 if (innerbd.getPossibleValues().size() > 0) {
                     //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
@@ -478,6 +522,7 @@ export class CubeWalkUtils {
         }
     }
     public visit(cube: sdmxdata.Cube, visual: visual.Visual, current: data.CubeDimension, adapter: Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey) {
+        //console.log("visit");
         var concept: string = current.getConcept();
         var val: string = current.getValue();
         //System.out.println("Visit:"+concept+":"+val);
@@ -490,9 +535,12 @@ export class CubeWalkUtils {
                 multiples.setComponent(concept, itm);
             }
             var innerbd: bindings.BoundTo = visual.findBinding(current.getSubDimension());
-            if (innerbd.isClientSide()) {
-                innerbd.getPossibleValues().clear();
-                for (var i: number = 0; i < current.listSubDimensions().length) {
+            
+            if(this.clearedPossibles.getValue(innerbd)==null){
+                innerbd.setPossibleValues([]);
+                this.clearedPossibles.setValue(innerbd,true);
+            }
+                for (var i: number = 0; i < current.listSubDimensions().length;i++) {
                     var it = current.listSubDimensions()[i];
                     var inCurrentValue: boolean = false;
                     var dim: sdmxdata.CubeDimension = it;
@@ -502,6 +550,7 @@ export class CubeWalkUtils {
                     var itm2: structure.ItemType = this.getComponent(visual, dim.getConcept(), dim.getValue()) as structure.ItemType;
                     innerbd.getPossibleValues().push(itm2);
                 }
+                if (innerbd.isClientSide()) {
                 if (!inCurrentValue) {
                     if (innerbd.getPossibleValues().size() > 0) {
                         //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
@@ -545,28 +594,18 @@ export class CubeWalkUtils {
         }
     }
     public visitTime(cube: sdmxdata.Cube, visual: visual.Visual, dim: sdmxdata.TimeCubeDimension, adapter: Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey) {
+        //console.log("visitTime");
         var concept: string = dim.getConcept();
         var val: string = dim.getValue();
         // This is for time drop down list
         // clearedTime clears all the time's possible values
         //System.out.println("Visit:"+concept+":"+val);
-        if (!this.clearedTime) {
-            visual.clearTime();
-            this.clearedTime = true;
-        }
-        // This code adds the current time to the possible values
-        if (visual.getTime() != null) {
-            if (!visual.getTime().isDiscrete()) {
-                // Time has Codelist
-                visual.getTime().addTime(sdmxdata.ValueTypeResolver.resolveCode(visual.getQueryable().getRemoteRegistry().getLocalRegistry(), visual.getDataStructure(), concept, val));
-            } else {
-                // Time has no codelist
-                var t: structure.CodeType = new structure.CodeType();
-                t.setId(new commonreferences.ID(val));
-                visual.getTime().addTime(t);
-            }
-        }
+
         var bd: bindings.BoundTo = visual.findBinding(concept);
+        if(this.clearedPossibles.getValue(bd)==null){
+            bd.setPossibleValues([]);
+            this.clearedPossibles.setValue(bd,true);
+        }
         var itm: object = this.getComponent(visual, bd.getConcept(), val);
         if (bd.isInCurrentValues(val)) {
             if (bd.expectValues() == 1) {
@@ -596,6 +635,7 @@ export class CubeWalkUtils {
         }
     }
     public visitObservation(cube: sdmxdata.Cube cube, visual: visual.Visual, dim: sdmxdata.CubeObservation, adapter: adapter.Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey) {
+        //console.log("visitObs");
         //System.out.println("Visit:" + dim.getConcept());
         if (dim.getCrossSection() != null) {
             /*
@@ -656,7 +696,8 @@ export class CubeWalkUtils {
      }*/
 }
 export var adapters: Array<Adapter> = [];
-this.adapters.push(new SparklineAdapter());
+this.adapters.push(new RechartsSparklineAdapter());
+this.adapters.push(new RechartsSeriesSparklineAdapter());
 export class AdapterRegistrySingleton {
     static getList() { return adapters; }
 }

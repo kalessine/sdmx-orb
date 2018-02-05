@@ -1,3 +1,6 @@
+// This is put here because webpack doesn't
+// like it lower down in adapter.tsx
+import * as collections from 'typescript-collections';
 import * as structure from './sdmx/structure';
         console.log('0.1');
         import * as React from 'preact-compat';
@@ -40,7 +43,7 @@ import * as structure from './sdmx/structure';
             <SdmxClient />
         </div>
     </Tabs.Panel>
-    <Tabs.Panel title='Tab #2'>
+    <Tabs.Panel title='Canned Visualisations'>
         <div>
             <Editor />
         </div>
@@ -52,7 +55,6 @@ import * as structure from './sdmx/structure';
         super.setState(o);
         }
         }
-
 
 React.render(<Main />, document.querySelector('#app'));
 

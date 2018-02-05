@@ -202,6 +202,7 @@ export default class Editor extends React.Component {
 
         html.push(<Services onConnect={(q: interfaces.Queryable) => { this.connect(q); }} ></Services>);
         html.push(<Dataflows dfs={this.getState().dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />);
+        console.log(this.getVisualObject());
         html.push(<JSONResultPanel str={JSON.stringify(this.getVisualObject())} obj={this.getVisualObject()} />);
         if (this.state.visual == null) {
             return <div>{html}</div>;

@@ -32,6 +32,7 @@ export default class Controls extends React.Component {
     }
     changeDropDown(e) {
         var c = e.target.title;
+        var binding = this.props.visual.findBinding(c);
         var item = this.props.visual.findBinding(c).getAllValues()[e.target.selectedIndex];
         this.props.visual.findBinding(c).setCurrentValue(item);
         this.props.visual.renderVisual();

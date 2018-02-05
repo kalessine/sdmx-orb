@@ -364,30 +364,26 @@ export class Visual {
        }
    }
    public renderVisual() {
-       
        var p = null;
        if(this.isRequery()) {
-           if(this.model!=null){this.model.unrender(this.visualId,null);
+           if(this.model!=null){this.model.unrender(this.visualId,null);}
            this.model=null;
            p=this.doUpdate();
        }
        if(this.isDirty()){
            if(this.model!=null){this.model.unrender(this.visualId,null);
            this.model=null;
-           if(p!=null){
-               p=p.then(function(msg){return this.doCube();}.bind(this));
-           }else{
-               doCube();
+           // Shouldn't Need To DoCube again
+           //this.doCube();
+           this.model=this.adapter.createModel(this,this.cube);
+           this.model.render(this.visualId,null)
            }
        }
        if(this.model!=null ) {return this.model;}
        if(p!=null){
-          p=p.then(function(cube){this.model=this.adapter.createModel(this,this.cube);
-              console.log(this.query);this.model.render(this.visualId,null) }.bind(this));
-       }
-       else{
-          this.model=this.adapter.createModel(this,this.cube);
-          this.model.render(this.visualId,null)
+          p=p.then(function(cube){
+              this.model=this.adapter.createModel(this,this.cube);
+              this.model.render(this.visualId,null) }.bind(this));
        }
    }
    public getPercentOf() {
@@ -408,6 +404,14 @@ export class Visual {
        }
        if( this.time!=null&&this.time.getBoundTo()==bindings.BoundTo.BOUND_TIME_SERIES) ){ return this.time;}
        if( this.crossSection!=null&&this.crossSection.getBoundTo()==bindings.BoundTo.BOUND_MEASURES_SERIES) ){ return this.crossSection;}
+       return null;
+   }
+   public getX():bindings.BoundTo {
+       for(var i:number = 0; i<this.bindings.length;i++) {
+           if( this.bindings[i].getBoundTo()==bindings.BoundTo.BOUND_DISCRETE_X){ return this.bindings[i];}
+       }
+       if( this.time!=null&&this.time.getBoundTo()==bindings.BoundTo.BOUND_TIME_X) ){ return this.time;}
+       if( this.crossSection!=null&&this.crossSection.getBoundTo()==bindings.BoundTo.BOUND_MEASURES_X) ){ return this.crossSection;}
        return null;
    }
 }

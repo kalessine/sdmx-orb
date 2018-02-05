@@ -3,14 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/Editor.tsx</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/index.html</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/public_html/main.tsx</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/public_html/index.html</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/visual.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/SdmxClient.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/data.ts</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/bindings.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/visual.tsx</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/adapter.tsx</file>
-            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/main.tsx</file>
         </group>
     </open-files>
 </project-private>

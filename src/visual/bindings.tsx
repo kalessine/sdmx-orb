@@ -4,6 +4,8 @@ import * as structure from "../sdmx/structure";
 import * as sdmx from "../sdmx";
 import * as visual from "../visual/visual";
 import * as data from "../sdmx/data";
+import * as colors from 'colors-ts';
+import * as collections from 'typescript-collections';
 import Checkbox from 'preact-material-components/Checkbox';
 import Select from 'preact-material-components/Select';
 console.log('14');
@@ -41,9 +43,10 @@ export class BoundTo {
     static BOUND_MEASURES_LIST: number = 22;
     static BOUND_MEASURES_INDIVIDUAL: number = 23;
     static BOUND_MEASURES_SERIES: number = 24;
+    static BOUND_MEASURES_X: number = 25;
     
-    static BOUND_DISCRETE_SINGLE: number = 25;
-    static BOUND_DISCRETE_ALL: number = 26;
+    static BOUND_DISCRETE_SINGLE: number = 26;
+    static BOUND_DISCRETE_ALL: number = 27;
 
     private concept: string;
     private boundTo: number = BoundTo.NOT_BOUND;
@@ -249,14 +252,16 @@ export class BoundTo {
      * @param currentValues the currentValues to set
      */
     public setCurrentValues(currentValues: Array<structure.ItemType>) {
-        if(currentValues.length==0){
-            throw new Error("Error");
-        }
+        //if(currentValues.length==0){
+        //    throw new Error("Error");
+        //}
         var currentValues: Array<structure.ItemType> = this.removeDuplicates(currentValues);
         this.visual.setBindingCurrentValues(this.concept, currentValues);
             if (this.isClientSide()) {
                 this.visual.setDirty(true);
+                this.visual.setRequery(false);
             } else {
+                this.visual.setDirty(true);
                 this.visual.setRequery(true);
             }
     }
@@ -286,17 +291,14 @@ export class BoundTo {
      * @return the possibleValues
      */
     public getPossibleValues(): Array<structure.ItemType> {
-        if (this.possibleValues == null) {
-            this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
-        }
-        return this.possibleValues;
+        return this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).getPossibleValues();
     }
 
     /**
      * @return the possibleValues
      */
     public setPossibleValues(list: Array<structure.ItemType>) {
-        this.possibleValues = this.visual.getQuery().getQueryKey(this.concept).possibleValuesItems();
+        this.visual.getQuery().getQueryKey(this.concept).setPossibleValues(list);
     }
 
     public getAllValues(): Array<structure.ItemType> {
@@ -341,9 +343,6 @@ export class BoundTo {
             this.setQueryAll(true);
         } else {
             this.setQueryAll(false);
-            var current: Array<structure.ItemType> = this.getCurrentValues();
-            current.push(this.getPossibleValues()[0]);
-            this.setCurrentValues(current);
         }
     }
 
@@ -443,9 +442,6 @@ export class BoundToTime extends BoundTo {
     }
     public isSingleLatestTime():boolean { return this.singleLatestTime; }
     public setSingleLatestTime(b:boolean):void{ this.singleLatestTime=b; }
-    public addTime(c:ItemType) {
-        super.getPossibleValues().push(c);
-    }
     public expectValues() { return 2; }
 }
 export class BoundToTimeX extends BoundToTime {
@@ -568,10 +564,17 @@ export class BoundToTimeList extends BoundToTime {
     }
 }
 export class BoundToTimeSeries extends BoundToTime {
+    private colours = new collections.Dictionary<string,Array<number>>();
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setQueryAll(true);
         super.setWalkAll(true);
+        for(var i:number=0;i<this.getAllValues().length;i++) {
+            var r = Math.random()*255;
+            var g = Math.random()*255;
+            var b = Math.random()*255;
+            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]),[r,g,b]);
+        }
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_TIME_SERIES;
@@ -579,13 +582,24 @@ export class BoundToTimeSeries extends BoundToTime {
     public getBoundToString() {
         return "BoundToTimeSeries";
     }
+    public getColours(){ return this.colours; }
 }
 export class BoundToSeries extends BoundToDiscrete {
+
+    private colours = new collections.Dictionary<string,Array<number>>();
 
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setQueryAll(true);
         super.setWalkAll(true);
+        super.setCurrentValues(this.getAllValues());
+        for(var i:number=0;i<this.getAllValues().length;i++) {
+            var r = Math.random()*255;
+            var g = Math.random()*255;
+            var b = Math.random()*255;
+            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]),[r,g,b]);
+            console.log(this.colours);
+        }
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_DISCRETE_SERIES;
@@ -593,6 +607,8 @@ export class BoundToSeries extends BoundToDiscrete {
     public getBoundToString() {
         return "Series";
     }
+    public expectValues() { return 2; }
+    public getColours(){ return this.colours; }
 }
 export class BoundToSlider extends BoundToDiscrete {
 
@@ -900,7 +916,7 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
         o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
         break;
     }
-    return b;
+    return o;
 }
 export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundToDiscreteX {
     var b = null;
