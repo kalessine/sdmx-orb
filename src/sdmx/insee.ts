@@ -35,7 +35,7 @@ export class INSEE implements interfaces.Queryable, interfaces.RemoteRegistry, i
     private dataflowList: Array<structure.Dataflow> = null;
     private classifications: structure.Codelist = null;
     private indicatorsArrayCodelist: Array<structure.Codelist> = [];
-
+    getDataService():string { return "INSEE";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

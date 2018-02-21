@@ -33,6 +33,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
     private mediaType: string = "text/xml; charset=utf-8"
     private dataflowList: Array<structure.Dataflow> = null;
 
+    getDataService():string { return "ABS";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

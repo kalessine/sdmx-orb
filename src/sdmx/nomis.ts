@@ -63,6 +63,7 @@ export class NOMISRESTServiceRegistry implements interfaces.RemoteRegistry, inte
             }
         };
     }
+    getDataService():string { return "NOMIS";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

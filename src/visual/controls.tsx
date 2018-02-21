@@ -19,7 +19,6 @@ export default class Controls extends React.Component {
     constructor(props, state) {
         this.props = props;
         this.state = state;
-        console.log("create");
     }
     listDropDown(c: string,val:string) {
         var options = [];

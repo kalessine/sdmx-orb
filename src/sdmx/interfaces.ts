@@ -25,6 +25,7 @@ import * as data from '../sdmx/data';
 export interface Queryable {
     getRemoteRegistry(): RemoteRegistry;
     getRepository(): Repository;
+    getDataService():string
 }
 /*
  * Sometimes i feel that i dont like the way this class works in javascript...

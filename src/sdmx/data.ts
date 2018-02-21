@@ -212,7 +212,7 @@ export class QueryKey {
         this.possibleValues=this.removeDuplicates(this.possibleValues);
         return this.possibleValues;
     }
-    public setPossibleValues(list:Array<structure.ItemType){
+    public setPossibleValues(list:Array<structure.ItemType>){
         this.possibleValues=list;
     }
     getQueryString() {

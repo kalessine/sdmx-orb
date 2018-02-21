@@ -1,0 +1,35 @@
+
+/* 
+    Created on : 09/02/2018, 8:53:13 PM
+    Author     : James
+*/
+
+.visualborderLayout {
+  display: table;  
+  width: 100%
+}
+
+.visualborderLayout .top {
+    display: table-row;
+}
+
+.visualborderLayout .left {
+    display: table-cell;
+    vertical-align: middle;
+    width: 10%;
+  }
+
+.visualborderLayout .center {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.visualBorderLayout .right {
+    display: table-cell;
+    vertical-align: middle;
+    width: 10%;
+  }
+
+.visualBorderLayout .bottom {
+    display: table-row; 
+}

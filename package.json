@@ -42,6 +42,7 @@
     "preact-virtual-list": "^0.3.1",
     "react-base": "^0.2.0",
     "react-dnd-html5-backend": "^2.5.1",
+    "react-menu-bar": "^2.0.4",
     "react-simple-tree": "^0.1.0",
     "react-simpletabs": "^0.7.0",
     "react-split-pane": "^0.1.70",
@@ -65,8 +66,8 @@
     "style-loader": "^0.18.2",
     "ts-loader": "^2.3.2",
     "typed-css-modules-loader": "0.0.10",
-    "typescript": "^2.5.0-dev.20170808",
+    "typescript": "^2.7.2",
     "typescript-collections": "^1.2.5",
-    "webpack": "^3.8.1"
+    "webpack": "^3.11.0"
   }
 }

@@ -30,7 +30,7 @@ export class ESTAT implements interfaces.Queryable, interfaces.RemoteRegistry {
     private options: string = "";
     private local: interfaces.LocalRegistry = new registry.LocalRegistry();
     private dataflowList: Array<structure.Dataflow> = null;
-
+    getDataService():string { return "ESTAT";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

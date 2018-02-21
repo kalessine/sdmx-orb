@@ -35,7 +35,7 @@ export class ILO implements interfaces.Queryable, interfaces.RemoteRegistry, int
     private dataflowList: Array<structure.Dataflow> = null;
     private classifications: structure.Codelist = null;
     private indicatorsArrayCodelist: Array<structure.Codelist> = [];
-
+    getDataService():string { return "ILO";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

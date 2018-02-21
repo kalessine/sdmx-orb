@@ -97,16 +97,18 @@ export default class Editor extends React.Component {
 
     }
     changeAdapter(e) {
-        console.log("ChangeAdapter");
+        var i:number = e.selectedIndex;
+        console.log(e.selectedIndex);
+        if(i==0){return;}
         this.state.visual.setAdapter(this.state.adapters[e.selectedIndex]);
         this.state.visual.render();
         super.forceUpdate();
     }
     listAdapters() {
         var adapters = [];
+        adapters.push(null);
         for (var i: number = 0; i < adapter.AdapterRegistrySingleton.getList().length; i++) {
             if (adapter.AdapterRegistrySingleton.getList()[i].canCreateModelFromVisual(this.state.visual)) {
-                console.log("Added");
                 var adapt = adapter.AdapterRegistrySingleton.getList()[i];
                 adapters.push(adapt);
             }
@@ -115,7 +117,7 @@ export default class Editor extends React.Component {
         var options = [];
         var index: number = 0;
         _.forEach(this.state.adapters,function(item) {
-            var name = item.getName();
+            var name = item!=null?item.getName():"";
             options.push(<Select.Item>{name}</Select.Item>);
             index++;
         });

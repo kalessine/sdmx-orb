@@ -34,7 +34,7 @@ export class OECD implements interfaces.Queryable, interfaces.RemoteRegistry {
     private local: interfaces.LocalRegistry = new registry.LocalRegistry();
 
     private dataflowList: Array<structure.Dataflow> = null;
-
+    getDataService():string { return "OECD";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

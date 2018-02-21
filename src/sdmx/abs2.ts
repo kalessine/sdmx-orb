@@ -35,7 +35,7 @@ export class ABS2 implements interfaces.Queryable, interfaces.RemoteRegistry {
     
     
     private displayFormat:any = moment("dd-mm-yyyy");
-
+    getDataService():string { return "ABS";}
     getRemoteRegistry(): interfaces.RemoteRegistry {
         return this;
     }

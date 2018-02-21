@@ -47,6 +47,8 @@ export class BoundTo {
     
     static BOUND_DISCRETE_SINGLE: number = 26;
     static BOUND_DISCRETE_ALL: number = 27;
+    
+    static BOUND_DISCRETE_MENU: number = 28;
 
     private concept: string;
     private boundTo: number = BoundTo.NOT_BOUND;
@@ -127,6 +129,7 @@ export class BoundTo {
     public expectValues(): number {
         return this.queryAll ? 2 : 1;
     }
+    public getItemScheme() {return this.visual.getItemScheme(this.concept);
 
     public isMeasureDescriptor(): boolean {
         return this.measureDescriptor;
@@ -136,7 +139,7 @@ export class BoundTo {
         this.measureDescriptor = measureDescriptor;
     }
 
-    public getConceptName(): String {
+    public getConceptName(): string {
         var loc: string = sdmx.SdmxIO.getLocale();
         var comp: structure.Component = this.visual.getDataStructure().findComponentString(this.concept);
         var concept: structure.ConceptType = this.visual.getRegistry().findConcept(comp.getConceptIdentity());
@@ -393,6 +396,15 @@ export class BoundTo {
             }
         }
         return null;
+    }
+    public removeCurrentValue(item:structure.ItemType){
+        this.visual.removeBindingCurrentValue(this.concept, item.getId().toString());
+    }
+    public addCurrentValue(item:structure.ItemType){
+        this.visual.addBindingCurrentValue(this.concept, item.getId().toString());
+    }
+    public containsValue(item:structure.ItemType):boolean {
+        return this.visual.containsValue(this.concept, item);
     }
 }
 
@@ -653,6 +665,30 @@ export class BoundToDropdown extends BoundToDiscrete {
     }
     public getBoundToString() {
         return "Dropdown";
+    }
+}
+export class BoundToMenu extends BoundToDiscrete {
+    public level: number = 0;
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(false);
+        super.setWalkAll(true);
+        super.setCurrentValue(super.getAllValues()[0]);
+    }
+    public expectValues(): number {
+        return 1;
+    }
+    public getLevel(): number {
+        return this.level;
+    }
+    public setLevel(b:number) {
+        this.level = b;
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_MENU;
+    }
+    public getBoundToString() {
+        return "Menu";
     }
 }
 export class BoundToTimeDropdown extends BoundToDiscrete {
@@ -981,6 +1017,7 @@ var be11: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_SERIES, "Series", d
 var be12: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_X, "X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousX);
 var be13: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_Y, "Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousY);
 var be14: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_COLOUR, "Colour", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousColour);
+var be15: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_MENU, "Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToMenu);
 
 
 
@@ -990,6 +1027,7 @@ DimensionBindingRegister.registerState(be3);
 DimensionBindingRegister.registerState(be4);
 DimensionBindingRegister.registerState(be5);
 DimensionBindingRegister.registerState(be6);
+DimensionBindingRegister.registerState(be15);
 
 TimeBindingRegister.registerState(be7);
 TimeBindingRegister.registerState(be8);
@@ -1000,3 +1038,6 @@ TimeBindingRegister.registerState(be11);
 MeasureBindingRegister.registerState(be12);
 MeasureBindingRegister.registerState(be13);
 MeasureBindingRegister.registerState(be14);
+MeasureBindingRegister.registerState(be15);
+
+
