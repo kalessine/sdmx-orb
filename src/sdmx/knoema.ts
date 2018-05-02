@@ -52,10 +52,10 @@ export class Knoema implements interfaces.Queryable, interfaces.RemoteRegistry, 
             var k = q.getKeyNames()[i];
             var qk = q.getQueryKey(k);
             qs+=k+"=";
-            for (var j: number = 0; j < qk.getValues().length;j++) {
-                var v = qk.getValues()[j];
+            for (var j: number = 0; j < qk.size();j++) {
+                var v = qk.get(j);
                 qs+=v;
-                if (j < qk.getValues().length-1 ) {
+                if (j < qk.size()-1 ) {
                     qs+="%2C";
                 }
             }

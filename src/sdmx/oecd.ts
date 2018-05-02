@@ -269,10 +269,10 @@ export class OECD implements interfaces.Queryable, interfaces.RemoteRegistry {
         s += "</Time>";
 
         for (var i: number = 0; i < q.size(); i++) {
-            if (q.getQueryKey(q.getKeyNames()[i]).getValues().length > 0) {
+            if (q.getQueryKey(q.getKeyNames()[i]).size() > 0) {
                 s += "<Or>";
-                for (var j: number = 0; j < q.getQueryKey(q.getKeyNames()[i]).getValues().length; j++) {
-                    s += "<Dimension id=\"" + q.getQueryKey(q.getKeyNames()[i]).getName() + "\">" + q.getQueryKey(q.getKeyNames()[i]).getValues()[j] + "</Dimension>";
+                for (var j: number = 0; j < q.getQueryKey(q.getKeyNames()[i]).size(); j++) {
+                    s += "<Dimension id=\"" + q.getQueryKey(q.getKeyNames()[i]).getName() + "\">" + q.getQueryKey(q.getKeyNames()[i]).get(j) + "</Dimension>";
                 }
                 s += "</Or>";
             }

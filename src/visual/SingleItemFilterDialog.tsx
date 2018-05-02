@@ -25,7 +25,7 @@ export interface FilterDialogState {
     tree: object
 }
 
-export default class MyDialog extends React.Component<FilterDialogProps, FilterDialogState> {
+export default class SingleItemFilterDialog extends React.Component<FilterDialogProps, FilterDialogState> {
     private props: FilterDialogProps = {};
     private state: FilterDialogState = {data: null};
 
@@ -48,46 +48,21 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
     change(id: string, checked: boolean) {
         var boundto: bindings.BoundTo = this.props.boundto;
         if (checked) {
-            boundto.removeCurrentValueString(id);
+            boundto.setCurrentValuesString([id]);
         } else {
-            boundto.addCurrentValueString(id);
+            boundto.setCurrentValues([]);
         }
+        super.forceUpdate();
     }
     toggle(id: string) {
         var boundto: bindings.BoundTo = this.props.boundto;
         var item: structure.ItemType = null;
-        var checked: number = 0;
-        var subs: Array<structure.ItemType> = boundto.getCodelist().findSubItemsString(id);
-        collections.arrays.forEach(subs, function (item2: structure.ItemType) {
-            if (boundto.containsValue(item2.getId().toString())) {
-                checked++;
-            }
-        });
-        if (checked == 0 || (checked > 0 && checked < subs.length) {
-            collections.arrays.forEach(subs, function (item2: structure.ItemType) {
-                boundto.addCurrentValueString(item2.getId().toString());
-            });
-        } else {
-            collections.arrays.forEach(subs, function (item2: structure.ItemType) {
-                boundto.removeCurrentValueString(item2.getId().toString());
-            });
-        }
+        boundto.setCurrentValueString(id);
         this.setState(this.state);
+        super.forceUpdate();
     }
     getItemSchemeList(props: FilterDialogProps, itemScheme: structure.ItemSchemeType) {
         return this.props.boundto.getCodelist();
-    }
-    selectAll() {
-        var boundto: bindings.BoundTo = this.props.boundto;
-        var to_add = [];
-        collections.arrays.forEach(boundto.getCodelist().getItems(), function (item: structure.ItemType) {
-            to_add.push(item);
-
-        });
-        collections.arrays.forEach(to_add, function (item: structure.ItemType) {
-            boundto.addCurrentValueString(item.getId().toString());
-        });
-        this.setState({open: true, data: this.getItemSchemeList(this.props, this.props.boundto.getCodelist())});
     }
     clear() {
         var boundto: bindings.BoundTo = this.props.boundto;
@@ -158,7 +133,6 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
                                     <label>{structure.NameableType.toString(item)}()</label></div>;
                             }} /></Dialog.Body>
                         <Dialog.Footer>
-                            <Dialog.FooterButton onClick={() => {this.selectAll();}}>Select All</Dialog.FooterButton>
                             <Dialog.FooterButton onClick={() => {this.clear();}}>Clear</Dialog.FooterButton>
                             <Dialog.FooterButton accept={true} onClick={() => {this.props.visual.renderVisual();
         super.forceUpdate();}}>Accept</Dialog.FooterButton>
@@ -180,9 +154,9 @@ export default class MyDialog extends React.Component<FilterDialogProps, FilterD
                         {tree}
                     </Dialog.Body>
                     <Dialog.Footer>
-                        <Dialog.FooterButton onClick={() => {this.selectAll();}}>Select All</Dialog.FooterButton>
                         <Dialog.FooterButton onClick={() => {this.clear();}}>Clear</Dialog.FooterButton>
-                        <Dialog.FooterButton accept={true} onClick={() => this.props.queryFunc()}>Accept</Dialog.FooterButton>
+                        <Dialog.FooterButton accept={true} onClick={() => {this.props.visual.renderVisual();
+        super.forceUpdate();}}>Accept</Dialog.FooterButton>
                     </Dialog.Footer>
                 </Dialog>
             };

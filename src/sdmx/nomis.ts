@@ -119,16 +119,15 @@ export class NOMISRESTServiceRegistry implements interfaces.RemoteRegistry, inte
             var kns = q.getKeyNames();
             for (var i: number = 0; i < kns.length; i++) {
                 var name: string = kns[i];
-                var values = q.getQueryKey(kns[i]).getValues();
                 if (i == 0) {
                     queryString += "?";
                 } else {
                     queryString += "&";
                 }
                 queryString += name + "=";
-                for (var j: number = 0; j < values.length; j++) {
-                    queryString += values[j];
-                    if (j < values.length - 1) {
+                for (var j: number = 0; j < q.getQueryKey(kns[i]).size(); j++) {
+                    queryString += q.getQueryKey(kns[i]).get(j);
+                    if (j < q.getQueryKey(kns[i]).size() - 1) {
                         queryString += ",";
                     }
                 }

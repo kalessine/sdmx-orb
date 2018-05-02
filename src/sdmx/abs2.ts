@@ -243,10 +243,10 @@ export class ABS2 implements interfaces.Queryable, interfaces.RemoteRegistry {
                 + "    <GetCompactData xmlns=\"http://stats.oecd.org/OECDStatWS/SDMX/\">\n"
             + "      <QueryMessage><message:QueryMessage xmlns:message=\"http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message\"><Header xmlns=\"http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message\"><message:ID>none</message:ID><message:Test>false</message:Test><message:Prepared>2016-08-19T00:11:33+08:00</message:Prepared><message:Sender id=\"Sdmx-Sax\" /><message:Receiver id=\"" + q.getProviderRef() + "\" /></Header><message:Query><DataWhere xmlns=\"http://www.SDMX.org/resources/SDMXML/schemas/v2_0/query\"><And><DataSet>" + q.getDataflow().getId().toString() + "</DataSet><Time><StartTime>" + moment(q.getStartDate()).format("dd-MM-yyyy") + "</StartTime><EndTime>" + moment(q.getEndDate()).format("dd-MM-yyyy") + "</EndTime></Time>";
         for (var i:number = 0; i < q.size(); i++) {
-            if (q.getQueryKey(q.getKeyNames()[i]).getValues().length > 0) {
+            if (q.getQueryKey(q.getKeyNames()[i]).size() > 0) {
                 s+="<Or>";
-                for (var j: number = 0; j < q.getQueryKey(q.getKeyNames()[i]).getValues().length; j++) {
-                    s += "<Dimension id=\"" + q.getQueryKey(q.getKeyNames()[i]).getName() + "\">" + q.getQueryKey(q.getKeyNames()[i]).getValues()[j] + "</Dimension>";
+                for (var j: number = 0; j < q.getQueryKey(q.getKeyNames()[i]).size(); j++) {
+                    s += "<Dimension id=\"" + q.getQueryKey(q.getKeyNames()[i]).getName() + "\">" + q.getQueryKey(q.getKeyNames()[i]).get(j) + "</Dimension>";
                 }
                 s+="</Or>";
             }

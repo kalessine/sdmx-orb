@@ -44,11 +44,16 @@ export class BoundTo {
     static BOUND_MEASURES_INDIVIDUAL: number = 23;
     static BOUND_MEASURES_SERIES: number = 24;
     static BOUND_MEASURES_X: number = 25;
-    
+
     static BOUND_DISCRETE_SINGLE: number = 26;
     static BOUND_DISCRETE_ALL: number = 27;
-    
-    static BOUND_DISCRETE_MENU: number = 28;
+
+    static BOUND_DISCRETE_SINGLE_MENU: number = 28;
+    static BOUND_DISCRETE_MULTI_MENU: number = 29;
+    static BOUND_DISCRETE_LEVEL_MENU: number = 30;
+
+    static BOUND_DISCRETE_CROSS_MULTIPLE: number = 31;
+    static BOUND_DISCRETE_CROSS_SINGLE: number = 32;
 
     private concept: string;
     private boundTo: number = BoundTo.NOT_BOUND;
@@ -60,10 +65,10 @@ export class BoundTo {
     private measureDescriptor: boolean = false;
     private visual: visual.Visual = null;
 
-    static DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
-    static MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
-    static MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
+    //static DIMENSION = [BoundTo.BOUND_DISCRETE_X, BoundTo.BOUND_DISCRETE_Y, BoundTo.BOUND_DISCRETE_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    //static TIME = [BoundTo.BOUND_TIME_X, BoundTo.BOUND_TIME_Y, BoundTo.BOUND_TIME_DROPDOWN, BoundTo.BOUND_DISCRETE_LIST, BoundTo.BOUND_DISCRETE_SERIES];
+    //static MEASURE = [BoundTo.BOUND_MEASURES_DROPDOWN, BoundTo.BOUND_MEASURES_LIST, BoundTo.BOUND_MEASURES_SERIES, BoundTo.BOUND_MEASURES_INDIVIDUAL];
+    //static MEASURES = [BoundTo.BOUND_CONTINUOUS_X, BoundTo.BOUND_CONTINUOUS_Y, BoundTo.BOUND_CONTINUOUS_COLOUR, BoundTo.BOUND_CONTINUOUS_SIZE];
 
     constructor(visual: visual.Visual, concept: string) {
         this.concept = concept;
@@ -129,7 +134,7 @@ export class BoundTo {
     public expectValues(): number {
         return this.queryAll ? 2 : 1;
     }
-    public getItemScheme() {return this.visual.getItemScheme(this.concept);
+    public getItemScheme() {return this.visual.getItemScheme(this.concept);}
 
     public isMeasureDescriptor(): boolean {
         return this.measureDescriptor;
@@ -142,8 +147,12 @@ export class BoundTo {
     public getConceptName(): string {
         var loc: string = sdmx.SdmxIO.getLocale();
         var comp: structure.Component = this.visual.getDataStructure().findComponentString(this.concept);
-        var concept: structure.ConceptType = this.visual.getRegistry().findConcept(comp.getConceptIdentity());
-        return BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(concept)));
+        if (comp == null) {
+            return structure.NameableType.toString(this.visual.getCrossSection().getCodelist().findItemString(this.concept));
+        } else {
+            var concept: structure.ConceptType = this.visual.getRegistry().findConcept(comp.getConceptIdentity());
+            return BoundTo.stripCRLFs(BoundTo.escape(structure.NameableType.toString(concept)));
+        }
     }
 
     public getCodelist(): structure.ItemSchemeType {
@@ -204,7 +213,7 @@ export class BoundTo {
 
     public setCurrentValue(itm: structure.ItemType) {
         var vals: Array<structure.ItemType> = [];
-        if(itm!=null){vals.push(itm);}
+        if (itm != null) {vals.push(itm);}
         this.setCurrentValues(vals);
     }
 
@@ -260,13 +269,23 @@ export class BoundTo {
         //}
         var currentValues: Array<structure.ItemType> = this.removeDuplicates(currentValues);
         this.visual.setBindingCurrentValues(this.concept, currentValues);
-            if (this.isClientSide()) {
-                this.visual.setDirty(true);
-                this.visual.setRequery(false);
-            } else {
-                this.visual.setDirty(true);
-                this.visual.setRequery(true);
-            }
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+            this.visual.setRequery(false);
+        } else {
+            this.visual.setDirty(true);
+            this.visual.setRequery(true);
+        }
+    }
+    public setCurrentValuesString(currentValues: Array<string>) {
+        //if(currentValues.length==0){
+        //    throw new Error("Error");
+        //}
+        var result = [];
+        for (var i: number = 0; i < currentValues.length; i++) {
+            result.push(data.ValueTypeResolver.resolveCode(this.visual.getRegistry(), this.visual.getDataStructure(), this.concept, currentValues[i]));
+        }
+        this.setCurrentValues(result);
     }
 
 
@@ -381,29 +400,63 @@ export class BoundTo {
     public setVisual(cc: visual.Visual) {
         this.visual = cc;
     }
-    public findItemFromId(s:string) {
-        for (var i: number = 0; i < this.getAllValues().length;i++) {
-            if (this.getAllValues()[i].getId().toString()==s ) {
+    public findItemFromId(s: string) {
+        for (var i: number = 0; i < this.getAllValues().length; i++) {
+            if (this.getAllValues()[i].getId().toString() == s) {
                 return this.getAllValues()[i];
             }
         }
         return null;
     }
-    public findItemFromName(s:string) {
-        for (var i: number = 0; i < this.getAllValues().length;i++) {
-            if (structure.NameableType.toString(this.getAllValues()[i])==s ) {
+    public findItemFromName(s: string) {
+        for (var i: number = 0; i < this.getAllValues().length; i++) {
+            if (structure.NameableType.toString(this.getAllValues()[i]) == s) {
                 return this.getAllValues()[i];
             }
         }
         return null;
     }
-    public removeCurrentValue(item:structure.ItemType){
+    public removeCurrentValue(item: structure.ItemType) {
         this.visual.removeBindingCurrentValue(this.concept, item.getId().toString());
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+            this.visual.setRequery(false);
+        } else {
+            this.visual.setDirty(true);
+            this.visual.setRequery(true);
+        }
     }
-    public addCurrentValue(item:structure.ItemType){
+    public addCurrentValue(item: structure.ItemType) {
         this.visual.addBindingCurrentValue(this.concept, item.getId().toString());
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+            this.visual.setRequery(false);
+        } else {
+            this.visual.setDirty(true);
+            this.visual.setRequery(true);
+        }
     }
-    public containsValue(item:structure.ItemType):boolean {
+    public removeCurrentValueString(s: string) {
+        this.visual.removeBindingCurrentValue(this.concept, s);
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+            this.visual.setRequery(false);
+        } else {
+            this.visual.setDirty(true);
+            this.visual.setRequery(true);
+        }
+    }
+    public addCurrentValueString(s: string) {
+        this.visual.addBindingCurrentValue(this.concept, s);
+        if (this.isClientSide()) {
+            this.visual.setDirty(true);
+            this.visual.setRequery(false);
+        } else {
+            this.visual.setDirty(true);
+            this.visual.setRequery(true);
+        }
+    }
+    public containsValue(item: structure.ItemType): boolean {
         return this.visual.containsValue(this.concept, item);
     }
 }
@@ -442,9 +495,8 @@ export class BoundToAllValues extends BoundToDiscrete {
     }
 }
 export class BoundToTime extends BoundTo {
-    private singleLatesTime:boolean = false;
-    
-    
+    private singleLatestTime: boolean = false;
+
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setWalkAll(true);
@@ -452,9 +504,12 @@ export class BoundToTime extends BoundTo {
     public getBoundTo(): number {
         return BoundTo.NOT_BOUND;
     }
-    public isSingleLatestTime():boolean { return this.singleLatestTime; }
-    public setSingleLatestTime(b:boolean):void{ this.singleLatestTime=b; }
-    public expectValues() { return 2; }
+    public isSingleLatestTime(): boolean {return this.singleLatestTime;}
+    public setSingleLatestTime(b: boolean): void {this.singleLatestTime = b;}
+    public isInCurrentValues(s: string): boolean {
+        return true;
+    }
+    public expectValues() {return 2;}
 }
 export class BoundToTimeX extends BoundToTime {
     constructor(visual: visual.Visual, concept: string) {
@@ -464,7 +519,10 @@ export class BoundToTimeX extends BoundToTime {
     public getBoundTo(): number {
         return BoundTo.BOUND_TIME_X;
     }
-    public expectValues() { return 2; }
+    public getBoundToString() {
+        return "TimeX";
+    }
+    public expectValues() {return 2;}
 }
 export class BoundToTimeY extends BoundTo {
     constructor(visual: visual.Visual, concept: string) {
@@ -474,7 +532,10 @@ export class BoundToTimeY extends BoundTo {
     public getBoundTo(): number {
         return BoundTo.BOUND_TIME_Y;
     }
-    public expectValues() { return 2; }
+    public getBoundToString() {
+        return "TimeY";
+    }
+    public expectValues() {return 2;}
 }
 export class BoundToContinuous extends BoundTo {
     private zeroOrigin = true;
@@ -489,10 +550,10 @@ export class BoundToContinuous extends BoundTo {
     public getBoundToString() {
         return "Continuous";
     }
-    public getZeroOrigin() { return this.zeroOrigin; }
-    public setZeroOrigin(b:boolean) { this.zeroOrigin=b; }
-    public setSharedMaximum(b:boolean) { this.sharedMaximum=b; }
-    public getSharedMaximum() { return this.sharedMaximum; }
+    public getZeroOrigin() {return this.zeroOrigin;}
+    public setZeroOrigin(b: boolean) {this.zeroOrigin = b;}
+    public setSharedMaximum(b: boolean) {this.sharedMaximum = b;}
+    public getSharedMaximum() {return this.sharedMaximum;}
 }
 export class BoundToDiscreteX extends BoundToDiscrete {
     constructor(visual: visual.Visual, concept: string) {
@@ -576,16 +637,16 @@ export class BoundToTimeList extends BoundToTime {
     }
 }
 export class BoundToTimeSeries extends BoundToTime {
-    private colours = new collections.Dictionary<string,Array<number>>();
+    private colours = new collections.Dictionary<string, Array<number>>();
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setQueryAll(true);
         super.setWalkAll(true);
-        for(var i:number=0;i<this.getAllValues().length;i++) {
-            var r = Math.random()*255;
-            var g = Math.random()*255;
-            var b = Math.random()*255;
-            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]),[r,g,b]);
+        for (var i: number = 0; i < this.getAllValues().length; i++) {
+            var r = Math.random() * 255;
+            var g = Math.random() * 255;
+            var b = Math.random() * 255;
+            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]), [r, g, b]);
         }
     }
     public getBoundTo(): number {
@@ -594,22 +655,22 @@ export class BoundToTimeSeries extends BoundToTime {
     public getBoundToString() {
         return "BoundToTimeSeries";
     }
-    public getColours(){ return this.colours; }
+    public getColours() {return this.colours;}
 }
 export class BoundToSeries extends BoundToDiscrete {
 
-    private colours = new collections.Dictionary<string,Array<number>>();
+    private colours = new collections.Dictionary<string, Array<number>>();
 
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setQueryAll(true);
         super.setWalkAll(true);
         super.setCurrentValues(this.getAllValues());
-        for(var i:number=0;i<this.getAllValues().length;i++) {
-            var r = Math.random()*255;
-            var g = Math.random()*255;
-            var b = Math.random()*255;
-            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]),[r,g,b]);
+        for (var i: number = 0; i < this.getAllValues().length; i++) {
+            var r = Math.random() * 255;
+            var g = Math.random() * 255;
+            var b = Math.random() * 255;
+            this.colours.setValue(structure.NameableType.toIDString(this.getAllValues()[i]), [r, g, b]);
             console.log(this.colours);
         }
     }
@@ -619,8 +680,8 @@ export class BoundToSeries extends BoundToDiscrete {
     public getBoundToString() {
         return "Series";
     }
-    public expectValues() { return 2; }
-    public getColours(){ return this.colours; }
+    public expectValues() {return 2;}
+    public getColours() {return this.colours;}
 }
 export class BoundToSlider extends BoundToDiscrete {
 
@@ -634,6 +695,19 @@ export class BoundToSlider extends BoundToDiscrete {
     }
     public getBoundToString() {
         return "Slider";
+    }
+}
+
+export class BoundToCrossMultiple extends BoundToDiscrete {
+
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_CROSS_MULTIPLE;
+    }
+    public getBoundToString() {
+        return "Cross Sectional - Multiple";
     }
 }
 export class BoundToDropdown extends BoundToDiscrete {
@@ -657,8 +731,15 @@ export class BoundToDropdown extends BoundToDiscrete {
     public getPercentOfId() {
         return this.perCentId;
     }
+    public getPercentOfItemType() {
+        return this.getCodelist().findItemString(this.perCentId);
+    }
     public setPercentOfId(s: string) {
+        if (this.perCentId != null) {this.removeCurrentValueString(this.perCentId);}
         this.perCentId = s;
+        if (s != null) {
+            this.addCurrentValueString(s);
+        }
     }
     public getBoundTo(): number {
         return BoundTo.BOUND_DISCRETE_DROPDOWN;
@@ -666,8 +747,38 @@ export class BoundToDropdown extends BoundToDiscrete {
     public getBoundToString() {
         return "Dropdown";
     }
+    public setCurrentValues(currentValues: Array<structure.ItemType>) {
+        super.setCurrentValues(currentValues);
+        if (this.perCentId != null) {
+            this.addCurrentValueString(this.perCentId);
+        }
+    }
 }
-export class BoundToMenu extends BoundToDiscrete {
+export class BoundToMultiMenu extends BoundToDiscrete {
+    public level: number = 0;
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(false);
+        super.setWalkAll(true);
+        super.setCurrentValue(super.getAllValues()[0]);
+    }
+    public expectValues(): number {
+        return 2;
+    }
+    public getLevel(): number {
+        return this.level;
+    }
+    public setLevel(b: number) {
+        this.level = b;
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_MULTI_MENU;
+    }
+    public getBoundToString() {
+        return "Multi Menu";
+    }
+}
+export class BoundToSingleMenu extends BoundToDiscrete {
     public level: number = 0;
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
@@ -681,15 +792,38 @@ export class BoundToMenu extends BoundToDiscrete {
     public getLevel(): number {
         return this.level;
     }
-    public setLevel(b:number) {
+    public setLevel(b: number) {
         this.level = b;
     }
     public getBoundTo(): number {
-        return BoundTo.BOUND_DISCRETE_MENU;
+        return BoundTo.BOUND_DISCRETE_SINGLE_MENU;
     }
     public getBoundToString() {
-        return "Menu";
+        return "Single Menu";
     }
+}
+export class BoundToLevelMenu extends BoundToDiscrete {
+    private level = 0;
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(false);
+        super.setWalkAll(true);
+        super.setCurrentValue(super.getAllValues()[0]);
+    }
+    public expectValues(): number {
+        return 1;
+    }
+    public getBoundTo(): number {
+        return BoundTo.BOUND_DISCRETE_LEVEL_MENU;
+    }
+    public getBoundToString() {
+        return "Level Menu";
+    }
+    public getLevel() {return this.level;}
+    public setLevel(n: number) {
+        this.setCurrentValues(this.getCodelist().getItemsOnLevel(n));
+    }
+
 }
 export class BoundToTimeDropdown extends BoundToDiscrete {
     public flat: boolean = true;
@@ -728,12 +862,16 @@ export class BindingEntry {
     private saveBindingToObject: Function = null;
     private customise: Function = null;
     private createNew: Function = null;
-    constructor(id: number, name: string, parse: Function, save: Function,createNew:Function) {
+    constructor(id: number, name: string, parse: Function, save: Function, createNew: Function) {
         this.id = id;
         this.name = name;
         this.parseObjectToBinding = parse;
         this.saveBindingToObject = save;
-        this.createNew=createNew;
+        if (this.id == 18) {
+            console.log("BE Constructor");
+            console.log(this.parseObjectToBinding);
+        }
+        this.createNew = createNew;
     }
     public getId(): number {return this.id;}
     public getName(): string {return this.name;}
@@ -746,7 +884,7 @@ export class BindingEntry {
         return this.customise;
     }
     public getCreateNew() {return this.createNew;}
-    public setCreateNew(c:Function) {this.createNew=c;}
+    public setCreateNew(c: Function) {this.createNew = c;}
 }
 
 export class BindingRegister {
@@ -821,7 +959,7 @@ export class BindingRegisterUtil {
                 return list[j];
             }
         }
-        console.log("Can't find bindingentry:"+i);
+        console.log("Can't find bindingentry:" + i);
     }
 
 }
@@ -850,8 +988,8 @@ export class BindingsCustomiser extends React.Component {
     public getBinding(): BoundTo {
         return null;
     }
-    public setBinding(b:BoundTo){
-        this.props.o=b;
+    public setBinding(b: BoundTo) {
+        this.props.o = b;
     }
 }
 
@@ -863,23 +1001,23 @@ export class DiscreteXCustomiser extends React.Component {
         this.props = props;
         this.state = state;
     }
-    public changeFlat(e){
+    public changeFlat(e) {
         this.getBinding().setFlat(!this.getBinding().isFlat());
         super.setState({});
     }
-    public changePercentId(e){
+    public changePercentId(e) {
         this.getBinding().setPercentOfId(e);
     }
     listItems() {
         var options = [];
         options.push(<Select.Item value={null}>No Percent of Id</Select.Item>);
         this.props.o.getAllValues().map(function (item) {
-            options.push(<Select.Item value={item}>{item}</Select.Item>);
+            options.push(<Select.Item value={structure.NameableType.toIDString(item)}>{item}</Select.Item>);
         });
         return options;
     }
     public render(props, state) {
-        return (<Checkbox checked={this.getBinding().isFlat()} id={this.getBinding().getConcept()+"_flat"} onclick={(evt) => {evt.stopPropagation(); this.changeFlat(evt)}} />
+        return (<Checkbox checked={this.getBinding().isFlat()} id={this.getBinding().getConcept() + "_flat"} onclick={(evt) => {evt.stopPropagation(); this.changeFlat(evt)}} />
             <Select value={this.getBinding().getPercentOfId()} onChange={(a) => this.changePercentId(a)}>{this.listItems()}</Select>
         );
     }
@@ -887,7 +1025,7 @@ export class DiscreteXCustomiser extends React.Component {
         return (this.props.o as BoundToDropdown);
     }
 }
-
+/*
 export class DropdownBindingCustomiser extends React.Component {
     public state: BindingCustomiserState = null;
     public props: BindingCustomiserProps = null;
@@ -899,25 +1037,97 @@ export class DropdownBindingCustomiser extends React.Component {
     public render() {
         return (<p>{this.props.o.getConcept()} {this.props.o.getBoundToString()} Test</p>);
     }
-    public getBinding(v: visual.Visual): BoundToDropdown{
-        return parseObjectToBindingBoundToDropdown(this.props.o,v);
+    public getBinding(v: visual.Visual): BoundToDropdown {
+        return parseObjectToBindingBoundToDropdown(this.props.o, v);
     }
     public setBinding(b: BoundTo) {
         this.props.o = b;
-        this.props.concept=b.getConcept();
+        this.props.concept = b.getConcept();
     }
-  
+
+}*/
+export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
+    var o: any = {};
+    o.concept = b.getConcept();
+    switch (b.getBoundTo()) {
+        case BoundTo.BOUND_DISCRETE_DROPDOWN:
+            o.typeid = BoundTo.BOUND_DISCRETE_DROPDOWN;
+            o.concept = b.getConcept();
+            o.typename = "BoundToDropdown";
+            o.clientSide = b.isClientSide();
+            o.flat = b.isFlat();
+            o.perCentOfId = b.getPercentOfId();
+            break;
+        case BoundTo.BOUND_CONTINUOUS_X:
+            o.typeid = BoundTo.BOUND_CONTINUOUS_X;
+            break;
+        case BoundTo.BOUND_CONTINUOUS_Y:
+            o.typeid = BoundTo.BOUND_CONTINUOUS_Y;
+            break;
+        case BoundTo.BOUND_TIME_X:
+            o.typeid = BoundTo.BOUND_TIME_X;
+            break;
+        case BoundTo.BOUND_TIME_Y:
+            o.typeid = BoundTo.BOUND_TIME_Y
+    x        break;
+        case BoundTo.BOUND_DISCRETE_LIST:
+            o.typeid = BoundTo.BOUND_DISCRETE_LIST;
+            break;
+        case BoundTo.BOUND_DISCRETE_SERIES:
+            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+            break;
+        case BoundTo.BOUND_DISCRETE_SLIDER:
+            o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
+            break;
+    }
+    return o;
 }
-function parseObjectToBindingBoundToDropdown(o: object, v: visual.Visual): BoundToDropdown {
-    var b = new BoundToDropdown(v, o['concept']);
-    b.setFlat(o['flat']);
-    b.setClientSide(o['clientSide']);
-    b.setPercentOfId(o['perCentOfId']);
+export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundTo {
+    //console.log("Default Parse Objet:");
+    //console.log(o);
+    var b = null;
+    if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
+        b = new BoundToDropdown(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_DISCRETE_DROPDOWN;
+        b.setFlat(o['flat']);
+        b.setClientSide(o['clientSide']);
+        b.setPercentOfId(o['perCentOfId']);
+    }
+    else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_X) {
+        b = new BoundToContinuousX(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_CONTINUOUS_X;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_Y) {
+        b = new BoundToContinuousY(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_CONTINUOUS_Y;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_TIME_X) {
+        b = new BoundToTimeX(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_TIME_X;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_TIME_Y) {
+        b = new BoundToTimeY(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_TIME_Y;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_DISCRETE_LIST) {
+        b = new BoundToList(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_DISCRETE_LIST;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_DISCRETE_SERIES) {
+        b = new BoundToSeries(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_DISCRETE_SERIES;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_DISCRETE_SLIDER) {
+        b = new BoundToSlider(v, o['concept']);
+        b.boundTo = BoundTo.BOUND_DISCRETE_SLIDER;
+    }
+    console.log("Returning");
+    console.log(b);
     return b;
 }
 /*
 function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
-    var o:any = {}
+    var o: any = {}
     o.concept = b.getConcept();
     o.typeid = b.getBoundTo();
     o.typename = "BoundToDropdown";
@@ -925,74 +1135,9 @@ function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
     o.flat = b.isFlat();
     o.perCentOfId = b.getPercentOfId();
     return o;
-    }*/
-export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
-    var o:any = {};
-    o.concept = b.getConcept();
-    switch (b.getBoundTo()){
-        case BoundTo.BOUND_CONTINUOUS_X:
-        o.typeid = BoundTo.BOUND_CONTINUOUS_X;
-        break;
-        case BoundTo.BOUND_CONTINUOUS_Y:
-        o.typeid = BoundTo.BOUND_CONTINUOUS_Y;
-        break;
-        case BoundTo.BOUND_TIME_X:
-        o.typeid = BoundTo.BOUND_TIME_X;
-        break;
-        case BoundTo.BOUND_TIME_Y:
-        o.typeid = BoundTo.BOUND_TIME_Y
-        break;
-        case BoundTo.BOUND_DISCRETE_LIST:
-        o.typeid = BoundTo.BOUND_DISCRETE_LIST;
-        break;
-        case BoundTo.BOUND_DISCRETE_SERIES:
-        o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
-        break;
-        case BoundTo.BOUND_DISCRETE_SLIDER:
-        o.typeid = BoundTo.BOUND_DISCRETE_SERIES;
-        break;
-    }
-    return o;
 }
-export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundToDiscreteX {
-    var b = null;
-    switch(o['typeid']){
-        case BoundTo.BOUND_CONTINUOUS_X:
-        b = new BoundToContinuousX(v,o['concept']);
-        break;
-        case BoundTo.BOUND_CONTINUOUS_Y:
-        b = new BoundToContinuousY(v,o['concept']);
-        break;
-        case BoundTo.BOUND_TIME_X:
-        b = new BoundToTimeX(v,o['concept']);
-        break;
-        case BoundTo.BOUND_TIME_Y:
-        b = new BoundToTimeY(v,o['concept']);
-        break;
-        case BoundTo.BOUND_DISCRETE_LIST:
-        b = new BoundToList(v,o['concept']);
-        break;
-        case BoundTo.BOUND_DISCRETE_SERIES:
-        b = new BoundToSeries(v,o['concept']);
-        break;
-        case BoundTo.BOUND_DISCRETE_SLIDER:
-        b = new BoundToSlider(v,o['concept']);
-        break;
-    }
-    return b;
-}
-function saveBindingToObjectBoundToDropdown(b: BoundToDropdown): object {
-    var o:any = {}
-    o.concept = b.getConcept();
-    o.typeid = b.getBoundTo();
-    o.typename = "BoundToDropdown";
-    o.clientSide = b.isClientSide();
-    o.flat = b.isFlat();
-    o.perCentOfId = b.getPercentOfId();
-    return o;
-    }
 export function saveBindingToObjectBoundToDiscreteX(b: BoundToDiscreteX): object {
-    var o:any = {};
+    var o: any = {};
     o.concept = b.getConcept();
     o.typeid = b.getBoundTo();
     o.typename = "BoundToDiscreteX";
@@ -1002,22 +1147,26 @@ export function parseObjectToBindingBoundToDiscreteX(o: object, v: visual.Visual
     var b: BoundToDiscreteX = new BoundToDiscreteX(v, o['concept']);
     return b;
 }
-
-var be1: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "Dropdown", parseObjectToBindingBoundToDropdown, saveBindingToObjectBoundToDropdown,BoundToDropdown);
-var be2: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "DiscreteX", parseObjectToBindingBoundToDiscreteX, saveBindingToObjectBoundToDiscreteX,BoundToDiscreteX);
-var be3: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject,BoundToList);
-var be4: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject,BoundToSeries);
+*/
+var be1: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToDropdown);
+var be2: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_X, "DiscreteX", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToDiscreteX);
+var be3: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToList);
+var be4: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSeries);
 var be5: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE, "Single Value", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleValue);
 var be6: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_ALL, "All Values", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToAllValues);
 var be7: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_X, "Time X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
-var be8: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+
+var be8: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeY);
 var be9: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeDropdown);
 var be10: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_LIST, "List", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeList);
 var be11: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_SERIES, "Series", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeSeries);
 var be12: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_X, "X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousX);
 var be13: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_Y, "Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousY);
 var be14: BindingEntry = new BindingEntry(BoundTo.BOUND_CONTINUOUS_COLOUR, "Colour", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToContinuousColour);
-var be15: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_MENU, "Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToMenu);
+var be15: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE_MENU, "Single Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleMenu);
+var be16: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_MULTI_MENU, "Multi Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToMultiMenu);
+var be17: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_LEVEL_MENU, "Level Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToLevelMenu);
+var be18: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_CROSS_MULTIPLE, "Cross Sectional - Multiple", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToCrossMultiple);
 
 
 
@@ -1028,16 +1177,28 @@ DimensionBindingRegister.registerState(be4);
 DimensionBindingRegister.registerState(be5);
 DimensionBindingRegister.registerState(be6);
 DimensionBindingRegister.registerState(be15);
-
+DimensionBindingRegister.registerState(be16);
+DimensionBindingRegister.registerState(be17);
+console.log("Binding Entry");
+console.log(be7);
 TimeBindingRegister.registerState(be7);
 TimeBindingRegister.registerState(be8);
 TimeBindingRegister.registerState(be9);
 TimeBindingRegister.registerState(be10);
 TimeBindingRegister.registerState(be11);
 
+
 MeasureBindingRegister.registerState(be12);
 MeasureBindingRegister.registerState(be13);
 MeasureBindingRegister.registerState(be14);
-MeasureBindingRegister.registerState(be15);
+//MeasureBindingRegister.registerState(be15);
+//MeasureBindingRegister.registerState(be16);
+//MeasureBindingRegister.registerState(be17);
+
+CrossSectionBindingRegister.registerState(be1);
+CrossSectionBindingRegister.registerState(be2);
+CrossSectionBindingRegister.registerState(be4);
+CrossSectionBindingRegister.registerState(be5);
+CrossSectionBindingRegister.registerState(be18);
 
 

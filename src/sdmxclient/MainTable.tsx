@@ -160,7 +160,7 @@ export default class MainTable extends React.Component<MainTableProps, MainTable
                     for (var k: number = 0; k < cartesiancols2.getMaxIndex(); k++) {
                         var colValues2 = cartesiancols2.next();
                         for (var l: number = 0; l < props.cols.length; l++) {
-                            columnsKey.setComponent(props.cols[l].getId().toString(), this.props.query.getQueryKey(props.cols[l].getId().toString()).possibleValues()[colValues2[k]]);
+                            columnsKey.setComponent(props.cols[l].getId().toString(), this.props.query.getQueryKey(props.cols[l].getId().toString()).getPossibleValues()[colValues2[k]]);
                         }
 
                         var f: data.FlatObs = props.cube.findFlatObs(columnsKey);

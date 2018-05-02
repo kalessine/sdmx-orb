@@ -98,12 +98,16 @@ export class SdmxIO {
     public static getLanguage(): string {
         return this.language;
     }
-    public static reference(agency: string, id: string, vers: string): commonreferences.Reference {
+    public static reference(agency: string, id: string, vers: string,oid:string): commonreferences.Reference {
         var ref = new commonreferences.Ref();
         ref.setAgencyId(new commonreferences.NestedNCNameID(agency));
         ref.setMaintainableParentId(new commonreferences.ID(id));
-        if (vers != null) {
+        if(oid!=null){ref.setId(new commonreferences.ID(oid));}
+        if (oid==null&&vers != null) {
             ref.setVersion(new commonreferences.Version(vers));
+        }
+        if(oid!=null&&vers!=null){
+            ref.setMaintainableParentVersion(new commonreferences.Version(vers));
         }
         var reference: commonreferences.Reference = new commonreferences.Reference(ref, null);
         return reference;

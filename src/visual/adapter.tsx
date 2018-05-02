@@ -6,17 +6,18 @@ import * as sdmxdata from '../sdmx/data';
 import * as commonreferences from '../sdmx/commonreferences';
 import * as structure from '../sdmx/structure';
 import * as _ from 'lodash';
-import * as model from 'model';
+//import * as model from 'model';
 import * as sdmxtime from '../sdmx/time';
 import * as bindings from './bindings';
 import * as colors from 'color-ts';
 import Controls from './controls';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
-import Menu from 'preact-material-components/Menu';
 import Button from 'preact-material-components/Button';
+import Menu from 'preact-material-components/Menu';
 import 'preact-material-components/List/style.css';
 import 'preact-material-components/Menu/style.css';
 import 'preact-material-components/Button/style.css';
+import FilterDialog from './SingleItemFilterDialog';
 
 export interface Model {
     render(s: string);
@@ -28,53 +29,164 @@ export interface ReactModel extends Model {
 private class ModelChrome {
 
 }
-export class MenuPage extends React.Component {
+export class MultiMenuPage extends React.Component {
     public props = {};
     public state = {};
-    constructor(props,state){
-        super(props,state);
-        this.props=props;
-        this.state=state;
+    constructor(props, state) {
+        super(props, state);
+        this.props = props;
+        this.state = state;
     }
-  getItems(itemscheme:structure.ItemSchemeType,item:structure.ItemType){
-      var result = [];
-      var items = itemscheme.findSubItemsString(item==null?null:item.getId().toString());
-      for (var i = 0; i < items.length;i++) {
-          result.push(<Menu.Item>{this.getItems(itemscheme,items[i])}</Menu.Item>);
-      }
-      if( items.length == 0 ) {
-          result.push(<Menu.Item>{structure.NameableType.toString(item)}</Menu.Item>)
-      }
-      return (result);
-  }
-    
-  render(props,state){
-      var visual:visual.Visual = props.visual;
-      var id:number = props.id;
-      var boundto:bindings.BoundTo = visual.getMenu(id);
-      if(boundto==null) return [];
-      var itemScheme = boundto.getCodelist();
-      var items = itemScheme.findSubItemsString(null);
-    return (
-      <div style="display: inline;float: left;">
-        <Menu.Anchor>
-          <Button
-            onClick={e => {
-              this.menu.MDComponent.open = true;
-            }}
-          >
-          {boundto.getConceptName()}
-          </Button>
-          <Menu
-            ref={menu => {
-              this.menu = menu;
-            }}
-          >{this.getItems(itemScheme,null)}
-          </Menu>
-        </Menu.Anchor>
-      </div>
-    );
-  }
+    onClick(e,item:structure.ItemType){
+        this.state.boundto.setCurrentValue(item);this.props.visual.renderVisual();super.forceUpdate();
+    }
+    getItems(itemscheme: structure.ItemSchemeType, boundto: bindings.BoundTo) {
+        var result = [];
+        var items = itemscheme.getItems();
+        for (var i = 0; i < items.length; i++) {
+            result.push(<Menu.Item onclick={(e)=>{this.onClick(e,items[i])}}>{structure.NameableType.toString(items[i])}</Menu.Item>);
+        }
+        return (result);
+    }
+
+    render(): any[] | Element {
+        var visual: visual.Visual = this.props.visual;
+        var id: number = this.props.id;
+        var boundto: bindings.BoundTo = visual.getMenu(id);
+        if (boundto == null) return [];
+        this.state.boundto=boundto;
+        var itemScheme = boundto.getCodelist();
+        var items = itemScheme.findSubItemsString(null);
+        return (
+            <div style="display: inline;float: left;">
+                <Menu.Anchor>
+                    <Button
+                        onClick={e => {
+                            this.menu.MDComponent.open = true;
+                        }}
+                    >
+                        {boundto.getConceptName()}
+                    </Button>
+                    <Menu
+                        ref={menu => {
+                            this.menu = menu;
+                        }}
+                    >{this.getItems(itemScheme,boundto)}
+                    </Menu>
+                </Menu.Anchor>
+            </div>
+        );
+    }
+}
+export class LevelMenuPage extends React.Component {
+    public props = {};
+    public state = {};
+    private menu = null;
+    constructor(props, state) {
+        super(props, state);
+        this.props = props;
+        this.state = state;
+    }
+    getItems(n: number) {
+        var result = [];
+        for (var i = 0; i < n; i++) {
+            result.push(<Menu.Item onclick={this.state.boundto.setLevel(i)}>Level {i}</Menu.Item>);
+        }
+        return (result);
+    }
+
+    render(): any[] | Element {
+        var visual: visual.Visual = this.props.visual;
+        var id: number = this.props.id;
+        var boundto: bindings.BoundTo = visual.getMenu(id);
+        if (boundto == null) return [];
+        this.state.boundto = boundto;
+        var itemScheme = boundto.getCodelist();
+        var n = boundto.getCodelist().getMaximumLevel();
+        return (
+            <div style="display: inline;float: left;">
+                <Menu.Anchor>
+                    <Button
+                        onClick={e => {
+                            this.menu.MDComponent.open = true;
+                        }}
+                    >
+                        {boundto.getConceptName()}
+                    </Button>
+                    <Menu
+                        ref={menu => {
+                            this.menu = menu;
+                        }}
+                    >{this.getItems(n)}
+                    </Menu>
+                </Menu.Anchor>
+            </div>
+        );
+    }
+}
+export class LevelButton extends React.Component {
+    public props = {};
+    public state = {};
+    private menu = null;
+    constructor(props, state) {
+        super(props, state);
+        this.props = props;
+        this.state = state;
+    }
+    getItems(n: number) {
+        var result = [];
+        for (var i = 0; i < n; i++) {
+            result.push(<Button onclick={this.state.boundto.setLevel(i)}>Level {i}</Button>);
+        }
+        return (result);
+    }
+
+    render(): any[] | Element {
+        var visual: visual.Visual = this.props.visual;
+        var id: number = this.props.id;
+        var boundto: bindings.BoundTo = visual.getMenu(id);
+        if (boundto == null) return [];
+        this.state.boundto = boundto;
+        var itemScheme = boundto.getCodelist();
+        var n = boundto.getCodelist().getMaximumLevel();
+        return (
+            <div style="display: inline;float: left;">
+                <label>{boundto.getConceptName()}</label>
+                {this.getItems(n)}
+            </div>
+        );
+    }
+}
+export class MenuPage extends React.Component {
+    public props = {open: false};
+    public state = {open: false};
+    public filter = null;
+    constructor(props, state) {
+        super(props, state);
+        this.props = props;
+        this.state = state;
+    }
+    onClick(e) {
+        var s = this.state;
+        s.open = true;
+        super.setState(s);
+        this.filter.show();
+    }
+    render(): any[] | Element {
+        var visual: visual.Visual = this.props.visual;
+        var id: number = this.props.id;
+        var boundto: bindings.BoundTo = visual.getMenu(id);
+        if (boundto == null) return [];
+        this.props.boundto = boundto;
+        this.state.struct = visual.getDataStructure();
+        var itemScheme = boundto.getCodelist();
+        var items = itemScheme.findSubItemsString(null);
+        return (
+            <div style="display: inline;float: left;">
+                <Button onClick={this.onClick.bind(this)}>{boundto.getConceptName()}</Button>
+                <FilterDialog ref={(filter) => {this.filter = filter}} open={this.state.open} visual={visual} registry={visual.getRegistry()} struct={this.state.struct} concept={this.props.boundto.getConcept()} boundto={this.props.boundto} />
+            </div>);
+    }
 }
 
 export class ModelWrapper {
@@ -92,12 +204,16 @@ export class ModelWrapper {
         this.visual = v;
     }
     public render(s: string) {
+        if (this.visualComponent != null) {
+            this.unrender(s);
+        }
         this.visualComponent = React.render(<VisualComponent visual={this.visual} selector={s} model={this.mymodel} />, document.querySelector(s));
     }
     public unrender(s: string) {
         if (s != null) {React.unmountComponentAtNode(document.querySelector(s));}
     }
 }
+
 
 export class VisualComponent extends React.Component {
 
@@ -121,14 +237,24 @@ export class VisualComponent extends React.Component {
         this.visual = props.visual;
         this.mymodel = props.model;
         var menus = [];
-        for(var i:number = 0; i<this.visual.getMenuCount();i++) {
-            menus.push(<MenuPage visual={this.visual} id={i} />);
+        for (var i: number = 0; i < this.visual.getMenuCount(); i++) {
+            var boundto = this.visual.getMenu(i);
+            console.log(boundto);
+            if (boundto.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
+                menus.push(<MenuPage visual={this.visual} id={i} />);
+            }
+            if (boundto.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+                menus.push(<MultiMenuPage visual={this.visual} id={i} />);
+            }
+            if (boundto.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
+                menus.push(<LevelMenuPage visual={this.visual} id={i} />);
+            }
         }
-        return (<div id={this.selector + "-main"} style="display: table; width: 100%">
-            <div id={this.selector + "-title"} style="display: table-row;"><span style="float:middle;margin:auto;">{this.visual.getTitle()}</span></div>
+        return (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
+            <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
             <div id={this.selector + "-menu"} style="display: table-row;">{menus}</div>
             <div id={this.selector + "-visual"} style="display: table-cell; vertical-align: middle;">{this.mymodel.getReact()}</div>
-            <div id={this.selector + "-right"} style="display: table-cell; vertical-align: middle; width: 33%;"><Controls visual={this.visual} /></div>
+            <div id={this.selector + "-right"} style="display: table-cell; vertical-align: top; width: 33%;border: 1px dotted black;"><Controls visual={this.visual} /></div>
             <div id={this.selector + "-bottom"} style="display: table-row;"></div>
         </div>);
 
@@ -141,6 +267,7 @@ export class VisualComponent extends React.Component {
 
 
 export interface Adapter {
+    getId():number
     getName(): string;
     canCreateModelFromVisual(v: visual.Visual): boolean;
     createModel(v: visual.Visual, cube: sdmxdata.Cube): Model;
@@ -149,6 +276,7 @@ export interface Adapter {
     addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void;
 }
 export class RechartsSparklineAdapter implements Adapter {
+    private id = 1000;
     private singleValues: sdmxdata.PartialKey = null;
     private visual: visual.Visual = null;
     private min: number = null;
@@ -158,7 +286,7 @@ export class RechartsSparklineAdapter implements Adapter {
     private model = new RechartsSparklineModel();
     constructor() {
     }
-
+    public getId() { return this.id; }
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
         this.model = new RechartsSparklineModel();
@@ -286,7 +414,6 @@ export class RechartsSparklineAdapter implements Adapter {
     addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void {
 
     }
-
 }
 
 export class RechartsSparklineModel implements ReactModel {
@@ -354,6 +481,7 @@ export class RechartsSparklineModel implements ReactModel {
 }
 
 export class RechartsSeriesSparklineAdapter implements Adapter {
+    private id:number = 1001;
     private singleValues: sdmxdata.PartialKey = null;
     private visual: visual.Visual = null;
     private min: number = null;
@@ -363,7 +491,7 @@ export class RechartsSeriesSparklineAdapter implements Adapter {
     private model = new RechartsSeriesSparklineModel();
     constructor() {
     }
-
+    public getId() { return this.id; }
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
         this.model = new RechartsSeriesSparklineModel();
@@ -505,7 +633,7 @@ export class RechartsSeriesSparklineModel implements ReactModel {
     private controls = null;
     private min = null;
     private max = null;
-    private colours: collections.Dictionary<string, Array> = null;
+    private colours: collections.Dictionary<string, Array<object>> = null;
     public addPoint(ser: string, x: string, y: number) {
         var dat = {};
         var n = true;
@@ -525,16 +653,16 @@ export class RechartsSeriesSparklineModel implements ReactModel {
         }
         this.seriesLabels.push(ser);
     }
-    public getReact(){
+    public getReact() {
         return (<LineChart width={600} height={300} data={this.data}
-                margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-                <XAxis dataKey={this.xAxisLabel} />
-                <YAxis max={this.max} />
-                <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Legend />
-                {this.getLines()}
-            </LineChart>);
+            margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+            <XAxis dataKey={this.xAxisLabel} />
+            <YAxis max={this.max} />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip />
+            <Legend />
+            {this.getLines()}
+        </LineChart>);
     }
     public render(s: string) {
         if (s != null) {
@@ -580,7 +708,7 @@ export class RechartsSeriesSparklineModel implements ReactModel {
     public setYLabel(s: string) {
         this.yAxisLabel = s;
     }
-    public setColours(c: collections.Dictionary<string, Array>) {
+    public setColours(c: collections.Dictionary<string, Array<any>>) {
 
 
     }
@@ -597,7 +725,7 @@ export class RechartsSeriesSparklineModel implements ReactModel {
  }
  */
 export class CubeWalkUtils {
-    private clearedPossibles: collections.Dictionary<string, boolean> = new collections.Dictionary<bindings.BoundTo, boolean>();
+    private clearedPossibles: collections.Dictionary<string, boolean> = new collections.Dictionary<string, boolean>();
     private clearedTime: boolean = false;
     visitRoot(cube: sdmxdata.Cube, visual: visual.Visual, adapter: Adapter) {
         //console.log("visitRoot");
@@ -637,7 +765,7 @@ export class CubeWalkUtils {
         }
         if (innerbd.isClientSide()) {
             if (!inCurrentValue) {
-                if (innerbd.getPossibleValues().size() > 0) {
+                if (innerbd.getPossibleValues().length > 0) {
                     //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
                     innerbd.setCurrentValue(innerbd.getPossibleValues()[0]);
                 }
@@ -664,7 +792,7 @@ export class CubeWalkUtils {
             return val;
         }
     }
-    public visit(cube: sdmxdata.Cube, visual: visual.Visual, current: data.CubeDimension, adapter: Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey) {
+    public visit(cube: sdmxdata.Cube, visual: visual.Visual, current: sdmxdata.CubeDimension, adapter: Adapter, singles: sdmxdata.PartialKey, multiples: sdmxdata.PartialKey) {
         //console.log("visit");
         var concept: string = current.getConcept();
         var val: string = current.getValue();
@@ -696,7 +824,7 @@ export class CubeWalkUtils {
         }
         if (innerbd.isClientSide()) {
             if (!inCurrentValue) {
-                if (innerbd.getPossibleValues().size() > 0) {
+                if (innerbd.getPossibleValues().length > 0) {
                     //System.out.println("Setting value:" + innerbd.getPossibleValues().get(0).toString());
                     innerbd.setCurrentValue(innerbd.getPossibleValues()[0]);
                 }
@@ -720,7 +848,7 @@ export class CubeWalkUtils {
             if (inner instanceof sdmxdata.TimeCubeDimension) {
                 if ((innerbd as bindings.BoundToTime).isSingleLatestTime()) {
                     if (latest == null) {
-                        latest = inner as data.TimeCubeDimension;
+                        latest = inner as sdmxdata.TimeCubeDimension;
                         latestTime = sdmxtime.TimeUtil.parseTime(freq, structure.NameableType.toIDString(inner.getValue()));
                     }
                     var timePeriod: sdmxtime.RegularTimePeriod = sdmxtime.TimeUtil.parseTime(structure.NameableType.toIDString(inner.getValue());
@@ -729,7 +857,7 @@ export class CubeWalkUtils {
                         latest = inner as sdmxdata.TimeCubeDimension;
                     }
                 } else {
-                    this.visitTime(cube, visual, inner as TimeCubeDimension, adapter, singles, multiples);
+                    this.visitTime(cube, visual, inner as sdmxdata.TimeCubeDimension, adapter, singles, multiples);
                 }
             } else {
                 this.visit(cube, visual, inner, adapter, singles, multiples);
@@ -749,14 +877,18 @@ export class CubeWalkUtils {
             bd.setPossibleValues([]);
             this.clearedPossibles.setValue(bd.getConcept(), true);
         }
+
         var itm: object = this.getComponent(visual, bd.getConcept(), val);
-        if (bd.isInCurrentValues(val)) {
+        if (bd.isInCurrentValues(structure.NameableType.toIDString(val))) {
             if (bd.expectValues() == 1) {
                 singles.setComponent(concept, itm);
             } else {
                 multiples.setComponent(concept, itm);
             }
+        }else{
+           
         }
+        bd.getPossibleValues().push(itm);
         if (visual.getValues().length > 1) {
             /*
              var cross:bindings.BoundTo = bindings.getCrossSection();
@@ -781,14 +913,19 @@ export class CubeWalkUtils {
         //console.log("visitObs");
         //System.out.println("Visit:" + dim.getConcept());
         if (dim.getCrossSection() != null) {
-            /*
-             //System.out.println("Cross" + dim.getConcept() + ":" + dim.getCrossSection());
-             BoundTo crossSection = visual.findBinding(dim.getConcept());
-             if (!crossSection.isInCurrentValues(dim.getCrossSection())) {
-             return;
-             */
-        }
-        multiples.setComponent(dim.getConcept(), this.getComponent(visual, dim.getConcept(), dim.getCrossSection()));
+            if (this.clearedPossibles.getValue(dim.getConcept()) == false) {
+                var boundto = visual.findBinding(dim.getConcept())
+                boundto.setPossibleValues([]);
+                this.clearedPossibles.setValue(dim.getConcept(), true);
+            }
+            var crossSection = visual.findBinding(dim.getConcept());
+            if (!crossSection.isInCurrentValues(dim.getCrossSection())) {
+                return;
+            }
+            var itm: object = this.getComponent(visual, crossSection.getConcept(), dim.getCrossSection());
+            crossSection.getPossibleValues().push(itm as structure.ItemType);
+            multiples.setComponent(dim.getConcept(), itm);
+            }
         multiples.clearAttributes();
         var concept: string = dim.getObservationConcept();
         multiples.setComponent(concept, dim.getValue());
@@ -796,21 +933,42 @@ export class CubeWalkUtils {
             var att: sdmxdata.CubeAttribute = dim.listAttributes()[a];
             multiples.setAttribute(att.getConcept(), this.getComponent(visual, att.getConcept(), att.getValue()));
         }
+        //console.log(cube);
         if (visual.getPercentOf() != null) {
+            //console.log("Percent OF!");
             var percentOf: bindings.BoundToDiscrete = visual.getPercentOf();
-            if (percentOf.getPercentOfItemType() != null) {
-                var key: sdmxdata.FullKey = new sdmxdata.FullKey(multiples);
-                key.getDict().putAll(singles.getDict());
-                key.setComponent(percentOf.getConcept(), percentOf.getPercentOfItemType());
-                var obs: sdmxdata.CubeObservation = cube.findObservation(key);
+            //console.log("Single Value:");
+            //console.log(singles.getComponent(percentOf.getConcept()));
+            //console.log("Mutliple Values");
+            //console.log(multiples.getComponent(percentOf.getConcept()));
+            //console.log("PercentOf");
+            //console.log(percentOf.getPercentOfItemType());
+            if (percentOf.getPercentOfItemType() != null && percentOf.getPercentOfItemType() != singles.getComponent(percentOf.getConcept())) {
+                var k: sdmxdata.FullKey = new sdmxdata.FullKey();
+                multiples.getDict().keys().forEach(function (key) {
+                    k.getDict().setValue(key, multiples.getDict().getValue(key));
+                });
+                singles.getDict().keys().forEach(function (key) {
+                    k.getDict().setValue(key, singles.getDict().getValue(key));
+                });
+                k.setComponent(percentOf.getConcept(), percentOf.getPercentOfItemType());
+                //console.log(k);
+                var obs: sdmxdata.CubeObs = cube.findCubeObs(k);
                 if (obs == null) {
-                    System.out.println("Can't Find Percent Of Observation for key:" + key.toString());
+                    //console.log("Obs is null");
                     return;
                 } else {
-                    var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue());
+                //console.log(obs);
+                // concept should be OBS_VALUE
+                var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue(concept));
                     percent *= 100;
+                    // Override OBS_VALUE
                     multiples.setComponent(concept, percent.toString());
+                    //console.log("Percent="+percent);
                 }
+            }else{
+            // This Point is the PercentOf Point, do nothing
+                return;
             }
         }
         adapter.setSingleValues(singles);
@@ -842,5 +1000,23 @@ export var adapters: Array<Adapter> = [];
 this.adapters.push(new RechartsSparklineAdapter());
 this.adapters.push(new RechartsSeriesSparklineAdapter());
 export class AdapterRegistrySingleton {
+    
+    static parseObjectFromJSON(b:Adapter) {
+        
+    }
     static getList() {return adapters;}
+    static saveObjectToJSON(o:object){
+        
+    }
+}
+export function adapter2Object(ad:Adapter) {
+    if(ad==null ) return {};
+    return { typeid: ad.getId(), name: ad.getName()};
+}
+export function object2Adapter(o:any):Adapter {
+    if(o==null ) return null;
+    switch(o.typeid) {
+        case 1000: return new RechartsSparklineAdapter();
+        case 1001: return new RechartsSeriesSparklineAdapter();
+    }
 }

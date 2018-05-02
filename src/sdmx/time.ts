@@ -17,6 +17,7 @@
 */
 //<reference path="../moment.d.ts"/>
 import moment = require("moment");
+import * as collections from 'typescript-collections';
 export class TimeUtil {
     public static LONG_MONTH_NAMES: Array<string> = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     public static SHORT_MONTH_NAMES: Array<string> = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

@@ -171,13 +171,18 @@ export class QueryKey {
         this.values = a;
     }
     public addValue(s: string) {
+        console.log("AddValue"+s);
         for (var i: number = 0; i < this.values.length; i++) {
             // already in here
-            if (this.values[i] == s) return;
+            if (this.values[i] == s) {
+                console.log("Value already in here");
+            return;
+            }
         }
         this.values.push(s);
     }
     public removeValue(s: string) {
+        console.log("RemValue"+s);
         collections.arrays.remove(this.values, s);
     }
     public getItemScheme(): structure.ItemSchemeType {
@@ -242,6 +247,15 @@ export class QueryKey {
     return _.uniq(list, function (e) {
         return e.getId().toString();
         });
+    }
+    public size() {
+        return this.values.length;
+    }
+    public get(n:number) {
+        return this.values[n];
+    }
+    public set(n:number,s:string) {
+        this.values[n]=s;
     }
 }
 
@@ -324,22 +338,22 @@ export class AttachmentLevel {
 
 }
 export class AbstractKey {
-    private dict = new collections.Dictionary<string, string>();
-    private attributes = new collections.Dictionary<string, string>();
+    private dict = new collections.Dictionary<string, any>();
+    private attributes = new collections.Dictionary<string, any>();
     constructor() {
 
     }
 
-    getComponent(s: string): string {
+    getComponent(s: string): any {
         return this.dict.getValue(s);
     }
-    setComponent(s: string, v: string) {
+    setComponent(s: string, v: any) {
         this.dict.setValue(s, v);
     }
-    getAttribute(s: string): string {
+    getAttribute(s: string): any {
         return this.attributes.getValue(s);
     }
-    setAttribute(s: string, v: string) {
+    setAttribute(s: string, v: any) {
         this.attributes.setValue(s, v);
     }
     clearAttributes() {
@@ -348,7 +362,7 @@ export class AbstractKey {
     toString() {
         return this.dict.values().join(":");
     }
-    public getDict() { return this.dict; }
+    getDict() { return this.dict; }
 }
 export class PartialKey extends AbstractKey {
 }
@@ -653,7 +667,7 @@ export class FlatDataSet implements interfaces.DataSet {
             var obs: FlatObs = this.getFlatObs(i);
             found = true;
             for (var j: number = 0; j < this.mapper.size() && !found; j++) {
-                if (!(key.getComponent(this.mapper.getColumnName(j)) == obs.getValue(j))) {
+                if (!(structure.NameableType.toIDString(key.getComponent(this.mapper.getColumnName(j))) == obs.getValue(j))) {
                     found = false;
                 }
             }
@@ -1258,9 +1272,9 @@ export class Cube {
         var dim: CubeDimension = this.getRootCubeDimension();
         var oldDim: CubeDimension = dim;
         for (var i: number = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
+            dim = dim.getSubCubeDimension(structure.NameableType.toIDString(key.getComponent(dim.getSubDimension())));
             if (dim == null) {
-                //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
+                console.log("Can't find dim:" + oldDim.getSubDimension()+":"+ structure.NameableType.toIDString(key.getComponent(oldDim.getSubDimension())));
                 return null;
             }
             oldDim = dim;
@@ -1287,7 +1301,7 @@ export class Cube {
                 return null;
             }
             if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure: string = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                var measure: string = structure.NameableType.toIDString(key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString()));
                 //tcd.dump();
                 //System.out.println("Measure="+measure);
                 return tcd.getObservation(measure).toCubeObs(key, this.mapper);
@@ -1297,15 +1311,16 @@ export class Cube {
                 return co.toCubeObs(key, this.mapper);;
             }
         } else {
-            var timeValue: string = key.getComponent(time.getId().toString());
+            var timeValue: string = structure.NameableType.toIDString(key.getComponent(time.getId().toString()));
             var tcd: TimeCubeDimension = <TimeCubeDimension> dim.getSubCubeDimension(timeValue);
             if (tcd == null) {
                 //System.out.println("TCD null:"+key.getComponent(time.getId().toString()+":"+timeValue));
                 //dim.dump();
+                console.log("Time Cube Dimension is null");
                 return null;
             }
             if (this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-                var measure: string = key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+                var measure: string = structure.NameableType.toIDString(key.getComponent(this.struct.getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString()));
                 //tcd.dump();
                 //System.out.println("Measure="+measure);
                 return tcd.getObservation(measure).toCubeObs(key, this.cubeObsMapper);
@@ -1321,7 +1336,7 @@ export class Cube {
         var dim: CubeDimension = this.getRootCubeDimension();
         var oldDim: CubeDimension = dim;
         for (var i: number = 0; i < this.struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            dim = dim.getSubCubeDimension(key.getComponent(dim.getSubDimension()));
+            dim = dim.getSubCubeDimension(structure.NameableType.toIDString(key.getComponent(dim.getSubDimension())));
             if (dim == null) {
                 //System.out.println("Can't find dim:"+key.getComponent(order.get(i))+":"+oldDim.getSubDimension());
                 return null;
@@ -1709,18 +1724,21 @@ export class CubeObservation {
     }
 
     public toCubeObs(key: FullKey, mapper: interfaces.ColumnMapper): CubeObs {
-        var f: CubeObs = new CubeObs();
+        var f: CubeObs = new CubeObs(mapper);
         for (var i: number = 0; i < mapper.size(); i++) {
             var s: string = mapper.getColumnName(i);
             var v: string = key.getComponent(s);
             f.addValue(s, v);
         }
         // Cross Sectional Data
+        
         if (this.concept != null) {f.addValue(this.concept, this.cross);}
+        if (!mapper.containsColumn(this.observationConcept)) {mapper.registerColumn(this.observationConcept, AttachmentLevel.OBSERVATION);}
         f.addValue(this.observationConcept, this.value);
         for (var i: number = 0; i < this.map.keys().length; i++) {
             var s: string = this.map.keys()[i];
             var v2: CubeAttribute = this.map.getValue(s);
+            if (!mapper.containsColumn(s)) {mapper.registerColumn(s, AttachmentLevel.OBSERVATION);}
             f.addValue(s, v2.getValue());
         }
         return f;
@@ -1761,8 +1779,26 @@ export class CubeAttribute {
 }
 
 export class CubeObs {
+    private mapper = null;
+    private data = [];
+    constructor(mapper:interfaces.ColumnMapper){
+        this.mapper=mapper;
+    }
     public addValue(c: string, v: string) {
-
+        this.data[this.mapper.getColumnIndex(c)]=v;
+    }
+    public getValue(c:string) {
+        return this.data[this.mapper.getColumnIndex(c)];
+    }
+    public toString() {
+        var s = "";
+        for(var i:number=0;i<this.mapper.size();i++) {
+            s+=this.data[i];
+            if(i<this.mapper.size()){
+                s+=":";
+            }
+        }
+        return s;
     }
 }
 

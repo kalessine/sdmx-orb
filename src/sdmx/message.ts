@@ -146,10 +146,12 @@ export class Contact {
 export class PartyType extends structure.NameableType {
     public contacts: Array<Contact> = [];
     constructor() {
+        super();
     }
 }
 export class Sender extends PartyType {
     constructor() {
+        super();
     }
 
 }

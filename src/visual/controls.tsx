@@ -51,6 +51,9 @@ export default class Controls extends React.Component {
                 var o = <select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(),val)}</select>
                 html.push(o);
                 html.push(<br/>);
+            }else{
+                console.log("No dropdown");
+                console.log(b);
             }
         }
         return (<div>{html}</div>);

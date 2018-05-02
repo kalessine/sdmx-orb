@@ -36,7 +36,7 @@ export class Visual {
     private dataMessage: message.DataMessage = null;
     private cube: data.Cube = null;
     private query: data.Query = null;
-    private adapter: adapter.Adapter = null;
+    private adapterInstance: adapter.Adapter = null;
     private model: adapter.Model = null;
     private modelWrapper: adapter.ModelWrapper = null;
 
@@ -89,7 +89,7 @@ export class Visual {
         return df;
     }
     getDataStructure(): structure.DataStructure {
-        return this.queryable.getRemoteRegistry().getLocalRegistry().findDataStructure(this.df.getStructure());
+        return this.getQueryable().getRemoteRegistry().getLocalRegistry().findDataStructure(this.df.getStructure());
     }
     public size(): number {
         return this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions().length;
@@ -107,17 +107,18 @@ export class Visual {
             this.bindingsColumnMapper.registerColumn(dim.getId().toString(), data.AttachmentLevel.OBSERVATION);
             this.bindings.push(b);
         }
-        var b2: bindings.BoundTo = new bindings.BoundToContinuousY(this, this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
-        this.values = [];
-        this.values.push(b2 as bindings.BoundToContinuous);
+
         if (this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension() != null) {
             var b3: bindings.BoundTo = new bindings.BoundToTimeX(this, this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension().getId().toString());
             this.time = b3 as bindings.BoundToTime;
         }
         if (this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
-            //var b4:bindings.BoundTo = new bindings.Bound
-            //this.crossSection=b4;
+            var b4: bindings.BoundTo = new bindings.BoundToDropdown(this, this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension().getId().toString());
+            this.crossSection = b4;
         }
+        var b2: bindings.BoundTo = new bindings.BoundToContinuousY(this, this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
+        this.values = [];
+        this.values.push(b2 as bindings.BoundToContinuous);
     }
     public isDirty() {return this.dirty;}
     public setDirty(dirty: boolean) {
@@ -174,6 +175,17 @@ export class Visual {
         }
         if (this.crossSection != null && this.crossSection.getConcept() == concept) {
             this.crossSection = b;
+            if (this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_CROSS_MULTIPLE) {
+                this.values = [];
+                for (var i: number = 0; i < this.crossSection.getAllValues().length; i++) {
+                    var bc = new bindings.BoundToContinuous(this, this.crossSection.getAllValuesString()[i]);
+                    this.values.push(bc);
+                }
+            } else {
+                this.values = [];
+                var bc = new bindings.BoundToContinuous(this, this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
+                this.values.push(bc);
+            }
         }
         for (var i: number = 0; i < this.values.length; i++) {
             if (this.values[i].getConcept() == concept) {
@@ -226,7 +238,7 @@ export class Visual {
      * @return the adapter
      */
     public getAdapter(): adapter.Adapter {
-        return this.adapter;
+        return this.adapterInstance;
     }
 
     /**
@@ -240,10 +252,9 @@ export class Visual {
         return this.query;
     }
     public getBindingCurrentValues(concept: string): Array<structure.ItemType> {
-        var array = this.query.getQueryKey(concept).getValues();
         var result: Array<structure.ItemType> = [];
-        for (var i: number = 0; i < array.length; i++) {
-            result.push(this.query.getQueryKey(concept).getItemScheme().findItemString(array[i]));
+        for (var i: number = 0; i < this.query.getQueryKey(concept).size(); i++) {
+            result.push(this.query.getQueryKey(concept).getItemScheme().findItemString(this.query.getQueryKey(concept).get(i)));
         }
         return result;
     }
@@ -272,7 +283,7 @@ export class Visual {
         return array;
     }
     public getBindingCurrentValue(concept: string): structure.ItemType {
-        if (this.query.getQueryKey(concept).getValues().length > 0) {
+        if (this.query.getQueryKey(concept).size() > 0) {
             return data.ValueTypeResolver.resolveCode(this.queryable.getRemoteRegistry().getLocalRegistry(), this.getDataStructure(), concept, this.query.getQueryKey(concept).getValues()[0]);
         } else {
             console.log(this.query);
@@ -311,20 +322,15 @@ export class Visual {
         return this.values;
     }
     public clearTime() {}
-    /*
-    public getCrossSection():bindings.BoundToCrossSection {
+    public getCrossSection(): bindings.BoundTo {
         return this.crossSection;
     }
-    */
     public getBindings() {return this.bindings;}
     public getVisualId() {return this.visualId;}
-    public getControlsId() {return this.controlsId;}
     public setVisualId(s: string) {this.visualId = s;}
-    public setControlsId(s: string) {this.controlsId = s;}
-    public setAdapter(ad: adapters.Adapter) {
+    public setAdapter(ad: adapter.Adapter) {
         if (ad.canCreateModelFromVisual(this)) {
-            this.adapter = ad;
-            this.render();
+            this.adapterInstance = ad;
         }
     }
     public render() {
@@ -339,13 +345,13 @@ export class Visual {
             if (p != null) {
                 p = p.then(function (msg) {return this.doCube();}.bind(this));
             } else {
-                doCube();
+                this.doCube();
             }
         }
         if (this.model != null) {return this.model;}
         if (p != null) {
             p = p.then(function (cube) {
-                this.model = this.adapter.createModel(this, this.cube);
+                this.model = this.adapterInstance.createModel(this, this.cube);
                 if (this.modelWrapper == null) {this.modelWrapper = new adapter.ModelWrapper();}
                 this.modelWrapper.setModel(this.model);
                 this.modelWrapper.setVisual(this);
@@ -353,7 +359,7 @@ export class Visual {
             }.bind(this));
         }
         else {
-            this.model = this.adapter.createModel(this, this.cube);
+            this.model = this.adapterInstance.createModel(this, this.cube);
             if (this.modelWrapper == null) {this.modelWrapper = new adapter.ModelWrapper();}
             this.modelWrapper.setModel(this.model);
             this.modelWrapper.setVisual(this);
@@ -363,17 +369,16 @@ export class Visual {
     public renderVisual() {
         var p = null;
         if (this.isRequery()) {
-            if (this.model != null) {this.model.unrender(this.visualId, null);}
+            if (this.model != null) {}
             this.model = null;
             p = this.doUpdate();
         }
         if (this.isDirty()) {
             if (this.model != null) {
-                this.model.unrender(this.visualId, null);
                 this.model = null;
                 // Shouldn't Need To DoCube again
                 //this.doCube();
-                this.model = this.adapter.createModel(this, this.cube);
+                this.model = this.adapterInstance.createModel(this, this.cube);
                 if (this.modelWrapper == null) {this.modelWrapper = new adapter.ModelWrapper();}
                 this.modelWrapper.setModel(this.model);
                 this.modelWrapper.setVisual(this);
@@ -383,7 +388,7 @@ export class Visual {
         if (this.model != null) {return this.model;}
         if (p != null) {
             p = p.then(function (cube) {
-                this.model = this.adapter.createModel(this, this.cube);
+                this.model = this.adapterInstance.createModel(this, this.cube);
                 if (this.modelWrapper == null) {this.modelWrapper = new adapter.ModelWrapper();}
                 this.modelWrapper.setModel(this.model);
                 this.modelWrapper.setVisual(this);
@@ -391,14 +396,17 @@ export class Visual {
             }.bind(this));
         }
     }
-    public getPercentOf() {
+    public getPercentOf(): bindings.BoundTo {
         for (var i: number = 0; i < this.bindings.length; i++) {
-            if (this.bindings[i].getPercentOf != null && this.bindings[i].getPercentOf() != null) {return this.bindings[i];}
+            if (typeof this.bindings[i].getPercentOfId === "function" && this.bindings[i].getPercentOfId() != null) {return this.bindings[i];}
         }
-        if (this.time != null && this.time.getPercentOf != null && this.time.getPercentOf() != null) {return this.time;}
+        if (this.crossSection != null && typeof this.crossSection.getPercentOfId === "function" && this.crossSection.getPercentOfId() != null) {return this.crossSection;}
+        if (this.time != null && typeof this.time.getPercentOfId === "function" && this.time.getPercentOfId() != null) {return this.time;}
+
         for (var i: number = 0; i < this.values.length; i++) {
-            if (this.values[i].getPercentOf != null && this.values[i].getPercentOf() != null) {return this.values[i];}
+            if (typeof this.values[i].getPercentOfId === "function" && this.values[i].getPercentOfId() != null) {return this.values[i];}
         }
+        return null;
     }
     public getPrimaryMeasure() {
         return this.findBinding(this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure().getId().toString());
@@ -407,36 +415,77 @@ export class Visual {
         for (var i: number = 0; i < this.bindings.length; i++) {
             if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SERIES) {return this.bindings[i];}
         }
-        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_TIME_SERIES) ){return this.time;}
-        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_MEASURES_SERIES) ){return this.crossSection;}
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_TIME_SERIES) {return this.time;}
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SERIES) {return this.crossSection;}
         return null;
     }
     public getX(): bindings.BoundTo {
         for (var i: number = 0; i < this.bindings.length; i++) {
             if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_X) {return this.bindings[i];}
         }
-        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_TIME_X) ){return this.time;}
-        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_MEASURES_X) ){return this.crossSection;}
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_TIME_X) {return this.time;}
         return null;
     }
     public getMenu(k: number) {
         var j: number = -1;
         for (var i: number = 0; i < this.bindings.length; i++) {
-            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
                 j++;
                 if (j == k) {
                     return this.bindings[i];
                 }
             }
         }
-        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) ){
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
             j++;
             if (j == k) {
                 return this.time;
             }
         }
 
-        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) ){
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
+            j++;
+            if (j == k) {
+                return this.crossSection;
+            }
+        }
+        for (var i: number = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+                j++;
+                if (j == k) {
+                    return this.bindings[i];
+                }
+            }
+        }
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+            j++;
+            if (j == k) {
+                return this.time;
+            }
+        }
+
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+            j++;
+            if (j == k) {
+                return this.crossSection;
+            }
+        }
+        for (var i: number = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
+                j++;
+                if (j == k) {
+                    return this.bindings[i];
+                }
+            }
+        }
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
+            j++;
+            if (j == k) {
+                return this.time;
+            }
+        }
+
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
             j++;
             if (j == k) {
                 return this.crossSection;
@@ -444,18 +493,42 @@ export class Visual {
         }
         return null;
     }
-    public getMenuCount(){
+    public getMenuCount() {
         var j: number = 0;
         for (var i: number = 0; i < this.bindings.length; i++) {
-            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
                 j++;
             }
         }
-        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) ){
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
             j++;
         }
 
-        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MENU) ){
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SINGLE_MENU) {
+            j++;
+        }
+        for (var i: number = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+                j++;
+            }
+        }
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+            j++;
+        }
+
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_MULTI_MENU) {
+            j++;
+        }
+        for (var i: number = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
+                j++;
+            }
+        }
+        if (this.time != null && this.time.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
+            j++;
+        }
+
+        if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_LEVEL_MENU) {
             j++;
         }
         return j;
@@ -463,10 +536,138 @@ export class Visual {
     public getTitle() {
         return structure.NameableType.toString(this.df);
     }
-    public containsValue(b:string,item:structure.ItemType):boolean {
+    public containsValue(b: string, item: structure.ItemType): boolean {
         return this.query.getQueryKey(b).containsValue(item.getId().toString());
     }
-    public getItemScheme(concept:string) {
+    public getItemScheme(concept: string) {
         return this.findBinding(concept).getCodelist();
+    }
+    public getVisualObject(): object {
+        var obj = {};
+        if (this.getDataflow() != null) {
+            obj["dataservice"] = this.getDataService();
+            obj["dataflowAgency"] = this.getDataflow().getAgencyId().toString();
+            obj["dataflowId"] = this.getDataflow().getId().toString();
+            obj["dataflowVersion"] = this.getDataflow().getVersion().toString();
+            obj["dataflowName"] = this.getDataflow().getNames()[0].getText();
+            obj["dataflowNameLang"] = this.getDataflow().getNames()[0].getLang();
+            obj["structureAgency"] = this.getDataflow().getStructure().getAgencyId().toString();
+            obj["structureId"] = this.getDataflow().getStructure().getMaintainableParentId().toString();
+            obj["structureVersion"] = this.getDataflow().getStructure().getVersion().toString();
+        }
+        var struct: structure.DataStructure = this.getDataStructure();
+        obj['dimensions'] = {};
+        for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+            var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
+            var b = this.findBinding(dim.getConceptIdentity().getId().toString());
+            var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(b.getBoundTo());
+            obj['dimensions'][b.getConcept()] = be.getSaveBindingToObject()(b);
+        }
+        var tdim: structure.TimeDimension = struct.getDataStructureComponents().getDimensionList().getTimeDimension();
+        if (tdim != null) {
+            var tb = this.findBinding(tdim.getConceptIdentity().getId().toString());
+            var tbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(tb.getBoundTo());
+            obj['time'] = tbe.getSaveBindingToObject()(tb);
+        }
+        var cross: structure.MeasureDimension = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
+        if (cross != null) {
+            var cb = this.findBinding(tdim.getConceptIdentity().getId().toString());
+            var cbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(cb.getBoundTo());
+            obj['cross'] = cbe.getSaveBindingToObject()(cb);
+        }
+        obj['values'] = {};
+        for (var i: number = 0; i < this.getValues().length; i++) {
+            var b2 = this.getValues()[i];
+            var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(b2.getBoundTo());
+            obj['values'][b2.getConcept()] = be.getSaveBindingToObject()(b2);
+        }
+        obj['adapter'] = adapter.adapter2Object(this.adapterInstance);
+        return obj;
+    }
+    public parseVisualObject(obj) {
+        console.log(obj);
+        this.setDataService(obj["dataservice"]);
+        var ref = sdmx.SdmxIO.reference(obj["structureAgency"], obj["structureId"], obj["structureVersion"], null);
+        var df: structure.Dataflow = new structure.Dataflow();
+        df.setAgencyId(obj["dataflowAgency"]);
+        df.setId(obj["dataflowId"]);
+        df.setVersion(obj["dataflowVersion"]);
+        df.setNames([new common.Name(obj["dataflowNameLang"],obj["dataflowName"])]);
+        df.setStructure(ref);
+        this.setDataflow(df);
+        this.getQueryable().getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct: structure.DataStructure) {
+            this.init();
+            for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
+                var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
+                console.log("TypeId="+obj["dimensions"][dim.getId().toString()].typeid);
+                var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["dimensions"][dim.getId().toString()].typeid);
+                var b = be.getParseObjectToBinding()(obj["dimensions"][dim.getId().toString()], this);
+                this.setBinding(b);
+            }
+            var tdim: structure.TimeDimension = struct.getDataStructureComponents().getDimensionList().getTimeDimension();
+            if (tdim != null) {
+                var tbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["time"].typeid);
+                var tb = be.getParseObjectToBinding()(obj["time"], this);
+                console.log("Time");
+                console.log(tb);
+                console.log(tbe);
+                this.setBinding(tb);
+            }
+            var cross: structure.MeasureDimension = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
+            if (cross != null) {
+                var cb: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["cross"].typeid);
+                var cbp = be.getParseObjectToBinding()(obj["cross"], this);
+                this.setBinding(cbp);
+            }
+            for (var i: number = 0; i < obj["values"].length; i++) {
+                var val = obj["values"][i];
+                var bep: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["values"][i].typeid);
+                var v = bep.getParseObjectToBinding()(obj["values"][i], this);
+                this.setBinding(v);
+            }
+            this.adapterInstance = adapter.object2Adapter(obj["adapter"]);
+            this.check();
+            this.renderVisual();
+        }.bind(this));
+    }
+    public check() {
+
+        for (var i: number = 0; i < this.dimSize(); i++) {
+            var dim: structure.Dimension = this.getDataStructure().getDataStructureComponents().getDimensionList().getDimensions()[i];
+            var b: bindings.BoundTo = this.findBinding(dim.getId().toString());
+            if (b == null) {
+                throw new Error("Unable to find Dimension:" + dim.getId().toString());
+            }
+        }
+
+        if (this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension() != null) {
+            var tdim: structure.TimeDimension = this.getDataStructure().getDataStructureComponents().getDimensionList().getTimeDimension();
+            var b3: bindings.BoundTo = this.findBinding(tdim.getId().toString());
+            if (b3 == null) {
+                throw new Error("Unable to find Dimension:" + tdim.getId().toString());
+            }
+        }
+        if (this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {
+            var mdim: structure.MeasureDimension = this.getDataStructure().getDataStructureComponents().getDimensionList().getMeasureDimension();
+            var b4: bindings.BoundTo = this.findBinding(mdim.getId().toString());
+            if (b4 == null) {
+                throw new Error("Unable to find Dimension:" + mdim.getId().toString());
+            }
+        }
+        if (this.getCrossSection()!=null&&this.getCrossSection().getBoundTo() == bindings.BoundTo.BOUND_MEASURES_INDIVIDUAL) {
+            for (var i: number = 0; i < this.getCrossSection().getAllValues().length; i++) {
+                var m: structure.ItemType = this.getCrossSection().getAllValues()[i];
+                var b6: bindings.BoundTo = this.findBinding(m.getId().toString());
+                if (b6 == null) {
+                    throw new Error("Unable to find Dimension:" + m.getId().toString());
+                }
+            }
+        } else {
+            var pm: structure.PrimaryMeasure = this.getDataStructure().getDataStructureComponents().getMeasureList().getPrimaryMeasure();
+            var b5: bindings.BoundTo = this.findBinding(pm.getId().toString());
+            if (b5 == null) {
+                throw new Error("Unable to find Dimension:" + pm.getId().toString());
+            }
+        }
     }
 }

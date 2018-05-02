@@ -52,7 +52,7 @@ export default class CustomiseDialog extends React.Component {
        return html;
     }
     public selectItem(b:bindings.BoundTo,s:string){
-         return (<Select selectedIndex={b.getAllValues().indexOf(b.findItemFromId(b[s]))+1}  onChange={(a) => {b[s]=b.getAllValues()[a['selectedIndex'] - 1] != null ? b.getAllValues()[a['selectedIndex'] - 1].getId().toString() : null;this.forceUpdate();}>{this.listItems(b)}</Select>);
+        return (<Select selectedIndex={b.getAllValues().indexOf(b.getPercentOfItemType())+1}  onChange={(event) => {b.setPercentOfId(b.getAllValues()[event.selectedIndex-1] != null ? b.getAllValues()[event.selectedIndex-1].getId().toString() : null);super.forceUpdate();}>{this.listItems(b)}</Select>);
     }
     render(): any {
     if (this.props.currentBindingObject == null) {

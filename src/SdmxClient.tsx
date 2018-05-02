@@ -144,7 +144,7 @@ export default class SdmxClient extends React.Component<SdmxClientProps, SdmxCli
         var q: data.Query = new data.Query(this.state.dataflow, reg);
         for (var i: number = 0; i < q.size(); i++) {
             // Select First Value for each dimension.
-            var vals: Array<string> = q.getQueryKey(q.getKeyNames()[i]).possibleValues();
+            var vals: Array<string> = q.getQueryKey(q.getKeyNames()[i]).getPossibleValues();
             q.getQueryKey(q.getKeyNames()[i]).addValue(vals[0]);
         }
         if (struct.getDataStructureComponents().getDimensionList().getMeasureDimension() != null) {

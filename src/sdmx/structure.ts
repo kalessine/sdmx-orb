@@ -27,7 +27,7 @@ import * as data from '../sdmx/data';
 import * as sdmx from '../sdmx';
 import * as time from '../sdmx/time';
 import * as xml from '../sdmx/xml';
-
+import * as collections from 'typescript-collections';
 export class IdentifiableType extends common.AnnotableType {
     private id: commonreferences.ID;
     private urn: xml.anyURI;
@@ -543,6 +543,24 @@ export class ItemSchemeType extends MaintainableType {
         }
         return i;
     }
+    public getItemsOnLevel(n:number):Array<ItemType> {
+        var result = [];
+        for (var i: number = 0; i < this.size();i++) {
+            if (this.getLevel(this.items[i].getId().toString())==n){
+                result.push(this.items[i]);
+            }
+        }
+        return result;
+    }
+    public getMaximumLevel():number {
+        var max = 0;
+        for (var i: number = 0; i < this.size();i++) {
+            if (this.getLevel(this.items[i].getId().toString())>max){
+                max = this.getLevel(this.items[i].getId().toString());
+            }
+        }
+        return max;
+    }
 }
 
 export class CodeType extends ItemType {
@@ -816,7 +834,6 @@ export class DataStructure extends MaintainableType {
         if ("OBS_VALUE" == col.getString()) {
             return dim2;
         }
-        alert("Can't find concept:" + col.getString() + " pm dim:" + dim2.getId().getString());
         return null;
     }
 

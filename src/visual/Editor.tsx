@@ -1,11 +1,13 @@
 import * as React from 'preact-compat';
-import { h } from 'preact';
+import {h} from 'preact';
 console.log('0.3');
 import * as visual from './visual';
 console.log('0.4');
 import * as bindings from './bindings';
 console.log('0.5');
 import * as structure from '../sdmx/structure';
+import * as commonreferences from '../sdmx/commonreferences';
+import * as sdmx from '../sdmx';
 console.log('0.6');
 import * as message from '../sdmx/message';
 console.log('0.7');
@@ -32,7 +34,6 @@ console.log('1.6');
 import Button from 'preact-material-components/Button';
 console.log('1.7');
 import * as adapter from './adapter';
-import Select from 'preact-material-components/Select';
 console.log('1.8');
 console.log('10');
 export interface EditorProps {
@@ -51,7 +52,7 @@ export interface EditorState {
     currentBindingRenderFunc: Function,
     currentBindingParse: Function,
     currentBindingSave: Function,
-    adapters: Array
+    adapters: Array<adapter.Adapter>
 }
 export default class Editor extends React.Component {
     private customiseDialog = null;
@@ -66,13 +67,13 @@ export default class Editor extends React.Component {
         console.log(e);
     }
     public connect(q) {
-        super.setState({ queryable: q });
+        super.setState({queryable: q});
         if (this.getState().queryable == null) {
-            super.setState({ dataflows: [] });
+            super.setState({dataflows: []});
             return;
         }
-        this.state.queryable.getRemoteRegistry().listDataflows().then(function(dfs) {
-            this.setState({ dataflows: dfs });
+        this.state.queryable.getRemoteRegistry().listDataflows().then(function (dfs) {
+            this.setState({dataflows: dfs});
         }.bind(this));
     }
     public selectDataflow(df: structure.Dataflow) {
@@ -80,7 +81,7 @@ export default class Editor extends React.Component {
         s.dataflow = df;
         s.visual = null;
         super.setState(s);
-        this.getState().queryable.getRemoteRegistry().findDataStructure(df.getStructure()).then(function(struct: structure.DataStructure) {
+        this.getState().queryable.getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct: structure.DataStructure) {
             this.selectStructure(struct);
         }.bind(this));
     }
@@ -92,16 +93,14 @@ export default class Editor extends React.Component {
         state.visual.init();
         super.forceUpdate();
     }
-    public getState() { return this.state; }
+    public getState() {return this.state;}
     public parseVisualObject(obj: object) {
 
     }
     changeAdapter(e) {
-        var i:number = e.selectedIndex;
-        console.log(e.selectedIndex);
-        if(i==0){return;}
+        var i: number = e.selectedIndex;
+        if (i == 0) {return;}
         this.state.visual.setAdapter(this.state.adapters[e.selectedIndex]);
-        this.state.visual.render();
         super.forceUpdate();
     }
     listAdapters() {
@@ -116,42 +115,20 @@ export default class Editor extends React.Component {
         this.state.adapters = adapters;
         var options = [];
         var index: number = 0;
-        _.forEach(this.state.adapters,function(item) {
-            var name = item!=null?item.getName():"";
+        _.forEach(this.state.adapters, function (item) {
+            var name = item != null ? item.getName() : "";
             options.push(<Select.Item>{name}</Select.Item>);
             index++;
         });
         return options;
     }
-    public getVisualObject(): object {
-        var obj = {};
-        if (this.state.visual == null) return obj;
-        if (this.state.visual != null && this.state.visual.getDataflow() != null) {
-            obj["dataservice"] = this.state.visual.getDataService();
-            obj["dataflowAgency"] = this.state.visual.getDataflow().getAgencyId().toString();
-            obj["dataflowId"] = this.state.visual.getDataflow().getId().toString();
-            obj["dataflowVersion"] = this.state.visual.getDataflow().getVersion().toString();
-            obj["dataflowName"] = this.state.visual.getDataflow().getName();
-            obj["structureAgency"] = this.state.visual.getDataflow().getStructure().getAgencyId().toString();
-            obj["structureId"] = this.state.visual.getDataflow().getStructure().getMaintainableParentId().toString();
-            obj["structureVersion"] = this.state.visual.getDataflow().getStructure().getVersion().toString();
-        }
-        var struct: structure.DataStructure = this.state.visual.getDataStructure();
-        obj['dimensions'] = {};
-        for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
-            var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
-            var b = this.state.visual.findBinding(dim.getConceptIdentity().getId().toString());
-            var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(b.getBoundTo());
-            obj['dimensions'][b.getConcept()] = be.getSaveBindingToObject()(b);
-        }
-        return obj;
-    }
+
     public selectBinding(concept: string, reg: bindings.BindingRegister, boundTo: number) {
         var html = [];
         var index: number = -1;
         var i = 0;
         var selectedBE: bindings.BindingEntry = null;;
-        _.forEach(reg.getList(), function(be: bindings.BindingEntry) {
+        _.forEach(reg.getList(), function (be: bindings.BindingEntry) {
             html.push(<Select.Item> {be.getName()}</Select.Item>);
             if (be.getId() == boundTo) {
                 index = i;
@@ -159,17 +136,17 @@ export default class Editor extends React.Component {
             }
             i++;
         });
-        return (<Select selectedIndex={index} onChange={(a) => { this.setBinding(concept, a['selectedIndex'], reg) }>{html}</Select>);
+        return (<Select selectedIndex={index} onChange={(a) => {this.setBinding(concept, a['selectedIndex'], reg)}>{html}</Select>);
     }
     public setBinding(concept: string, i: number, reg: bindings.BindingRegister) {
         var html = [];
         var index: number = 0;
         var entry = null;
-        _.forEach(reg.getList(), function(item: bindings.BindingEntry) {
-            if (i == index) { entry = item; }
+        _.forEach(reg.getList(), function (item: bindings.BindingEntry) {
+            if (i == index) {entry = item;}
             index++;
         });
-        if (entry == null) { return; }
+        if (entry == null) {return;}
         var cn = entry.getCreateNew();
         var b = new cn(this.state.visual, concept);
         this.state.visual.setBinding(b);
@@ -177,7 +154,10 @@ export default class Editor extends React.Component {
     }
 
     public customRow(concept: structure.ConceptType, register: bindings.BindingRegister) {
-        return (<div><p>{concept.getId().toString()}:{structure.NameableType.toString(concept)}</p>{this.selectBinding(concept.getId().toString(), register, this.state.visual.findBinding(concept.getId().toString()).getBoundTo())}<Button onclick={(e) => { this.customise(concept.getId().toString()); }>Customise</Button></div>);
+        return (<div><p>{concept.getId().toString()}:{structure.NameableType.toString(concept)}</p>{this.selectBinding(concept.getId().toString(), register, this.state.visual.findBinding(concept.getId().toString()).getBoundTo())}<Button onclick={(e) => {this.customise(concept.getId().toString());}>Customise</Button></div>);
+    }
+    public customRow2(boundto: bindings.BoundTo, register: bindings.BindingRegister) {
+        return (<div><p>{boundto.getConcept()}:{structure.NameableType.toString(boundto.getConceptName())}</p>{this.selectBinding(boundto.getConcept(), register, boundto.getBoundTo())}<Button onclick={(e) => {this.customise(boundto.getConcept());}>Customise</Button></div>);
     }
     public customise(s: string) {
         var st = this.state;
@@ -202,51 +182,54 @@ export default class Editor extends React.Component {
     public render() {
         var html = [];
 
-        html.push(<Services onConnect={(q: interfaces.Queryable) => { this.connect(q); }} ></Services>);
+        html.push(<Services onConnect={(q: interfaces.Queryable) => {this.connect(q);}} ></Services>);
         html.push(<Dataflows dfs={this.getState().dataflows} selectDataflow={(df: structure.Dataflow) => this.selectDataflow(df)} />);
-        console.log(this.getVisualObject());
-        html.push(<JSONResultPanel str={JSON.stringify(this.getVisualObject())} obj={this.getVisualObject()} />);
         if (this.state.visual == null) {
             return <div>{html}</div>;
-                }
-                html.push(<label>Visual Id</label><input type="text" value={this.state.visual.getVisualId()} onChange={this.changeVisualText.bind(this)}/>);
-                html.push(<label>Controls Id</label><input type="text" value={this.state.visual.getControlsId()} onChange={this.changeControlsText.bind(this)}/>);
-                var struct: structure.DataStructure = this.state.visual.getDataStructure();
+        }
+        html.push(<JSONResultPanel str={JSON.stringify(this.state.visual.getVisualObject())} obj={this.state.visual.getVisualObject()} />);
+        html.push(<label>Visual Id</label> <input type="text" value={this.state.visual.getVisualId()} onChange={this.changeVisualText.bind(this)} />);
+        var struct: structure.DataStructure = this.state.visual.getDataStructure();
         if (struct == null) {
-                    console.log("Struct is null");
-                return <div>{html}</div>;
-            }
+            console.log("Struct is null");
+            return <div>{html}</div>;
+        }
         for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
             var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
-                    var concept: structure.ConceptType = this.state.visual.getRegistry().findConcept(dim.getConceptIdentity());
-                    var b: bindings.BoundTo = this.state.visual.findBinding(concept.getId().toString());
-                    html.push(this.customRow(concept,bindings.DimensionBindingRegister.register));
+            var concept: structure.ConceptType = this.state.visual.getRegistry().findConcept(dim.getConceptIdentity());
+            var b: bindings.BoundTo = this.state.visual.findBinding(concept.getId().toString());
+            html.push(this.customRow(concept, bindings.DimensionBindingRegister.register));
             //if (this.state.currentBindingObject == null) {
-                    //    this.customise(concept.getId().toString());
-                    //}
-                }
-                if( this.state.visual.getTime()!=null) {
+            //    this.customise(concept.getId().toString());
+            //}
+        }
+        if (this.state.visual.getTime() != null) {
             var dim2: structure.TimeDimension = struct.findComponentString(this.state.visual.getTime().getConcept()) as structure.TimeDimension;
-                    var concept2 = this.state.visual.getRegistry().findConcept(dim2.getConceptIdentity());
-                    html.push(this.customRow(concept2,bindings.TimeBindingRegister.register));
-                }/*
-        if(this.state.visual.getCrossSection()!=null){
-            var dim3: structure.Component = struct.findComponentString(this.state.visual.getCrossSection().getConcept());
-                    var concept3 = this.state.visual.getRegistry().findConcept(dim3.getConceptIdentity());
-                    html.push(this.customRow(concept3,bindings.CrossSectionBindingRegister.register));
-                }*/
-        for(var i:number=0;i<this.state.visual.getValues().length;i++) {
-            var dim4: structure.Component = struct.findComponentString(this.state.visual.getValues()[i].getConcept());
-                    var concept4= this.state.visual.getRegistry().findConcept(dim4.getConceptIdentity());
-                    html.push(this.customRow(concept4,bindings.MeasureBindingRegister.register));
-                }
-        html.push(<CustomiseDialog currentBindingObject={this.state.currentBindingObject} renderFunc={this.state.currentBindingRenderFunc} currentBindingConcept={this.state.currentBindingConcept} visual={this.state.visual} ref={(customiseDialog) => { this.customiseDialog = customiseDialog }} open={this.state.openCustomise} />);
-            var ad = this.state.visual.getAdapter();
-            var adps = this.listAdapters();
-            var change = this.changeAdapter.bind(this);
-            html.push(<Select value={ad!=null?ad.getName():""} onChange={change}>{adps}</Select>);
+            var concept2 = this.state.visual.getRegistry().findConcept(dim2.getConceptIdentity());
+            html.push(this.customRow(concept2, bindings.TimeBindingRegister.register));
+        }
+        if (this.state.visual.getCrossSection() != null) {
+            var dim3: structure.Component = struct.findComponentString(this.state.visual.getCrossSection().getConcept()) as structure.Component; 3
+            var concept3 = this.state.visual.getRegistry().findConcept(dim3.getConceptIdentity());
+            html.push(this.customRow(concept3, bindings.CrossSectionBindingRegister.register));
+        }
+        for (var i: number = 0; i < this.state.visual.getValues().length; i++) {
+            html.push(this.customRow2(this.state.visual.getValues()[i], bindings.MeasureBindingRegister.register));
+        }
+        html.push(<CustomiseDialog currentBindingObject={this.state.currentBindingObject} renderFunc={this.state.currentBindingRenderFunc} currentBindingConcept={this.state.currentBindingConcept} visual={this.state.visual} ref={(customiseDialog) => {this.customiseDialog = customiseDialog}} open={this.state.openCustomise} />);
+        var ad = this.state.visual.getAdapter();
+        var adps = this.listAdapters();
+        var change = this.changeAdapter.bind(this);
+        html.push(<Select value={ad != null ? ad.getName() : ""} onChange={change}>{adps}</Select>);
+        if(this.state.visual.getAdapter()!=null) {
+         html.push(<Button onClick={(e)=>this.renderVisual()}>Render!</Button>);
+        }
         return <div>{html}</div>;
-                    }
-                }
-                
-                
+    }
+    public renderVisual() {
+        var vis = new visual.Visual();
+        vis.parseVisualObject(this.state.visual.getVisualObject());
+    }
+}
+
+
