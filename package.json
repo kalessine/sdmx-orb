@@ -4,7 +4,9 @@
   "description": "SDMX Client Software",
   "main": "index.js",
   "scripts": {
+    "toolbox": "react-toolbox-themr",
     "build": "webpack",
+    "build-embed": "webpack --config webpack.config.embed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +20,7 @@
   },
   "homepage": "https://github.com/kalessine/sdmx-orb#readme",
   "dependencies": {
+    "@opuscapita/react-dates": "^0.4.0-beta.4",
     "@types/react-dnd-html5-backend": "^2.1.8",
     "bluebird": "^3.5.1",
     "chart.js": "^2.7.1",
@@ -29,20 +32,25 @@
     "material": "^0.1.1",
     "material-components-web": "0.8.0",
     "material-design-icons": "^3.0.0",
-    "moment": "^2.19.2",
+    "moment": "^2.22.1",
     "postcss": "^6.0.11",
-    "postcss-cssnext": "^3.0.2",
     "postcss-each": "^0.10.0",
     "postcss-import": "^11.0.0",
     "postcss-mixins": "^6.1.0",
-    "preact": "^8.2.5",
-    "preact-compat": "^3.17.0",
+    "preact": "^8.2.9",
+    "preact-compat": "^3.18.0",
+    "preact-datepicker": "^0.1.0",
     "preact-dnd": "^2.1.5",
     "preact-habitat": "^3.2.1",
     "preact-material-components": "^1.1.7",
     "preact-virtual-list": "^0.3.1",
+    "react": "^16.3.2",
     "react-base": "^0.2.0",
+    "react-datepicker": "^1.4.1",
+    "react-dates": "^16.6.1",
+    "react-day-picker": "^7.1.6",
     "react-dnd-html5-backend": "^2.5.1",
+    "react-dom": "^16.3.2",
     "react-menu-bar": "^2.0.4",
     "react-simple-tree": "^0.1.0",
     "react-simpletabs": "^0.7.0",
@@ -50,25 +58,43 @@
     "react-tabs": "^2.1.0",
     "react-tiny-virtual-list": "^2.1.4",
     "react-toolbox": "^2.0.0-beta.12",
+    "react-toolbox-themr": "^1.0.2",
     "react-treeview": "^0.4.7",
     "react-virtual-list": "^2.2.2",
     "recharts": "^1.0.0-beta.10"
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.4.1",
-    "css-loader": "^0.28.7",
+    "css-loader": "^0.28.11",
     "extract-text-webpack-plugin": "^3.0.0",
     "node-sass": "^4.5.3",
     "postcss": "^6.0.11",
-    "postcss-loader": "^2.0.6",
+    "postcss-cssnext": "^3.1.0",
+    "postcss-loader": "^2.1.4",
+    "react-hot-loader": "^4.1.2",
     "sass-loader": "^6.0.6",
     "script-loader": "^0.7.1",
     "sinon": "^3.3.0",
     "style-loader": "^0.18.2",
+    "toolbox-loader": "0.0.3",
     "ts-loader": "^2.3.2",
     "typed-css-modules-loader": "0.0.10",
-    "typescript": "^2.7.2",
+    "typescript": "^2.8.3",
     "typescript-collections": "^1.2.5",
     "webpack": "^3.11.0"
+  },
+  "reactToolbox": {
+    "include": [
+      "BUTTON",
+      "DATE_PICKER"
+    ],
+    "customProperties": {
+      "animation-duration": "0.3s",
+      "color-accent": "var(--palette-pink-a200)",
+      "color-accent-dark": "var(--palette-pink-700)",
+      "color-primary-contrast": "var(--color-dark-contrast)",
+      "color-accent-contrast": "var(--color-dark-contrast)"
+    },
+    "output": "src/react-toolbox"
   }
 }

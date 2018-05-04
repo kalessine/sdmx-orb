@@ -10,9 +10,10 @@ import * as common from "../sdmx/common";
 import * as structure from "../sdmx/structure";
 import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "./bindings";
-import _ from 'lodash';
+import * as _ from 'lodash';
+import * as moment from 'moment';
 import Select from 'preact-material-components/Select';
-
+import {DatePicker} from 'react-toolbox';
 export default class Controls extends React.Component {
     public props: any = {};
     public state: any = {};
@@ -37,25 +38,50 @@ export default class Controls extends React.Component {
         this.props.visual.renderVisual();
         super.forceUpdate();
     }
+    onEndDateChange(endDate) {
+        this.props.visual.getTime().setEndDate(endDate);
+        this.props.visual.renderVisual();
+        this.setState({open:true});
+    }
+    onStartDateChange(startDate) {
+        this.props.visual.getTime().setStartDate(startDate);
+        this.props.visual.renderVisual();
+        this.setState({open:true});
+    }
+    onFocusChange(){
+        
+    }
     public render(props, state) {
         this.props = props;
         this.state = state;
         var html = [];
         var visual = this.props.visual;
         for (var i: number = 0; i < visual.getBindings().length; i++) {
-            var b = visual.getBinding(i);
-            if (b instanceof bindings.BoundToDropdown) {
+            var b:bindings.BoundTo = visual.getBinding(i);
+            if (b.getBoundTo()==bindings.BoundTo.BOUND_DISCRETE_DROPDOWN) {
                 var cnc = b.getConceptName();
                 var val = structure.NameableType.toString(b.getCurrentValue());
                 html.push(<div>{cnc}</div>);
                 var o = <select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(),val)}</select>
                 html.push(o);
                 html.push(<br/>);
-            }else{
+            }
+            else{
                 console.log("No dropdown");
                 console.log(b);
             }
-        }
+            }
+            b = visual.getTime();
+            if (b.getBoundTo()==bindings.BoundTo.BOUND_TIME_DROPDOWN||b.getBoundTo()==bindings.BoundTo.BOUND_TIME_X||b.getBoundTo()==bindings.BoundTo.BOUND_TIME_Y) {
+                var bt = b as bindings.BoundToTime;
+                var cnc = bt.getConceptName();
+                var start = bt.getStartDate();
+                var end = bt.getEndDate();
+                html.push(<div>{cnc}</div>);
+                html.push(<DatePicker onChange={(day) => this.onStartDateChange(day)} value={start} />);
+                html.push(<DatePicker onChange={(day) => this.onEndDateChange(day)} value={end} />);
+                html.push(<br/>);
+            }
         return (<div>{html}</div>);
     }
 }

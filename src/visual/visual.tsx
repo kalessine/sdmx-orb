@@ -8,6 +8,10 @@ import * as common from "../sdmx/common";
 import * as structure from "../sdmx/structure";
 import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "../visual/bindings";
+export var embed = function(v){
+  var vis = new Visual();
+  vis.parseVisualObject(v);
+}
 export class Visual {
 
     private bindings: Array<bindings.BoundTo> = [];
@@ -608,6 +612,7 @@ export class Visual {
             if (tdim != null) {
                 var tbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["time"].typeid);
                 var tb = be.getParseObjectToBinding()(obj["time"], this);
+                tb.init();
                 console.log("Time");
                 console.log(tb);
                 console.log(tbe);

@@ -496,6 +496,8 @@ export class BoundToAllValues extends BoundToDiscrete {
 }
 export class BoundToTime extends BoundTo {
     private singleLatestTime: boolean = false;
+    private chooseTime: boolean = true;
+    private lastTime: number = 0;
 
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
@@ -510,6 +512,28 @@ export class BoundToTime extends BoundTo {
         return true;
     }
     public expectValues() {return 2;}
+    public getStartDate(): Date {return super.getVisual().getQuery().getStartDate();}
+    public getEndDate(): Date {return super.getVisual().getQuery().getEndDate();}
+    public setStartDate(d: Date) {
+        super.getVisual().getQuery().setStartDate(d);
+        super.getVisual().setRequery(true);
+        super.getVisual().setDirty(true);
+        }
+    public setEndDate(d: Date) {
+        super.getVisual().getQuery().setEndDate(d);
+        super.getVisual().setRequery(true);
+        super.getVisual().setDirty(true);
+        }
+    public isChooseTime(): boolean {return this.chooseTime;}
+    public setChooseTime(b: boolean) {this.chooseTime = b;}
+    public setLastTime(n: number) {this.lastTime = n;}
+    public getLastTime() {return this.lastTime;}
+    public init() {
+        if (this.lastTime != 0) {
+            super.getVisual().getQuery().setEndDate(new Date());
+            super.getVisual().getQuery().setStartDate(new Date(new Date().getTime()-this.lastTime));
+        }
+    }
 }
 export class BoundToTimeX extends BoundToTime {
     constructor(visual: visual.Visual, concept: string) {
@@ -524,7 +548,7 @@ export class BoundToTimeX extends BoundToTime {
     }
     public expectValues() {return 2;}
 }
-export class BoundToTimeY extends BoundTo {
+export class BoundToTimeY extends BoundToTime {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setWalkAll(true);
@@ -1066,10 +1090,24 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             break;
         case BoundTo.BOUND_TIME_X:
             o.typeid = BoundTo.BOUND_TIME_X;
+            var bx: BoundToTimeX = b as BoundToTimeX;
+            o.typename = "BoundToTimeX";
+            o.lastTime = bx.getLastTime();
+            o.singleLatestTime = bx.isSingleLatestTime();
+            o.chooseTime = bx.isChooseTime();
+            o.start = bx.getStartDate().getTime();
+            o.end = bx.getEndDate().getTime();
             break;
         case BoundTo.BOUND_TIME_Y:
             o.typeid = BoundTo.BOUND_TIME_Y
-    x        break;
+            var by: BoundToTimeY = b as BoundToTimeY;
+            o.typename = "BoundToTimeY";
+            o.lastTime = by.getLastTime();
+            o.singleLatestTime = by.isSingleLatestTime();
+            o.chooseTime = by.isChooseTime();
+            o.start = by.getStartDate().getTime();
+            o.end = by.getEndDate().getTime();
+            break;
         case BoundTo.BOUND_DISCRETE_LIST:
             o.typeid = BoundTo.BOUND_DISCRETE_LIST;
             break;
@@ -1088,38 +1126,48 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
     var b = null;
     if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
         b = new BoundToDropdown(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_DISCRETE_DROPDOWN;
         b.setFlat(o['flat']);
         b.setClientSide(o['clientSide']);
         b.setPercentOfId(o['perCentOfId']);
     }
     else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_X) {
         b = new BoundToContinuousX(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_CONTINUOUS_X;
     }
     else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_Y) {
         b = new BoundToContinuousY(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_CONTINUOUS_Y;
     }
     else if (o['typeid'] == BoundTo.BOUND_TIME_X) {
         b = new BoundToTimeX(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_TIME_X;
+        b.setLastTime(o['lastTime']);
+        b.setSingleLatestTime(o['singleLatestTime']);
+        b.setChooseTime(o['chooseTime']);
+        var start = new Date();
+        start.setTime(o['start']);
+        var end = new Date();
+        end.setTime(o['end']);
+        b.setStartDate(start);
+        b.setEndDate(end);
     }
     else if (o['typeid'] == BoundTo.BOUND_TIME_Y) {
         b = new BoundToTimeY(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_TIME_Y;
+        b.setLastTime(o['lastTime']);
+        b.setSingleLatestTime(o['singleLatestTime']);
+        b.setChooseTime(o['chooseTime']);
+        var start = new Date();
+        start.setTime(o['start']);
+        var end = new Date();
+        end.setTime(o['end']);
+        b.setStartDate(start);
+        b.setEndDate(end);
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_LIST) {
         b = new BoundToList(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_DISCRETE_LIST;
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_SERIES) {
         b = new BoundToSeries(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_DISCRETE_SERIES;
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_SLIDER) {
         b = new BoundToSlider(v, o['concept']);
-        b.boundTo = BoundTo.BOUND_DISCRETE_SLIDER;
     }
     console.log("Returning");
     console.log(b);

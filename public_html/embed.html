@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="react-toolbox/theme.css">
+        <link rel="stylesheet" type="text/css" href="css/chartist.css">
+    </head>
+    <body>
+        <div id="render"></div><br/>
+        <script src="js/sdmx.js"></script>
+        <script>
+            window.onload = function () {
+              sdmx.embed({"dataservice":"ABS", "dataflowAgency":"ABS", "dataflowId":"ABS_OAD_COUNTRY", "dataflowVersion":"1.0", "dataflowName":"Visitor arrivals and resident returns by country", "dataflowNameLang":"en", "structureAgency":"ABS", "structureId":"ABS_OAD_COUNTRY", "structureVersion":"1.0", "dimensions":{"CAT_TRAVELLER":{"concept":"CAT_TRAVELLER", "typeid":14}, "COUNTRY":{"concept":"COUNTRY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "TSEST":{"concept":"TSEST", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "FREQUENCY":{"concept":"FREQUENCY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}}, "time":{"concept":"TIME", "typeid":18, "typename":"BoundToTimeX", "lastTime":0, "singleLatestTime":false, "chooseTime":true, "start":957458376155, "end":1462379976155}, "values":{"OBS_VALUE":{"concept":"OBS_VALUE", "typeid":2}}, "adapter":{"typeid":1001, "name":"RechartsSeriesSparkline"}});
+            };
+        </script>
+    </body>
+</html>
