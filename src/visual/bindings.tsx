@@ -8,7 +8,43 @@ import * as colors from 'colors-ts';
 import * as collections from 'typescript-collections';
 import Checkbox from 'preact-material-components/Checkbox';
 import Select from 'preact-material-components/Select';
-console.log('14');
+
+var makeRequest = function (opts): Promise<string> {
+    return new Promise<string>(function (resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(opts.method, opts.url);
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.response);
+            } else {
+                reject({
+                    status: xhr.status,
+                    statusText: xhr.statusText
+                });
+            }
+        };
+        xhr.onerror = function () {
+            reject({
+                status: xhr.status,
+                statusText: xhr.statusText
+            });
+        };
+        if (opts.headers) {
+            Object.keys(opts.headers).forEach(function (key) {
+                xhr.setRequestHeader(key, opts.headers[key]);
+            });
+        }
+        var params = opts.params;
+        // We'll need to stringify if we've been given an object
+        // If we have a string, this is skipped.
+        if (params && typeof params === 'object') {
+            params = Object.keys(params).map(function (key) {
+                return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+            }).join('&');
+        }
+        xhr.send(params);
+    });
+}
 export class BoundTo {
 
     static NOT_BOUND: number = -1;
@@ -16,7 +52,7 @@ export class BoundTo {
     static BOUND_DISCRETE_X: number = 1;
     static BOUND_CONTINUOUS_Y: number = 2;
     static BOUND_DISCRETE_Y: number = 3;
-    static BOUND_AREA: number = 4;
+    static BOUND_DISCRETE_AREA: number = 4;
     static BOUND_CONTINUOUS_COLOUR: number = 5;
     static BOUND_DISCRETE_COLOUR: number = 6;
     static BOUND_CONTINUOUS_SIZE: number = 7;
@@ -518,12 +554,12 @@ export class BoundToTime extends BoundTo {
         super.getVisual().getQuery().setStartDate(d);
         super.getVisual().setRequery(true);
         super.getVisual().setDirty(true);
-        }
+    }
     public setEndDate(d: Date) {
         super.getVisual().getQuery().setEndDate(d);
         super.getVisual().setRequery(true);
         super.getVisual().setDirty(true);
-        }
+    }
     public isChooseTime(): boolean {return this.chooseTime;}
     public setChooseTime(b: boolean) {this.chooseTime = b;}
     public setLastTime(n: number) {this.lastTime = n;}
@@ -531,7 +567,7 @@ export class BoundToTime extends BoundTo {
     public init() {
         if (this.lastTime != 0) {
             super.getVisual().getQuery().setEndDate(new Date());
-            super.getVisual().getQuery().setStartDate(new Date(new Date().getTime()-this.lastTime));
+            super.getVisual().getQuery().setStartDate(new Date(new Date().getTime() - this.lastTime));
         }
     }
 }
@@ -624,6 +660,13 @@ export class BoundToContinuousY extends BoundToContinuous {
     }
 }
 export class BoundToContinuousColour extends BoundToContinuous {
+    private minR: number = 255;
+    private minG: number = 255;
+    private minB: number = 255;
+    private maxR: number = 0;
+    private maxG: number = 0;
+    private maxB: number = 0;
+
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
     }
@@ -633,6 +676,20 @@ export class BoundToContinuousColour extends BoundToContinuous {
     public getBoundToString() {
         return "BoundToContinuousColour";
     }
+    public getMinRed() {return this.minR;}
+    public getMinGreen() {return this.minG;}
+    public getMinBlue() {return this.minB;}
+    public setMinRef(i: number) {this.minR = i;}
+    public setMinGreen(i: number) {this.minG = i;}
+    public setMinBlue(i: number) {this.minB = i;}
+    public getMaxRed() {return this.maxR;}
+    public getMaxGreen() {return this.maxG;}
+    public getMaxBlue() {return this.maxB;}
+    public setMaxRef(i: number) {this.maxR = i;}
+    public setMaxGreen(i: number) {this.maxG = i;}
+    public setMaxBlue(i: number) {this.maxB = i;}
+    public getMinColour(): string {return "rgb(" + this.minR + "," + this.minG + "," + this.minB + ")";}
+    public getMaxColour(): string {return "rgb(" + this.maxR + "," + this.maxG + "," + this.maxB + ")";}
 }
 export class BoundToList extends BoundToDiscrete {
     constructor(visual: visual.Visual, concept: string) {
@@ -849,7 +906,64 @@ export class BoundToLevelMenu extends BoundToDiscrete {
     }
 
 }
-export class BoundToTimeDropdown extends BoundToDiscrete {
+export class BoundToArea extends BoundToDiscrete {
+    private flat: boolean = true;
+    private level: number = 0;
+    private density: boolean = true;
+    private lat: number = 131.0361;
+    private lon: number = -35.345;
+    private zoom: number = 2;
+    private ignoreTotal: boolean = true;
+    private title: string = "ASGS2011";
+    private geoJSON: string = "asgs2011.geojson";
+    private matchField: string = "ID";
+    private area: string = "AREA";
+    private geoJSONObject:object = null;
+    
+    constructor(visual: visual.Visual, concept: string) {
+        super(visual, concept);
+        super.setQueryAll(true);
+        super.setWalkAll(true);
+
+    }
+    public isDensity() {return this.density;}
+    public setDensity(b: boolean) {this.density = b;}
+    public getBoundTo() {return BoundTo.BOUND_DISCRETE_AREA;}
+    public isFlat(): boolean {return this.flat;}
+    public setFlat(b: boolean) {this.flat = b;}
+    public getLevel() {return this.level;}
+    public setLevel(i: number) {this.level = i;}
+    public getLatitude(): number {return this.lat;}
+    public setLatitude(l: number) {this.lat = l;}
+    public getLongitude(): number {return this.lon;}
+    public setLongitude(l:number) {this.lon=l;}
+    public getZoom(): number {return this.zoom;}
+    public setZoom(i: number) {this.zoom = i;}
+    public getIgnoreTotal(): boolean {return this.ignoreTotal;}
+    public setIgnoreTotal(b: boolean) {this.ignoreTotal = b;}
+    public getTitle(): string {return this.title;}
+    public setTitle(s: string) {this.title = s;}
+    public getGeoJSON(): string {return this.geoJSON;}
+    public setGeoJSON(s: string) {this.geoJSON = s;
+        this.geoJSONObject = makeRequest({url: this.geoJSON}).then(function(gj){
+            this.geoJSONObject = JSON.parse(gj);
+            }.bind(this));
+        }
+    public getGeoJSONObject():object {return this.geoJSONObject; }
+    public getMatchField(): string {
+        return this.matchField;
+    }
+    public setMatchField(s: string) {
+        this.matchField = s;
+    }
+    public getAreaField(): string {
+        return this.area;
+    }
+    public setAreaField(s: string) {
+        this.area = s;
+    }
+}
+export class BoundToTimeDropdown extends BoundToTime {
     public flat: boolean = true;
     public perCentId: string = null;
     constructor(visual: visual.Visual, concept: string) {
@@ -1071,6 +1185,7 @@ export class DropdownBindingCustomiser extends React.Component {
 
 }*/
 export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
+    console.log("Save:" + b.getBoundTo() + " Concept:" + b.getConcept());
     var o: any = {};
     o.concept = b.getConcept();
     switch (b.getBoundTo()) {
@@ -1081,6 +1196,23 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             o.clientSide = b.isClientSide();
             o.flat = b.isFlat();
             o.perCentOfId = b.getPercentOfId();
+            break;
+        case BoundTo.BOUND_DISCRETE_AREA:
+            o.typeid = BoundTo.BOUND_DISCRETE_AREA;
+            var ba = b as BoundToArea;
+            o.concept = b.getConcept();
+            o.typename = "BoundToArea";
+            o.flat = b.isFlat();
+            o.level = ba.getLevel();
+            o.density = ba.isDensity();
+            o.lat = ba.getLatitude();
+            o.lon = ba.getLongitude();
+            o.zoom = ba.getZoom();
+            o.ignoreTotal = ba.getIgnoreTotal();
+            o.title = ba.getTitle();
+            o.geoJSON = ba.getGeoJSON();
+            o.matchField = ba.getMatchField();
+            o.area = ba.getAreaField();
             break;
         case BoundTo.BOUND_CONTINUOUS_X:
             o.typeid = BoundTo.BOUND_CONTINUOUS_X;
@@ -1099,9 +1231,19 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             o.end = bx.getEndDate().getTime();
             break;
         case BoundTo.BOUND_TIME_Y:
-            o.typeid = BoundTo.BOUND_TIME_Y
+            o.typeid = BoundTo.BOUND_TIME_Y;
             var by: BoundToTimeY = b as BoundToTimeY;
             o.typename = "BoundToTimeY";
+            o.lastTime = by.getLastTime();
+            o.singleLatestTime = by.isSingleLatestTime();
+            o.chooseTime = by.isChooseTime();
+            o.start = by.getStartDate().getTime();
+            o.end = by.getEndDate().getTime();
+            break;
+        case BoundTo.BOUND_TIME_DROPDOWN:
+            o.typeid = BoundTo.BOUND_TIME_DROPDOWN;
+            var by: BoundToTimeY = b as BoundToTimeY;
+            o.typename = "BoundToTimeDropDown";
             o.lastTime = by.getLastTime();
             o.singleLatestTime = by.isSingleLatestTime();
             o.chooseTime = by.isChooseTime();
@@ -1121,10 +1263,25 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
     return o;
 }
 export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundTo {
-    //console.log("Default Parse Objet:");
-    //console.log(o);
+    console.log("Default Parse Objet:");
+    console.log(o);
     var b = null;
-    if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
+    if (o['typeid'] == BoundTo.BOUND_DISCRETE_AREA) {
+        var ba = new BoundToArea(v,o['concept']);
+        ba.setFlat(o['flat']);
+        ba.setLevel(o['level']);
+        ba.setDensity(o['density']);
+        ba.setLatitude(o['lat']);
+        ba.setLongitude(o['lon']);
+        ba.setZoom(o['zoom']);
+        ba.setTitle(o['ignoreTotal']);
+        ba.setTitle(o['title']);
+        ba.setGeoJSON(o['geoJSON']);
+        ba.setMatchField(o['matchField']);
+        ba.setAreaField(o['area']);
+        b=ba;
+    }
+    else if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
         b = new BoundToDropdown(v, o['concept']);
         b.setFlat(o['flat']);
         b.setClientSide(o['clientSide']);
@@ -1150,6 +1307,18 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
     }
     else if (o['typeid'] == BoundTo.BOUND_TIME_Y) {
         b = new BoundToTimeY(v, o['concept']);
+        b.setLastTime(o['lastTime']);
+        b.setSingleLatestTime(o['singleLatestTime']);
+        b.setChooseTime(o['chooseTime']);
+        var start = new Date();
+        start.setTime(o['start']);
+        var end = new Date();
+        end.setTime(o['end']);
+        b.setStartDate(start);
+        b.setEndDate(end);
+    }
+    else if (o['typeid'] == BoundTo.BOUND_TIME_DROPDOWN) {
+        b = new BoundToTimeDropdown(v, o['concept']);
         b.setLastTime(o['lastTime']);
         b.setSingleLatestTime(o['singleLatestTime']);
         b.setChooseTime(o['chooseTime']);
@@ -1203,6 +1372,8 @@ var be4: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SERIES, "Series"
 var be5: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE, "Single Value", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToSingleValue);
 var be6: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_ALL, "All Values", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToAllValues);
 var be7: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_X, "Time X", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeX);
+var be20: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_AREA, "Area", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToArea);
+
 
 var be8: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_Y, "Time Y", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeY);
 var be9: BindingEntry = new BindingEntry(BoundTo.BOUND_TIME_DROPDOWN, "Dropdown", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToTimeDropdown);
@@ -1215,6 +1386,7 @@ var be15: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_SINGLE_MENU, "S
 var be16: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_MULTI_MENU, "Multi Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToMultiMenu);
 var be17: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_LEVEL_MENU, "Level Menu", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToLevelMenu);
 var be18: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_CROSS_MULTIPLE, "Cross Sectional - Multiple", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToCrossMultiple);
+var be19: BindingEntry = new BindingEntry(BoundTo.BOUND_DISCRETE_AREA, "Area", defaultParseObjectToBinding, defaultSaveBindingToObject, BoundToArea);
 
 
 
@@ -1227,6 +1399,8 @@ DimensionBindingRegister.registerState(be6);
 DimensionBindingRegister.registerState(be15);
 DimensionBindingRegister.registerState(be16);
 DimensionBindingRegister.registerState(be17);
+DimensionBindingRegister.registerState(be19);
+DimensionBindingRegister.registerState(be20);
 console.log("Binding Entry");
 console.log(be7);
 TimeBindingRegister.registerState(be7);
@@ -1248,5 +1422,6 @@ CrossSectionBindingRegister.registerState(be2);
 CrossSectionBindingRegister.registerState(be4);
 CrossSectionBindingRegister.registerState(be5);
 CrossSectionBindingRegister.registerState(be18);
+
 
 

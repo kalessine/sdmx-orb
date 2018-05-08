@@ -305,6 +305,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
         s += "</GetCompactData>";
         s += "</soap12:Body>";
         s += "</soap12:Envelope>";
+        //console.log(s);
         return s;
     }
 }

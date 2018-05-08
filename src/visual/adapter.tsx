@@ -14,11 +14,13 @@ import Controls from './controls';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 import Button from 'preact-material-components/Button';
 import Menu from 'preact-material-components/Menu';
+import * as model from './model';
 import 'preact-material-components/List/style.css';
 import 'preact-material-components/Menu/style.css';
 import 'preact-material-components/Button/style.css';
 import FilterDialog from './SingleItemFilterDialog';
-
+import {Map, Marker, Popup, TileLayer,GeoJSON } from "react-leaflet";
+import * as Promise from 'bluebird';
 export interface Model {
     render(s: string);
     unrender(s: string);
@@ -37,14 +39,14 @@ export class MultiMenuPage extends React.Component {
         this.props = props;
         this.state = state;
     }
-    onClick(e,item:structure.ItemType){
-        this.state.boundto.setCurrentValue(item);this.props.visual.renderVisual();super.forceUpdate();
+    onClick(e, item: structure.ItemType) {
+        this.state.boundto.setCurrentValue(item); this.props.visual.renderVisual(); super.forceUpdate();
     }
     getItems(itemscheme: structure.ItemSchemeType, boundto: bindings.BoundTo) {
         var result = [];
         var items = itemscheme.getItems();
         for (var i = 0; i < items.length; i++) {
-            result.push(<Menu.Item onclick={(e)=>{this.onClick(e,items[i])}}>{structure.NameableType.toString(items[i])}</Menu.Item>);
+            result.push(<Menu.Item onclick={(e) => {this.onClick(e, items[i])}}>{structure.NameableType.toString(items[i])}</Menu.Item>);
         }
         return (result);
     }
@@ -54,7 +56,7 @@ export class MultiMenuPage extends React.Component {
         var id: number = this.props.id;
         var boundto: bindings.BoundTo = visual.getMenu(id);
         if (boundto == null) return [];
-        this.state.boundto=boundto;
+        this.state.boundto = boundto;
         var itemScheme = boundto.getCodelist();
         var items = itemScheme.findSubItemsString(null);
         return (
@@ -71,7 +73,7 @@ export class MultiMenuPage extends React.Component {
                         ref={menu => {
                             this.menu = menu;
                         }}
-                    >{this.getItems(itemScheme,boundto)}
+                    >{this.getItems(itemScheme, boundto)}
                     </Menu>
                 </Menu.Anchor>
             </div>
@@ -225,7 +227,14 @@ export class VisualComponent extends React.Component {
     }
     public props = {};
     public state = {};
-    '
+
+    public componentDidMount() {
+        if (typeof this.mymodel.getReact === "function") {
+            this.mymodel.render(this.getVisualComponentId());
+        }
+    }
+
+
     constructor(props, state) {
         super(props, state);
         this.props = props;
@@ -250,13 +259,28 @@ export class VisualComponent extends React.Component {
                 menus.push(<LevelMenuPage visual={this.visual} id={i} />);
             }
         }
-        return (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
-            <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
-            <div id={this.selector + "-menu"} style="display: table-row;">{menus}</div>
-            <div id={this.selector + "-visual"} style="display: table-cell; vertical-align: middle;">{this.mymodel.getReact()}</div>
-            <div id={this.selector + "-right"} style="display: table-cell; vertical-align: top; width: 33%;border: 1px dotted black;"><Controls visual={this.visual} /></div>
-            <div id={this.selector + "-bottom"} style="display: table-row;"></div>
-        </div>);
+        if (typeof this.mymodel.getReact === "function") {
+            return (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
+                <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
+                <div id={this.selector + "-menu"} style="display: table-row;">{menus}</div>
+                <div id={this.selector + "-visual"} style="display: table-cell; vertical-align: middle;">{this.mymodel.getReact()}</div>
+                <div id={this.selector + "-right"} style="display: table-cell; vertical-align: top; width: 33%;border: 1px dotted black;"><Controls visual={this.visual} /></div>
+                <div id={this.selector + "-bottom"} style="display: table-row;"></div>
+            </div>);
+        }
+        else {
+            var html = (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
+                <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
+                <div id={this.selector + "-menu"} style="display: table-row;">{menus}</div>
+                <div id={this.selector + "-visual"} style="display: table-cell; vertical-align: middle;"></div>
+                <div id={this.selector + "-right"} style="display: table-cell; vertical-align: top; width: 33%;border: 1px dotted black;"><Controls visual={this.visual} /></div>
+                <div id={this.selector + "-bottom"} style="display: table-row;"></div>
+            </div>);
+            setTimeout(function () {
+                this.mymodel.render(this.getVisualComponentId());
+            }.bind(this), 100);
+            return html;
+        }
 
     }
     public getVisualComponentId() {
@@ -267,14 +291,199 @@ export class VisualComponent extends React.Component {
 
 
 export interface Adapter {
-    getId():number
+    getId(): number
     getName(): string;
     canCreateModelFromVisual(v: visual.Visual): boolean;
     createModel(v: visual.Visual, cube: sdmxdata.Cube): Model;
     setSingleValues(key: sdmxdata.PartialKey): void;
     addSingleDataPoint(key: sdmxdata.PartialKey): void;
-    addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void;
+    addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary<string, string>): void;
 }
+export class LeafletMapAdapter {
+    private visual: visual.Visual = null;
+    private model: MapModel = new MapModel();
+    getId(): number {return 1002;}
+    getName(): string {return "Leaflet Map";}
+    canCreateModelFromVisual(v: visual.Visual): boolean {
+        this.visual = v;
+        var multiBinds: number = 0;
+        var singleBinds: number = 0;
+        var colour: number = 0;
+        var time: number = 0;
+        var area: number = 0;
+        for (var i: number = 0; i < v.getBindings().length; i++) {
+            var b: bindings.BoundTo = v.getBinding(i);
+            var discrete: bindings.BoundToDiscrete = b as bindings.BoundToDiscrete;
+            if (discrete.expectValues() == 1) {
+                singleBinds++;
+            } else if (b.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_AREA) {
+                multiBinds++;
+                area++;
+            } else {
+                multiBinds++;
+            }
+        }
+        if (v.getValues()[0].getBoundTo() == bindings.BoundTo.BOUND_CONTINUOUS_COLOUR) {
+            colour = 1;
+        }
+        if (v.getTime().getBoundTo() == bindings.BoundTo.BOUND_TIME_DROPDOWN) {
+            time = 1;
+        }
+
+        //System.out.println("ContinuousBinds=" + continuousBinds);
+        //System.out.println("Series=" + series);
+        return multiBinds == 1 && area == 1 && colour == 1 && time == 1;
+    }
+    createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
+        var area: bindings.BoundToArea = visual.getArea();
+        this.model = new MapModel();
+        this.model.setGeoJSON(area.getGeoJSON());
+        this.model.setGeoJSONObject(area.getGeoJSONObject());
+        this.model.setVisual(visual);
+        this.visual = visual;
+        if (cube.then != null) {
+            return cube.then(function (cube2) {
+                var cu: CubeWalkUtils = new CubeWalkUtils();
+                cu.visitRoot(cube2, visual, this);
+                return this.model;
+            }.bind(this));
+        } else {
+            var cu: CubeWalkUtils = new CubeWalkUtils();
+            cu.visitRoot(cube, visual, this);
+            return this.model;
+        }
+    }
+    setSingleValues(key: sdmxdata.PartialKey): void {}
+    addSingleDataPoint(key: sdmxdata.PartialKey): void {
+        var btarea: bindings.BoundToDiscreteArea = this.visual.getArea();
+        var area: structure.ItemType = key.getComponent(btarea.getConcept());
+        var id: string = structure.NameableType.toIDString(area);
+        var value = this.visual.getPrimaryMeasure().getConcept();
+        var vl = key.getComponent(value);
+        //var desc = AdapterTools.toDescription(bindings, singleValues, key);
+        this.model.addDataPoint(id, structure.NameableType.toString(area), vl, null);
+    }
+    addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void {
+
+    }
+}
+export class MapModel extends model.Model {
+    private visual: visual.Visual = null;
+    // Area
+    private flat: boolean = true;
+    private level: number = 0;
+    private density: boolean = true;
+    private lat: number = 131.0361;
+    private lon: number = -35.345;
+    private zoom: number = 2;
+    private ignoreTotal: boolean = true;
+    private title: string = "ASGS2011";
+    private geoJSON: string = "http://www.notionworks.com.au/sdmxsax-faces/asgs2011.geojson";
+    private geoJSONObject: object = null;
+    private matchField: string = "ID";
+    private area: string = "AREA";
+
+    //Color
+    private zeroOrigin: boolean = false;
+    private maxColor = "";
+    private minColor = "";
+
+    // Data
+    private ids = new Array();
+    private values = new Array();
+    private names = new Array();
+    private descs = new Array();
+
+    // Meta
+    private min: number = null;
+    private max: number = null;
+
+    constructor() {
+        super();
+    }
+
+    public setVisual(v: visual.Visual) {
+        this.visual = v;
+    }
+
+    public isDensity(): boolean {return this.density;}
+    public setDensity(b: boolean) {this.density = b;}
+    public isFlat(): boolean {return this.flat;}
+    public setFlat(b: boolean) {this.flat = b;}
+    public getLevel() {return this.level;}
+    public setLevel(i: number) {this.level = i;}
+    public getLatitude(): number {return this.lat;}
+    public setLatitude(l: number) {this.lat = l;}
+    public getLongitude(): number {return this.lon;}
+    public getZoom(): number {return this.zoom;}
+    public setZoom(i: number) {this.zoom = i;}
+    public getIgnoreTotal(): boolean {return this.ignoreTotal;}
+    public setIgnoreTotal(b: boolean) {this.ignoreTotal = b;}
+    public getTitle(): string {return this.title;}
+    public setTitle(s: string) {this.title = s;}
+    public getGeoJSON(): string {return this.geoJSON;}
+    public setGeoJSON(s: string) {this.geoJSON = s;}
+    public getGeoJSONObject() {return this.geoJSONObject; }
+    public setGeoJSONObject(gj: object) {this.geoJSONObject=gj; }
+    public getMatchField(): string {
+        return this.matchField;
+    }
+    public setMatchField(s: string) {
+        this.matchField = s;
+    }
+    public getAreaField(): string {
+        return this.area;
+    }
+    public setAreaField(s: string) {
+        this.area = s;
+    }
+    public setZeroOrigin(b: boolean) {
+        this.zeroOrigin = b;
+    }
+    public setMaxColour(s: string) {
+        this.maxColor = s;
+    }
+    public setMinColor(s: string) {
+        this.minColor = s;
+    }
+    public addDataPoint(id: string, name: string, value: number, desc: string) {
+        if (this.ignoreTotal) {
+            if (id.toLowerCase().indexOf("total") != -1) return;
+            if (name.toLowerCase().indexOf("total") != -1) return;
+        }
+        this.ids.push(id);
+        this.names.push(name);
+        this.values.push(value);
+        this.descs.push(desc);
+        if (this.min == null || value < this.min) {
+            this.min = value;
+        }
+        if (this.max == null || value > this.max) {
+            this.max = value;
+        }
+    }
+    render(id: string) {
+    }
+    unrender(s: string) {
+
+    }
+    public styleFunc(feature) {
+        console.log(feature);
+        return "#00ff00";
+    }
+    public getReact() {
+        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style={{height: "300px"}}>
+            <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+            <GeoJSON data:{this.geoJSONObject} style={this.styleFunc} />
+            <Marker position={[this.lat, this.lon]}>
+                <Popup>
+                    <span> Here </span>
+                </Popup>
+            </Marker>
+        </Map>);
+    }
+}
+
 export class RechartsSparklineAdapter implements Adapter {
     private id = 1000;
     private singleValues: sdmxdata.PartialKey = null;
@@ -286,7 +495,7 @@ export class RechartsSparklineAdapter implements Adapter {
     private model = new RechartsSparklineModel();
     constructor() {
     }
-    public getId() { return this.id; }
+    public getId() {return this.id;}
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
         this.model = new RechartsSparklineModel();
@@ -481,7 +690,7 @@ export class RechartsSparklineModel implements ReactModel {
 }
 
 export class RechartsSeriesSparklineAdapter implements Adapter {
-    private id:number = 1001;
+    private id: number = 1001;
     private singleValues: sdmxdata.PartialKey = null;
     private visual: visual.Visual = null;
     private min: number = null;
@@ -491,7 +700,7 @@ export class RechartsSeriesSparklineAdapter implements Adapter {
     private model = new RechartsSeriesSparklineModel();
     constructor() {
     }
-    public getId() { return this.id; }
+    public getId() {return this.id;}
     public createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         this.visual = visual;
         this.model = new RechartsSeriesSparklineModel();
@@ -713,6 +922,9 @@ export class RechartsSeriesSparklineModel implements ReactModel {
 
     }
 }
+
+
+
 /*
 
  export class SeriesSparklineAdapter implements Adapter {
@@ -731,7 +943,7 @@ export class CubeWalkUtils {
         //console.log("visitRoot");
         // Comment this our for weird shit to happen
         this.clearedPossibles = new collections.Dictionary<string, boolean>();
-        for (var i: number = 0; i < visual.getBindings().length; i++) {
+        for (var i: number = 0; i < visual.dimSize(); i++) {
             this.clearedPossibles.setValue(visual.getBinding(i).getConcept(), false);
         }
         if (visual.getTime() != null) {
@@ -851,8 +1063,8 @@ export class CubeWalkUtils {
                         latest = inner as sdmxdata.TimeCubeDimension;
                         latestTime = sdmxtime.TimeUtil.parseTime(freq, structure.NameableType.toIDString(inner.getValue()));
                     }
-                    var timePeriod: sdmxtime.RegularTimePeriod = sdmxtime.TimeUtil.parseTime(structure.NameableType.toIDString(inner.getValue());
-                    if (timePeriod.getStart().after(latestTime.getStart())) {
+                    var timePeriod: sdmxtime.RegularTimePeriod = sdmxtime.TimeUtil.parseTime(structure.NameableType.toIDString(inner.getValue()), "");
+                    if (timePeriod.getStart().getTime() > latestTime.getStart().getTime()) {
                         latestTime = timePeriod;
                         latest = inner as sdmxdata.TimeCubeDimension;
                     }
@@ -885,8 +1097,8 @@ export class CubeWalkUtils {
             } else {
                 multiples.setComponent(concept, itm);
             }
-        }else{
-           
+        } else {
+
         }
         bd.getPossibleValues().push(itm);
         if (visual.getValues().length > 1) {
@@ -925,7 +1137,7 @@ export class CubeWalkUtils {
             var itm: object = this.getComponent(visual, crossSection.getConcept(), dim.getCrossSection());
             crossSection.getPossibleValues().push(itm as structure.ItemType);
             multiples.setComponent(dim.getConcept(), itm);
-            }
+        }
         multiples.clearAttributes();
         var concept: string = dim.getObservationConcept();
         multiples.setComponent(concept, dim.getValue());
@@ -958,16 +1170,16 @@ export class CubeWalkUtils {
                     //console.log("Obs is null");
                     return;
                 } else {
-                //console.log(obs);
-                // concept should be OBS_VALUE
-                var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue(concept));
+                    //console.log(obs);
+                    // concept should be OBS_VALUE
+                    var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue(concept));
                     percent *= 100;
                     // Override OBS_VALUE
                     multiples.setComponent(concept, percent.toString());
                     //console.log("Percent="+percent);
                 }
-            }else{
-            // This Point is the PercentOf Point, do nothing
+            } else {
+                // This Point is the PercentOf Point, do nothing
                 return;
             }
         }
@@ -999,24 +1211,26 @@ export class CubeWalkUtils {
 export var adapters: Array<Adapter> = [];
 this.adapters.push(new RechartsSparklineAdapter());
 this.adapters.push(new RechartsSeriesSparklineAdapter());
+this.adapters.push(new LeafletMapAdapter());
 export class AdapterRegistrySingleton {
-    
-    static parseObjectFromJSON(b:Adapter) {
-        
+
+    static parseObjectFromJSON(b: Adapter) {
+
     }
     static getList() {return adapters;}
-    static saveObjectToJSON(o:object){
-        
+    static saveObjectToJSON(o: object) {
+
     }
 }
-export function adapter2Object(ad:Adapter) {
-    if(ad==null ) return {};
-    return { typeid: ad.getId(), name: ad.getName()};
+export function adapter2Object(ad: Adapter) {
+    if (ad == null) return {};
+    return {typeid: ad.getId(), name: ad.getName()};
 }
-export function object2Adapter(o:any):Adapter {
-    if(o==null ) return null;
-    switch(o.typeid) {
+export function object2Adapter(o: any): Adapter {
+    if (o == null) return null;
+    switch (o.typeid) {
         case 1000: return new RechartsSparklineAdapter();
         case 1001: return new RechartsSeriesSparklineAdapter();
+        case 1002: return new LeafletMapAdapter();
     }
 }

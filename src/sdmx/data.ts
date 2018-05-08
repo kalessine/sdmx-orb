@@ -179,6 +179,8 @@ export class QueryKey {
             return;
             }
         }
+        if(s=='undefined')return;
+        if(s==null)return;
         this.values.push(s);
     }
     public removeValue(s: string) {

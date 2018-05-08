@@ -423,6 +423,12 @@ export class Visual {
         if (this.crossSection != null && this.crossSection.getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_SERIES) {return this.crossSection;}
         return null;
     }
+    public getArea(): bindings.BoundToArea {
+        for (var i: number = 0; i < this.bindings.length; i++) {
+            if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_AREA) {return this.bindings[i];}
+        }
+        return null;
+    }
     public getX(): bindings.BoundTo {
         for (var i: number = 0; i < this.bindings.length; i++) {
             if (this.bindings[i].getBoundTo() == bindings.BoundTo.BOUND_DISCRETE_X) {return this.bindings[i];}
@@ -575,7 +581,7 @@ export class Visual {
         }
         var cross: structure.MeasureDimension = struct.getDataStructureComponents().getDimensionList().getMeasureDimension();
         if (cross != null) {
-            var cb = this.findBinding(tdim.getConceptIdentity().getId().toString());
+            var cb = this.findBinding(cross.getConceptIdentity().getId().toString());
             var cbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(cb.getBoundTo());
             obj['cross'] = cbe.getSaveBindingToObject()(cb);
         }
