@@ -158,6 +158,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
     }
 
     public findDataStructure(ref: commonreferences.Reference): Promise<structure.DataStructure> {
+        console.log("findDataStructure");
         var dst: structure.DataStructure = this.local.findDataStructure(ref);
         if (dst != null) {
             var promise = new Promise<structure.DataStructure>(function (resolve, reject) {

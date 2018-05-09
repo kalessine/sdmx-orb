@@ -19,7 +19,7 @@ import 'preact-material-components/List/style.css';
 import 'preact-material-components/Menu/style.css';
 import 'preact-material-components/Button/style.css';
 import FilterDialog from './SingleItemFilterDialog';
-import {Map, Marker, Popup, TileLayer,GeoJSON } from "react-leaflet";
+import {Map, Marker, Popup, TileLayer, GeoJSON} from "react-leaflet";
 import * as Promise from 'bluebird';
 export interface Model {
     render(s: string);
@@ -212,7 +212,7 @@ export class ModelWrapper {
         this.visualComponent = React.render(<VisualComponent visual={this.visual} selector={s} model={this.mymodel} />, document.querySelector(s));
     }
     public unrender(s: string) {
-        if (s != null) {React.unmountComponentAtNode(document.querySelector(s));}
+        //if (s != null) {React.unmountComponentAtNode(document.querySelector(s));}
     }
 }
 
@@ -268,6 +268,7 @@ export class VisualComponent extends React.Component {
                 <div id={this.selector + "-bottom"} style="display: table-row;"></div>
             </div>);
         }
+        /*
         else {
             var html = (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
                 <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
@@ -280,7 +281,7 @@ export class VisualComponent extends React.Component {
                 this.mymodel.render(this.getVisualComponentId());
             }.bind(this), 100);
             return html;
-        }
+        }*/
 
     }
     public getVisualComponentId() {
@@ -339,6 +340,8 @@ export class LeafletMapAdapter {
         this.model = new MapModel();
         this.model.setGeoJSON(area.getGeoJSON());
         this.model.setGeoJSONObject(area.getGeoJSONObject());
+        this.model.setMatchField(area.getMatchField());
+        this.model.setAreaField(area.getAreaField());
         this.model.setVisual(visual);
         this.visual = visual;
         if (cube.then != null) {
@@ -423,8 +426,8 @@ export class MapModel extends model.Model {
     public setTitle(s: string) {this.title = s;}
     public getGeoJSON(): string {return this.geoJSON;}
     public setGeoJSON(s: string) {this.geoJSON = s;}
-    public getGeoJSONObject() {return this.geoJSONObject; }
-    public setGeoJSONObject(gj: object) {this.geoJSONObject=gj; }
+    public getGeoJSONObject() {return this.geoJSONObject;}
+    public setGeoJSONObject(gj: object) {this.geoJSONObject = gj;}
     public getMatchField(): string {
         return this.matchField;
     }
@@ -457,8 +460,10 @@ export class MapModel extends model.Model {
         this.descs.push(desc);
         if (this.min == null || value < this.min) {
             this.min = value;
+            this.visual.getValues()[0].setMin(this.min);
         }
         if (this.max == null || value > this.max) {
+            this.visual.getValues()[0].setMax(this.max);
             this.max = value;
         }
     }
@@ -468,13 +473,34 @@ export class MapModel extends model.Model {
 
     }
     public styleFunc(feature) {
-        console.log(feature);
-        return "#00ff00";
+        var id = feature.properties[this.matchField];
+        for (var i: number = 0; i < this.ids.length; i++) {
+            if (id == this.ids[i]) {
+                var value = this.values[i];
+                var desc = this.descs[i];
+                console.log(id);
+                console.log(this.visual);
+                var fc = this.visual.getValues()[0].getColor(parseFloat(value))
+                return {
+                    fillColor: fc,
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+        }
+        return {
+            weight: 0,
+            opacity: 0,
+            fillOpacity: 0.0
+        };
     }
     public getReact() {
         return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style={{height: "300px"}}>
             <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-            <GeoJSON data:{this.geoJSONObject} style={this.styleFunc} />
+            <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} />
             <Marker position={[this.lat, this.lon]}>
                 <Popup>
                     <span> Here </span>

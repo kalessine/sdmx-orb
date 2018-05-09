@@ -37,7 +37,9 @@ export class LocalRegistry implements interfaces.LocalRegistry {
         this.structures = [];
     }
     load(struct: message.StructureType): void {
+        if( struct!=null ) {
         this.structures.push(struct);
+        }
     }
     unload(struct: message.StructureType): void {
         collections.arrays.remove(this.structures, struct);

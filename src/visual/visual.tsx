@@ -585,11 +585,11 @@ export class Visual {
             var cbe: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(cb.getBoundTo());
             obj['cross'] = cbe.getSaveBindingToObject()(cb);
         }
-        obj['values'] = {};
+        obj['values'] = [];
         for (var i: number = 0; i < this.getValues().length; i++) {
             var b2 = this.getValues()[i];
             var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(b2.getBoundTo());
-            obj['values'][b2.getConcept()] = be.getSaveBindingToObject()(b2);
+            obj['values'][i] = be.getSaveBindingToObject()(b2);
         }
         obj['adapter'] = adapter.adapter2Object(this.adapterInstance);
         return obj;

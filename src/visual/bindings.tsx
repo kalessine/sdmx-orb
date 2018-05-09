@@ -667,6 +667,10 @@ export class BoundToContinuousColour extends BoundToContinuous {
     private maxG: number = 0;
     private maxB: number = 0;
 
+    private max: number = null;
+    private min: number = null;
+
+
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
     }
@@ -679,18 +683,33 @@ export class BoundToContinuousColour extends BoundToContinuous {
     public getMinRed() {return this.minR;}
     public getMinGreen() {return this.minG;}
     public getMinBlue() {return this.minB;}
-    public setMinRef(i: number) {this.minR = i;}
+    public setMinRed(i: number) {this.minR = i;}
     public setMinGreen(i: number) {this.minG = i;}
     public setMinBlue(i: number) {this.minB = i;}
     public getMaxRed() {return this.maxR;}
     public getMaxGreen() {return this.maxG;}
     public getMaxBlue() {return this.maxB;}
-    public setMaxRef(i: number) {this.maxR = i;}
+    public setMaxRed(i: number) {this.maxR = i;}
     public setMaxGreen(i: number) {this.maxG = i;}
     public setMaxBlue(i: number) {this.maxB = i;}
     public getMinColour(): string {return "rgb(" + this.minR + "," + this.minG + "," + this.minB + ")";}
     public getMaxColour(): string {return "rgb(" + this.maxR + "," + this.maxG + "," + this.maxB + ")";}
+    public getMin() {return this.min;}
+    public setMin(n: number) {this.min = n;}
+    public getMax() {return this.max;}
+    public setMax(n: number) {this.max = n;}
+    public getColor(n: number) {
+        if (super.getZeroOrigin()) {
+            this.min = 0;
+        }
+        var cval = (n - this.min) / (this.max - this.min);
+        var rd = this.getMaxRed() - this.getMinRed();
+        var gd = this.getMaxGreen() - this.getMinGreen();
+        var bd = this.getMaxBlue() - this.getMinBlue();
+        return 'rgba(' + parseInt(this.minR * (1 - cval)) + ', ' + parseInt(this.minG * (1 - cval)) + ', ' + parseInt(this.minB * (1 - cval)) + ', ' + 1.0 + ')';
+    }
 }
+
 export class BoundToList extends BoundToDiscrete {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
@@ -703,7 +722,9 @@ export class BoundToList extends BoundToDiscrete {
     public getBoundToString() {
         return "BoundToList";
     }
-}
+    public getColor(n: number) {
+
+    }
 export class BoundToTimeList extends BoundToTime {
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
@@ -918,13 +939,13 @@ export class BoundToArea extends BoundToDiscrete {
     private geoJSON: string = "asgs2011.geojson";
     private matchField: string = "ID";
     private area: string = "AREA";
-    private geoJSONObject:object = null;
-    
+    private geoJSONObject: object = null;
+
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);
         super.setQueryAll(true);
         super.setWalkAll(true);
-
+        super.setCurrentValues(super.getPossibleValues());
     }
     public isDensity() {return this.density;}
     public setDensity(b: boolean) {this.density = b;}
@@ -936,7 +957,7 @@ export class BoundToArea extends BoundToDiscrete {
     public getLatitude(): number {return this.lat;}
     public setLatitude(l: number) {this.lat = l;}
     public getLongitude(): number {return this.lon;}
-    public setLongitude(l:number) {this.lon=l;}
+    public setLongitude(l: number) {this.lon = l;}
     public getZoom(): number {return this.zoom;}
     public setZoom(i: number) {this.zoom = i;}
     public getIgnoreTotal(): boolean {return this.ignoreTotal;}
@@ -944,12 +965,14 @@ export class BoundToArea extends BoundToDiscrete {
     public getTitle(): string {return this.title;}
     public setTitle(s: string) {this.title = s;}
     public getGeoJSON(): string {return this.geoJSON;}
-    public setGeoJSON(s: string) {this.geoJSON = s;
-        this.geoJSONObject = makeRequest({url: this.geoJSON}).then(function(gj){
+    public setGeoJSON(s: string) {
+        this.geoJSON = s;
+        this.geoJSONObject = makeRequest({url: this.geoJSON, method: "GET"}).then(function (gj) {
+            console.log(gj);
             this.geoJSONObject = JSON.parse(gj);
-            }.bind(this));
-        }
-    public getGeoJSONObject():object {return this.geoJSONObject; }
+        }.bind(this));
+    }
+    public getGeoJSONObject(): object {return this.geoJSONObject;}
     public getMatchField(): string {
         return this.matchField;
     }
@@ -1214,6 +1237,19 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             o.matchField = ba.getMatchField();
             o.area = ba.getAreaField();
             break;
+        case BoundTo.BOUND_CONTINUOUS_COLOUR:
+            o.typeid = BoundTo.BOUND_CONTINUOUS_COLOUR;
+            o.typename = "BoundToContinuousColour";
+            var bc = b as BoundToContinuousColour;
+            o.zeroOrigin = bc.getZeroOrigin();
+            o.concept = bc.getConcept();
+            o.minR = bc.getMinRed();
+            o.minG = bc.getMinGreen();
+            o.minB = bc.getMinBlue();
+            o.maxR = bc.getMaxRed();
+            o.maxG = bc.getMaxGreen();
+            o.maxB = bc.getMaxBlue();
+            break;
         case BoundTo.BOUND_CONTINUOUS_X:
             o.typeid = BoundTo.BOUND_CONTINUOUS_X;
             break;
@@ -1267,7 +1303,7 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
     console.log(o);
     var b = null;
     if (o['typeid'] == BoundTo.BOUND_DISCRETE_AREA) {
-        var ba = new BoundToArea(v,o['concept']);
+        var ba = new BoundToArea(v, o['concept']);
         ba.setFlat(o['flat']);
         ba.setLevel(o['level']);
         ba.setDensity(o['density']);
@@ -1279,7 +1315,7 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
         ba.setGeoJSON(o['geoJSON']);
         ba.setMatchField(o['matchField']);
         ba.setAreaField(o['area']);
-        b=ba;
+        b = ba;
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
         b = new BoundToDropdown(v, o['concept']);
@@ -1292,6 +1328,16 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
     }
     else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_Y) {
         b = new BoundToContinuousY(v, o['concept']);
+    }
+    else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_COLOUR) {
+        b = new BoundToContinuousColour(v, o['concept']);
+        b.setZeroOrigin(o['zeroOrigin' == 'true'])
+        b.setMinRed(o.minR);
+        b.setMinGreen(o.minG);
+        b.setMinBlue(o.minB);
+        b.setMaxRed(o.maxR);
+        b.setMaxGreen(o.maxG);
+        b.setMaxBlue(o.maxB);
     }
     else if (o['typeid'] == BoundTo.BOUND_TIME_X) {
         b = new BoundToTimeX(v, o['concept']);

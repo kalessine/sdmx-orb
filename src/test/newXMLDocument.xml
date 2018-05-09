@@ -1,0 +1,43 @@
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+    <soap12:Body>
+        <GetCompactData xmlns="http://stats.oecd.org/OECDStatWS/SDMX/">
+            <QueryMessage>
+                <message:QueryMessage xmlns:message="http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message">
+                    <Header xmlns="http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message">
+                        <message:ID>none</message:ID>
+                        <message:Test>false</message:Test>
+                        <message:Prepared>2016-08-19T00:11:33+08:00</message:Prepared>
+                        <message:Sender id="Sdmx-Sax"/>
+                        <message:Receiver id="ABS"/>
+                    </Header>
+                    <message:Query>
+                        <DataWhere xmlns="http://www.SDMX.org/resources/SDMXML/schemas/v2_0/query">
+                            <And>
+                                <DataSet>ABS_CENSUS2011_B02</DataSet>
+                                <Time>
+                                    <StartTime>2000-05-09</StartTime>
+                                    <EndTime>2016-05-09</EndTime>
+                                </Time>
+                                <Or>
+                                    <Dimension id="STATE">5</Dimension>
+                                </Or>
+                                <Or>
+                                    <Dimension id="REGIONTYPE">SA3</Dimension>
+                                </Or>
+                                <Or>
+                                    <Dimension id="REGION">0</Dimension>
+                                </Or>
+                                <Or>
+                                    <Dimension id="FREQUENCY">A</Dimension>
+                                </Or>
+                                <Or>
+                                    <Dimension id="MEASURE">MAGE</Dimension>
+                                </Or>
+                            </And>
+                        </DataWhere>
+                    </message:Query>
+                </message:QueryMessage>
+            </QueryMessage>
+        </GetCompactData>
+    </soap12:Body>
+</soap12:Envelope>
