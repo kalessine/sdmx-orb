@@ -598,7 +598,7 @@ export class BoundToTimeY extends BoundToTime {
     public expectValues() {return 2;}
 }
 export class BoundToContinuous extends BoundTo {
-    private zeroOrigin = true;
+    private zeroOrigin = false;
     private sharedMaximum = true;
     constructor(visual: visual.Visual, concept: string) {
         super(visual, concept);

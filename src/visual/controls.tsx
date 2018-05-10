@@ -71,6 +71,14 @@ export default class Controls extends React.Component {
                 console.log(b);
             }
             }
+            if( visual.getCrossSection()!=null&&visual.getCrossSection().getBoundTo()==bindings.BoundTo.BOUND_DISCRETE_DROPDOWN){
+                var cnc = visual.getCrossSection().getConceptName();
+                var val = structure.NameableType.toString(visual.getCrossSection().getCurrentValue());
+                html.push(<div>{cnc}</div>);
+                var o = <select title={visual.getCrossSection().getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(visual.getCrossSection().getConcept(),val)}</select>
+                html.push(o);
+                html.push(<br/>);
+            }
             b = visual.getTime();
             if (b.getBoundTo()==bindings.BoundTo.BOUND_TIME_DROPDOWN||b.getBoundTo()==bindings.BoundTo.BOUND_TIME_X||b.getBoundTo()==bindings.BoundTo.BOUND_TIME_Y) {
                 var bt = b as bindings.BoundToTime;

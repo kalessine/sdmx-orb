@@ -371,6 +371,10 @@ export class LeafletMapAdapter {
     }
 }
 export class MapModel extends model.Model {
+    public state = {};
+    public props = {};
+
+
     private visual: visual.Visual = null;
     // Area
     private flat: boolean = true;
@@ -472,22 +476,39 @@ export class MapModel extends model.Model {
     unrender(s: string) {
 
     }
+    public click(event) {
+        console.log(event);
+        var map = event.target;
+        var clickBounds = event.latlng.toBounds(5);
+        console.log(clickBounds);
+        for (var key in map._layers) {
+            if (map._layers[key].feature) {
+                //console.log(map._layers[key].feature.properties.Name);
+                var feature = map._layers[key];
+                if (feature._bounds.intersects(clickBounds)) {
+                    for (var j: number = 0; j < this.ids.length; j++) {
+                        if (feature.feature.properties[this.matchField] == this.ids[j]) {
+                            this.state.position = event.latlng;
+                            this.state.description = this.descs[j];
+                            console.log(this.descs[j]);
+                            console.log(this.ids[j]);
+                            this.state.id = this.ids[j];
+                        }
+                    }
+                }
+            }
+        }
+    }
     public styleFunc(feature) {
         var id = feature.properties[this.matchField];
         for (var i: number = 0; i < this.ids.length; i++) {
             if (id == this.ids[i]) {
                 var value = this.values[i];
                 var desc = this.descs[i];
-                console.log(id);
-                console.log(this.visual);
                 var fc = this.visual.getValues()[0].getColor(parseFloat(value))
                 return {
                     fillColor: fc,
-                    weight: 2,
-                    opacity: 1,
-                    color: 'white',
-                    dashArray: '3',
-                    fillOpacity: 0.7
+                    fillOpacity: 1.0
                 };
             }
         }
@@ -498,12 +519,14 @@ export class MapModel extends model.Model {
         };
     }
     public getReact() {
-        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style={{height: "300px"}}>
+        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style={{height: "300px"}} onClick={(e) => {this.click(e)}}>
             <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
             <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} />
-            <Marker position={[this.lat, this.lon]}>
+            <Marker position={this.state.position == null ? [0, 0] : this.state.position}>
                 <Popup>
-                    <span> Here </span>
+                    <span>
+                        {this.state.id}:{this.state.description}
+                    </span>
                 </Popup>
             </Marker>
         </Map>);
