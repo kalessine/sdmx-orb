@@ -1,2 +1,7 @@
 console.log('16');
-export class Model {}
+export class Model {
+    public hasStatus():boolean{
+        return false;
+    }
+    
+}

@@ -51,6 +51,10 @@ export default class Controls extends React.Component {
     onFocusChange(){
         
     }
+    changeDensity(e){
+        this.props.visual.getArea().setDensity(e.target.checked);
+        this.props.visual.renderVisual();
+    }
     public render(props, state) {
         this.props = props;
         this.state = state;
@@ -89,6 +93,11 @@ export default class Controls extends React.Component {
                 html.push(<DatePicker onChange={(day) => this.onStartDateChange(day)} value={start} />);
                 html.push(<DatePicker onChange={(day) => this.onEndDateChange(day)} value={end} />);
                 html.push(<br/>);
+            }
+            b = visual.getArea();
+            if(b!=null) {
+                var ba = b as bindings.BoundToArea;
+                html.push(<input type="checkbox" value={ba.isDensity()} onChange={this.changeDensity.bind(this)}>Density</input>);
             }
         return (<div>{html}</div>);
     }

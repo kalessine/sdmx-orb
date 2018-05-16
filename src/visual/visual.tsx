@@ -8,9 +8,9 @@ import * as common from "../sdmx/common";
 import * as structure from "../sdmx/structure";
 import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "../visual/bindings";
-export var embed = function(v){
-  var vis = new Visual();
-  vis.parseVisualObject(v);
+export var embed = function (v) {
+    var vis = new Visual();
+    vis.parseVisualObject(v);
 }
 export class Visual {
 
@@ -32,7 +32,7 @@ export class Visual {
     // Derived from above fields   
     private df: structure.Dataflow = null;
 
-    private visualId: string = "#render";
+    private visualId: string = "render";
 
     private requery: boolean = true;
     private dirty: boolean = true;
@@ -202,7 +202,6 @@ export class Visual {
     public getQueryable(): interfaces.Queryable {
         if (this.queryable == null) {
             this.queryable = sdmx.SdmxIO.connect(this.dataservice);
-            this.queryable.getRemoteRegistry().findDataStructure(this.getDataflow().getStructure());
         }
         return this.queryable;
     }
@@ -595,21 +594,20 @@ export class Visual {
         return obj;
     }
     public parseVisualObject(obj) {
-        console.log(obj);
         this.setDataService(obj["dataservice"]);
         var ref = sdmx.SdmxIO.reference(obj["structureAgency"], obj["structureId"], obj["structureVersion"], null);
         var df: structure.Dataflow = new structure.Dataflow();
         df.setAgencyId(obj["dataflowAgency"]);
         df.setId(obj["dataflowId"]);
         df.setVersion(obj["dataflowVersion"]);
-        df.setNames([new common.Name(obj["dataflowNameLang"],obj["dataflowName"])]);
+        df.setNames([new common.Name(obj["dataflowNameLang"], obj["dataflowName"])]);
         df.setStructure(ref);
         this.setDataflow(df);
-        this.getQueryable().getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct: structure.DataStructure) {
+        var struct = this.getQueryable().getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct) {
             this.init();
             for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
                 var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
-                console.log("TypeId="+obj["dimensions"][dim.getId().toString()].typeid);
+                console.log("TypeId=" + obj["dimensions"][dim.getId().toString()].typeid);
                 var be: bindings.BindingEntry = bindings.BindingRegisterUtil.findBindingEntry(obj["dimensions"][dim.getId().toString()].typeid);
                 var b = be.getParseObjectToBinding()(obj["dimensions"][dim.getId().toString()], this);
                 this.setBinding(b);
@@ -665,7 +663,7 @@ export class Visual {
                 throw new Error("Unable to find Dimension:" + mdim.getId().toString());
             }
         }
-        if (this.getCrossSection()!=null&&this.getCrossSection().getBoundTo() == bindings.BoundTo.BOUND_MEASURES_INDIVIDUAL) {
+        if (this.getCrossSection() != null && this.getCrossSection().getBoundTo() == bindings.BoundTo.BOUND_MEASURES_INDIVIDUAL) {
             for (var i: number = 0; i < this.getCrossSection().getAllValues().length; i++) {
                 var m: structure.ItemType = this.getCrossSection().getAllValues()[i];
                 var b6: bindings.BoundTo = this.findBinding(m.getId().toString());

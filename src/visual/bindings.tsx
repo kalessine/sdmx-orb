@@ -702,11 +702,12 @@ export class BoundToContinuousColour extends BoundToContinuous {
         if (super.getZeroOrigin()) {
             this.min = 0;
         }
-        var cval = (n - this.min) / (this.max - this.min);
+        var cval = (parseFloat(n) - parseFloat(this.min)) / (parseFloat(this.max) - parseFloat(this.min));
         var rd = this.getMaxRed() - this.getMinRed();
         var gd = this.getMaxGreen() - this.getMinGreen();
         var bd = this.getMaxBlue() - this.getMinBlue();
-        return 'rgba(' + parseInt(this.minR * (1 - cval)) + ', ' + parseInt(this.minG * (1 - cval)) + ', ' + parseInt(this.minB * (1 - cval)) + ', ' + 1.0 + ')';
+        
+        return 'rgba(' + parseInt(this.minR + (cval*rd)) + ', ' + parseInt(this.minG + (cval*gd)) + ', ' + parseInt(this.minB + (cval*bd)) + ', ' + 1.0 + ')';
     }
 }
 
@@ -948,7 +949,10 @@ export class BoundToArea extends BoundToDiscrete {
         super.setCurrentValues(super.getPossibleValues());
     }
     public isDensity() {return this.density;}
-    public setDensity(b: boolean) {this.density = b;}
+    public setDensity(b: boolean) {
+        this.density = b;
+        super.getVisual().setDirty(true);
+    }
     public getBoundTo() {return BoundTo.BOUND_DISCRETE_AREA;}
     public isFlat(): boolean {return this.flat;}
     public setFlat(b: boolean) {this.flat = b;}

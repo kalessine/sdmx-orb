@@ -28,7 +28,7 @@ export interface Model {
 export interface ReactModel extends Model {
     public getReact();
 }
-private class ModelChrome {
+export class ModelChrome {
 
 }
 export class MultiMenuPage extends React.Component {
@@ -209,7 +209,7 @@ export class ModelWrapper {
         if (this.visualComponent != null) {
             this.unrender(s);
         }
-        this.visualComponent = React.render(<VisualComponent visual={this.visual} selector={s} model={this.mymodel} />, document.querySelector(s));
+        this.visualComponent = React.render(<VisualComponent visual={this.visual} selector={s} model={this.mymodel} />, document.querySelector("#" + s));
     }
     public unrender(s: string) {
         //if (s != null) {React.unmountComponentAtNode(document.querySelector(s));}
@@ -259,13 +259,17 @@ export class VisualComponent extends React.Component {
                 menus.push(<LevelMenuPage visual={this.visual} id={i} />);
             }
         }
+        var status = null;
+        if (this.mymodel.hasStatus()) {
+            status = <span id={this.selector + "-status"}>Status</span>;
+        }
         if (typeof this.mymodel.getReact === "function") {
             return (<div id={this.selector + "-main"} style="display: table; border: 1px solid black;">
                 <div id={this.selector + "-title"} style="display: table-row;"><span style="float:right;">{this.visual.getTitle()}</span></div>
                 <div id={this.selector + "-menu"} style="display: table-row;">{menus}</div>
                 <div id={this.selector + "-visual"} style="display: table-cell; vertical-align: middle;">{this.mymodel.getReact()}</div>
                 <div id={this.selector + "-right"} style="display: table-cell; vertical-align: top; width: 33%;border: 1px dotted black;"><Controls visual={this.visual} /></div>
-                <div id={this.selector + "-bottom"} style="display: table-row;"></div>
+                <div id={this.selector + "-bottom"} style="display: table-row;">{status}</div>
             </div>);
         }
         /*
@@ -301,6 +305,7 @@ export interface Adapter {
     addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary<string, string>): void;
 }
 export class LeafletMapAdapter {
+
     private visual: visual.Visual = null;
     private model: MapModel = new MapModel();
     getId(): number {return 1002;}
@@ -369,8 +374,12 @@ export class LeafletMapAdapter {
     addCrossSectionalDataPoint(key: sdmxdata.PartialKey, crossSections: collections.Dictionary): void {
 
     }
+
 }
 export class MapModel extends model.Model {
+
+    private placeField = null;
+
     public state = {};
     public props = {};
 
@@ -400,10 +409,15 @@ export class MapModel extends model.Model {
     private values = new Array();
     private names = new Array();
     private descs = new Array();
+    private areas = {};
+    private densities = {};
 
     // Meta
     private min: number = null;
     private max: number = null;
+
+    private minDensity = null;
+    private maxDensity = null;
 
     constructor() {
         super();
@@ -431,7 +445,15 @@ export class MapModel extends model.Model {
     public getGeoJSON(): string {return this.geoJSON;}
     public setGeoJSON(s: string) {this.geoJSON = s;}
     public getGeoJSONObject() {return this.geoJSONObject;}
-    public setGeoJSONObject(gj: object) {this.geoJSONObject = gj;}
+    public setGeoJSONObject(gj: any) {
+    this.geoJSONObject = gj;
+        for (var i: number = 0; i < this.geoJSONObject.features.length; i++) {
+            var id = this.geoJSONObject.features[i].properties[this.matchField];
+            var area = this.geoJSONObject.features[i].properties[this.area];
+            this.areas[id] = area;
+        }
+
+    }
     public getMatchField(): string {
         return this.matchField;
     }
@@ -471,41 +493,60 @@ export class MapModel extends model.Model {
             this.max = value;
         }
     }
+    public getPlaceField() {return this.placeField;}
+    public setPlaceField(s: string) {this.placeField = s;}
     render(id: string) {
     }
     unrender(s: string) {
 
     }
     public click(event) {
-        console.log(event);
         var map = event.target;
         var clickBounds = event.latlng.toBounds(5);
-        console.log(clickBounds);
         for (var key in map._layers) {
             if (map._layers[key].feature) {
-                //console.log(map._layers[key].feature.properties.Name);
                 var feature = map._layers[key];
                 if (feature._bounds.intersects(clickBounds)) {
                     for (var j: number = 0; j < this.ids.length; j++) {
                         if (feature.feature.properties[this.matchField] == this.ids[j]) {
-                            this.state.position = event.latlng;
-                            this.state.description = this.descs[j];
-                            console.log(this.descs[j]);
-                            console.log(this.ids[j]);
-                            this.state.id = this.ids[j];
+                            var status = document.querySelector("#" + this.visual.getVisualId() + "-status");
+                            if (status) {status.innerHTML = this.ids[j] + ":" + structure.NameableType.toString(this.visual.getArea().getCodelist().findItemString(this.ids[j])) + ":" + this.values[j] + (this.descs[j] != null ? (":" + this.descs[j]) : "");}
                         }
                     }
                 }
             }
         }
     }
+    public linearInterpolation(x, x0, y0, x1, y1) {
+        var a = (y1 - y0) / (x1 - x0)
+        var b = -a * x0 + y0
+        return a * x + b
+    }
     public styleFunc(feature) {
         var id = feature.properties[this.matchField];
+        var bc: bindings.BoundToContinuosColour = this.visual.getValues()[0];
         for (var i: number = 0; i < this.ids.length; i++) {
             if (id == this.ids[i]) {
                 var value = this.values[i];
                 var desc = this.descs[i];
-                var fc = this.visual.getValues()[0].getColor(parseFloat(value))
+                var fc = null;
+                if (this.visual.getArea().isDensity()) {
+                    this.calcDensity();
+                    var d = value / this.areas[parseInt(this.ids[i])];
+                    if (d > this.minDensity && d < this.maxDensity) {
+                        fc = this.getColour(this.minDensity, this.maxDensity, d, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
+                    } else {
+                        console.log("Error:" + this.ids[i] + ":" + d + ":" + this.minDensity + ":" + this.maxDensity);
+                    }
+                } else {
+                    this.calc();
+                    var dv = value;
+                    if (dv >= this.min && dv <= this.max) {
+                        fc = this.getColour(this.min, this.max, dv, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
+                    } else {
+                        console.log("Error:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
+                    }
+                }
                 return {
                     fillColor: fc,
                     fillOpacity: 1.0
@@ -513,23 +554,68 @@ export class MapModel extends model.Model {
             }
         }
         return {
-            weight: 0,
-            opacity: 0,
+            fillColor: 'rgb(0,0,0)',
             fillOpacity: 0.0
         };
     }
     public getReact() {
         return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style={{height: "300px"}} onClick={(e) => {this.click(e)}}>
             <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-            <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} />
-            <Marker position={this.state.position == null ? [0, 0] : this.state.position}>
-                <Popup>
-                    <span>
-                        {this.state.id}:{this.state.description}
-                    </span>
-                </Popup>
-            </Marker>
+            <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} onEachFeature={this.onEachFeature.bind(this)} />
         </Map>);
+    }
+    public hasStatus() {return true;}
+    public calcDensity() {
+        this.minDensity = null;
+        this.maxDensity = null;
+        for (var j: number = 0; j < this.ids.length; j++) {
+            if (this.areas[parseInt(this.ids[j])] == 0) continue;
+            var density = this.values[j] / this.areas[parseInt(this.ids[j])];
+            if ((this.minDensity == null && !isNaN(density)) || (this.minDensity > density && !isNaN(density))) {
+                this.minDensity = density;
+            }
+            if ((this.maxDensity == null && !isNaN(density)) || (this.maxDensity < density && !isNaN(density))) {
+                this.maxDensity = density;
+            }
+        }
+    }
+    public calc() {
+        this.min = null;
+        this.max = null;
+        for (var j: number = 0; j < this.ids.length; j++) {
+            var d = this.values[j];
+            if ((this.min == null && !isNaN(d)) || (this.min > d && !isNaN(d))) {
+                this.min = d;
+            }
+            if ((this.max == null && !isNaN(d)) || (this.max < d && !isNaN(d))) {
+                this.max = d;
+            }
+        }
+    }
+    public getColour(min: number, max: number, val: number, minCol: colors.Color, maxCol: colors.Color): string {
+        var ratio: number = (val - min) / (max - min);
+        return colors.rgbToHtml(this.blend(maxCol, minCol, ratio));
+    }
+
+    public blend(rgb1: colors.Color, rgb2: colors.Color, ratio: number): colors.Color {
+        if (ratio > 1.0 || ratio < 0) {
+            throw new Error("Ratio " + ratio + " greater than 1.0 or less than 0");
+        }
+        if (isNaN(ratio)) {return rgb2;}
+        var r = 1 - ratio;
+        var diff = new Array();
+        diff.push(0)
+        diff.push(0);
+        diff.push(0);
+        for (var i = 0; i < 3; i++) {
+            diff[i] = rgb2[i] - rgb1[i];
+        }
+        var color = [rgb1[0] + (parseFloat(diff[0]) * r), rgb1[1] + (parseFloat(diff[1]) * r), rgb1[2] + (parseFloat(diff[2]) * r)];
+        return color as colors.Color;
+    }
+
+    public onEachFeature(feature, layer) {
+        //this.areas[feature.properties[this.matchField]] = parseFloat(feature.properties[this.area]);
     }
 }
 

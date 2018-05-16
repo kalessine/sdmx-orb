@@ -161,14 +161,14 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
         console.log("findDataStructure");
         var dst: structure.DataStructure = this.local.findDataStructure(ref);
         if (dst != null) {
+            console.log("DST");
+            console.log(dst);
             var promise = new Promise<structure.DataStructure>(function (resolve, reject) {
                 resolve(dst);
             }.bind(this));
             return promise;
         } else {
             return <Promise<structure.DataStructure>> this.retrieve(this.serviceURL, this.toGetDataStructureQuery(ref.getMaintainableParentId().toString(), ref.getAgencyId().toString(), this.options), {headers: {"Content-Type": this.mediaType, "SOAPAction": "http://stats.oecd.org/OECDStatWS/SDMX/GetDataStructureDefinition"}}).then(function(structure) {
-                console.log("Struct");
-                console.log(structure);
                 this.local.load(structure);
                 return structure.getStructures().findDataStructure(ref);
             }.bind(this));
