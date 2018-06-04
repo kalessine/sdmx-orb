@@ -101,7 +101,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
             xhr.open(opts.method, opts.url);
             xhr.onload = function () {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(xhr.responseText);
+                    resolve(xhr.response);
                 } else {
                     reject({
                         status: xhr.status,
