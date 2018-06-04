@@ -8,12 +8,14 @@ import * as common from "../sdmx/common";
 import * as structure from "../sdmx/structure";
 import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "../visual/bindings";
+import * as Promise from 'bluebird';
 export var embed = function (v) {
     var vis = new Visual();
     vis.parseVisualObject(v);
 }
 export class Visual {
 
+    private waitForPromises:Array<Promise> = [];
     private bindings: Array<bindings.BoundTo> = [];
     private bindingsColumnMapper = new data.FlatColumnMapper();
     private time: bindings.BoundToTime = null;
@@ -636,7 +638,9 @@ export class Visual {
             }
             this.adapterInstance = adapter.object2Adapter(obj["adapter"]);
             this.check();
-            this.renderVisual();
+            Promise.all(this.waitForPromises).then(function(){
+                this.renderVisual();
+            }.bind(this));
         }.bind(this));
     }
     public check() {
@@ -679,4 +683,8 @@ export class Visual {
             }
         }
     }
+    public addToWaitFors(p:Promise<object>){
+        this.waitForPromises.push(p);
+    }
+    
 }

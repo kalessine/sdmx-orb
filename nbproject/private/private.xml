@@ -4,9 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/controls.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/abs.ts</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/sdmx/structure.ts</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/public_html/index.html</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/bindings.tsx</file>
+            <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/visual.tsx</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/adapter.tsx</file>
             <file>file:/C:/Users/James/Dropbox/sdmx-orb/src/visual/model.tsx</file>
         </group>

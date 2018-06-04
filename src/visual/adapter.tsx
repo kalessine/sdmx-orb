@@ -389,8 +389,8 @@ export class MapModel extends model.Model {
     private flat: boolean = true;
     private level: number = 0;
     private density: boolean = true;
-    private lat: number = 131.0361;
-    private lon: number = -35.345;
+    private lat: number = -35.345;
+    private lon: number = 131.0361;
     private zoom: number = 2;
     private ignoreTotal: boolean = true;
     private title: string = "ASGS2011";
@@ -446,7 +446,7 @@ export class MapModel extends model.Model {
     public setGeoJSON(s: string) {this.geoJSON = s;}
     public getGeoJSONObject() {return this.geoJSONObject;}
     public setGeoJSONObject(gj: any) {
-    this.geoJSONObject = gj;
+        this.geoJSONObject = gj;
         for (var i: number = 0; i < this.geoJSONObject.features.length; i++) {
             var id = this.geoJSONObject.features[i].properties[this.matchField];
             var area = this.geoJSONObject.features[i].properties[this.area];
@@ -484,14 +484,7 @@ export class MapModel extends model.Model {
         this.names.push(name);
         this.values.push(value);
         this.descs.push(desc);
-        if (this.min == null || value < this.min) {
-            this.min = value;
-            this.visual.getValues()[0].setMin(this.min);
-        }
-        if (this.max == null || value > this.max) {
-            this.visual.getValues()[0].setMax(this.max);
-            this.max = value;
-        }
+        console.log(id + ":" + name + ":" + value);
     }
     public getPlaceField() {return this.placeField;}
     public setPlaceField(s: string) {this.placeField = s;}
@@ -527,12 +520,12 @@ export class MapModel extends model.Model {
         var bc: bindings.BoundToContinuosColour = this.visual.getValues()[0];
         for (var i: number = 0; i < this.ids.length; i++) {
             if (id == this.ids[i]) {
-                var value = this.values[i];
+                var value = parseFloat(this.values[i]);
                 var desc = this.descs[i];
                 var fc = null;
                 if (this.visual.getArea().isDensity()) {
                     this.calcDensity();
-                    var d = value / this.areas[parseInt(this.ids[i])];
+                    var d = value / this.areas[this.ids[i]];
                     if (d > this.minDensity && d < this.maxDensity) {
                         fc = this.getColour(this.minDensity, this.maxDensity, d, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
                     } else {
@@ -541,19 +534,26 @@ export class MapModel extends model.Model {
                 } else {
                     this.calc();
                     var dv = value;
-                    if (dv >= this.min && dv <= this.max) {
+                    if (this.min <= value && value <= this.max) {
+                        //console.log("OK:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
                         fc = this.getColour(this.min, this.max, dv, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
                     } else {
                         console.log("Error:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
                     }
                 }
                 return {
+                    "color": "#000000",
+                    "weight": 1,
+                    "opacity": 0.5,
                     fillColor: fc,
                     fillOpacity: 1.0
                 };
             }
         }
         return {
+            "color": "#000000",
+            "weight": 1,
+            "opacity": 0.0,
             fillColor: 'rgb(0,0,0)',
             fillOpacity: 0.0
         };
@@ -569,31 +569,33 @@ export class MapModel extends model.Model {
         this.minDensity = null;
         this.maxDensity = null;
         for (var j: number = 0; j < this.ids.length; j++) {
-            if (this.areas[parseInt(this.ids[j])] == 0) continue;
-            var density = this.values[j] / this.areas[parseInt(this.ids[j])];
-            if ((this.minDensity == null && !isNaN(density)) || (this.minDensity > density && !isNaN(density))) {
-                this.minDensity = density;
-            }
-            if ((this.maxDensity == null && !isNaN(density)) || (this.maxDensity < density && !isNaN(density))) {
-                this.maxDensity = density;
+            if (this.areas[this.ids[j]] != null && parseFloat(this.areas[this.ids[j]]) != 0) {
+                var density = this.values[j] / this.areas[this.ids[j]];
+                if ((this.minDensity == null && !isNaN(density)) || (this.minDensity > density && !isNaN(density))) {
+                    this.minDensity = density;
+                }
+                if ((this.maxDensity == null && !isNaN(density)) || (this.maxDensity < density && !isNaN(density))) {
+                    this.maxDensity = density;
+                }
             }
         }
     }
     public calc() {
         this.min = null;
         this.max = null;
-        for (var j: number = 0; j < this.ids.length; j++) {
-            var d = this.values[j];
+        for (var key in this.ids) {
+            var d = parseFloat(this.values[key]);
             if ((this.min == null && !isNaN(d)) || (this.min > d && !isNaN(d))) {
                 this.min = d;
             }
             if ((this.max == null && !isNaN(d)) || (this.max < d && !isNaN(d))) {
                 this.max = d;
             }
+
         }
     }
     public getColour(min: number, max: number, val: number, minCol: colors.Color, maxCol: colors.Color): string {
-        var ratio: number = (val - min) / (max - min);
+        var ratio: number = ((val - min) / (max - min));
         return colors.rgbToHtml(this.blend(maxCol, minCol, ratio));
     }
 
@@ -777,6 +779,7 @@ export class RechartsSparklineModel implements ReactModel {
         //dat['series']='series';
         this.data.push(dat);
     }
+    public hasStatus() {return false;}
     public getReact() {
         return (<LineChart width={600} height={300} data={this.data}
             margin={{top: 5, right: 30, left: 20, bottom: 5}}>
@@ -1021,6 +1024,7 @@ export class RechartsSeriesSparklineModel implements ReactModel {
             </LineChart>, document.querySelector(s));
         }
     }
+    public hasStatus() {return false;}
     public getLines() {
         var html = [];
         var series: bindings.BoundToSeries = this.visual.getSeries() as bindings.BoundToSeries;

@@ -969,11 +969,12 @@ export class BoundToArea extends BoundToDiscrete {
     public getTitle(): string {return this.title;}
     public setTitle(s: string) {this.title = s;}
     public getGeoJSON(): string {return this.geoJSON;}
-    public setGeoJSON(s: string) {
+    public setGeoJSON(s: string):Promise<object> {
         this.geoJSON = s;
-        this.geoJSONObject = makeRequest({url: this.geoJSON, method: "GET"}).then(function (gj) {
+        return this.geoJSONObject = makeRequest({url: this.geoJSON, method: "GET"}).then(function (gj) {
             console.log(gj);
             this.geoJSONObject = JSON.parse(gj);
+            return gj;
         }.bind(this));
     }
     public getGeoJSONObject(): object {return this.geoJSONObject;}
@@ -1316,7 +1317,7 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
         ba.setZoom(o['zoom']);
         ba.setTitle(o['ignoreTotal']);
         ba.setTitle(o['title']);
-        ba.setGeoJSON(o['geoJSON']);
+        v.addToWaitFors(ba.setGeoJSON(o['geoJSON']));
         ba.setMatchField(o['matchField']);
         ba.setAreaField(o['area']);
         b = ba;
