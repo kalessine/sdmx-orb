@@ -484,7 +484,7 @@ export class MapModel extends model.Model {
         this.names.push(name);
         this.values.push(value);
         this.descs.push(desc);
-        console.log(id + ":" + name + ":" + value);
+        //console.log(id + ":" + name + ":" + value);
     }
     public getPlaceField() {return this.placeField;}
     public setPlaceField(s: string) {this.placeField = s;}

@@ -103,7 +103,7 @@ export default class Controls extends React.Component {
         b = visual.getArea();
         if (b != null) {
             var ba = b as bindings.BoundToArea;
-            html.push(<Checkbox onChange={this.changeDensity.bind(this)} checked={ba.isDensity()}></Checkbox> <p>Density</p>);
+            html.push([<Checkbox onChange={this.changeDensity.bind(this)} checked={ba.isDensity()} />,ba.isDensity()?"Density":"Raw Number"]);
         }
         return (<div>{html}</div>);
     }
