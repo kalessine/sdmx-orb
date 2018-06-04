@@ -559,7 +559,7 @@ export class MapModel extends model.Model {
         };
     }
     public getReact() {
-        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} onClick={(e) => {this.click(e)}}>
+        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} style="width:100%; height: 100%;" onClick={(e) => {this.click(e)}}>
             <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
             <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} onEachFeature={this.onEachFeature.bind(this)} />
         </Map>);
