@@ -534,16 +534,24 @@ export class MapModel extends model.Model {
                 } else {
                     this.calc();
                     var dv = value;
+                    var ratio: number = ((dv - this.min) / (this.max - this.min));
                     if (this.min <= value && value <= this.max) {
                         //console.log("OK:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
                         fc = this.getColour(this.min, this.max, dv, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
                     } else {
                         console.log("Error:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
                     }
+                    return {
+                        "color": "#000000",
+                        "weight": 0,
+                        "opacity": 0.0,
+                        fillColor: [bc.getMaxRed(),bc.getMaxGreen(),bc.getMaxBlue()],
+                        fillOpacity: ratio
+                    };
                 }
                 return {
                     "color": "#000000",
-                    "weight": 1,
+                    "weight": 0,
                     "opacity": 0.5,
                     fillColor: fc,
                     fillOpacity: 1.0
@@ -552,7 +560,7 @@ export class MapModel extends model.Model {
         }
         return {
             "color": "#000000",
-            "weight": 1,
+            "weight": 0,
             "opacity": 0.0,
             fillColor: 'rgb(0,0,0)',
             fillOpacity: 0.0
