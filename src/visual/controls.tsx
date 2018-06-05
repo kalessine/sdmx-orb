@@ -53,7 +53,8 @@ export default class Controls extends React.Component {
 
     }
     changeDensity(e) {
-        this.props.visual.getArea().setDensity(e.target.checked);
+        this.props.visual.getArea().setDensity(!this.props.visual.getArea().getDensity());
+        this.props.visual.setDirty(true);
         this.props.visual.renderVisual();
     }
     public render(props, state) {
