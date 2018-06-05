@@ -610,7 +610,7 @@ export class BoundToContinuous extends BoundTo {
     public getBoundToString() {
         return "Continuous";
     }
-    public getZeroOrigin() {return this.zeroOrigin;}
+    public isZeroOrigin() {return this.zeroOrigin;}
     public setZeroOrigin(b: boolean) {this.zeroOrigin = b;}
     public setSharedMaximum(b: boolean) {this.sharedMaximum = b;}
     public getSharedMaximum() {return this.sharedMaximum;}
