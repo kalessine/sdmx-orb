@@ -27,7 +27,7 @@ export default class Controls extends React.Component {
         this.props.visual.findBinding(c).getAllValues().forEach(function (item) {
             var val2 = structure.NameableType.toString(item);
             var sel = val == val2 ? "true" : "false";
-            options.push(<Select.Item selected={sel}>{val2}</Select.Item>);
+            options.push(<option selected={sel}>{val2}</option>);
         });
         return options;
     }
@@ -68,7 +68,7 @@ export default class Controls extends React.Component {
                 var cnc = b.getConceptName();
                 var val = structure.NameableType.toString(b.getCurrentValue());
                 html.push(<div>{cnc}</div>);
-                var o = <Select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(), val)}</Select>
+                var o = <select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(), val)}</select>
                 html.push(o);
                 html.push(<br />);
             }
@@ -81,7 +81,7 @@ export default class Controls extends React.Component {
             var cnc = visual.getCrossSection().getConceptName();
             var val = structure.NameableType.toString(visual.getCrossSection().getCurrentValue());
             html.push(<div>{cnc}</div>);
-            var o = <Select title={visual.getCrossSection().getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(visual.getCrossSection().getConcept(), val)}</Select>
+            var o = <select title={visual.getCrossSection().getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(visual.getCrossSection().getConcept(), val)}</select>
             html.push(o);
             html.push(<br />);
         }
@@ -96,7 +96,7 @@ export default class Controls extends React.Component {
             html.push(<DatePicker onChange={(day) => this.onEndDateChange(day)} value={end} />);
             if (bt.getBoundTo() == bindings.BoundTo.BOUND_TIME_DROPDOWN) {
                 var val = structure.NameableType.toString(bt.getCurrentValue());
-                var o = <Select title={bt.getConcept()} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(bt.getConcept(), val)}</Select>
+                var o = <select title={bt.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(bt.getConcept(), val)}</select>
                 html.push(o);
             }
             html.push(<br />);
