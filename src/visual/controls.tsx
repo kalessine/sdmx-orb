@@ -12,8 +12,8 @@ import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "./bindings";
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import Select from 'preact-material-components/Select';
-import Button from 'preact-material-components/Button';
+import {Select} from 'preact-material-components/Select';
+import {Button} from 'preact-material-components/Button';
 import {DatePicker} from 'react-toolbox';
 export default class Controls extends React.Component {
     public props: any = {};
