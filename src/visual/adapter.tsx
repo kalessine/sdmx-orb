@@ -526,11 +526,19 @@ export class MapModel extends model.Model {
                 if (this.visual.getArea().isDensity()) {
                     this.calcDensity();
                     var d = value / this.areas[this.ids[i]];
+                    var ratio: number = ((d - this.minDensity) / (this.maxDensity - this.minDensity));
                     if (d > this.minDensity && d < this.maxDensity) {
                         fc = this.getColour(this.minDensity, this.maxDensity, d, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
                     } else {
                         console.log("Error:" + this.ids[i] + ":" + d + ":" + this.minDensity + ":" + this.maxDensity);
                     }
+                    return {
+                        "color": "#000000",
+                        "weight": 0,
+                        "opacity": 0.0,
+                        fillColor: [bc.getMaxRed(),bc.getMaxGreen(),bc.getMaxBlue()],
+                        fillOpacity: ratio
+                    };
                 } else {
                     this.calc();
                     var dv = value;
@@ -545,8 +553,8 @@ export class MapModel extends model.Model {
                         "color": "#000000",
                         "weight": 0,
                         "opacity": 0.0,
-                        fillColor: [bc.getMaxRed(),bc.getMaxGreen(),bc.getMaxBlue()],
-                        fillOpacity: ratio
+                        fillColor: fc,
+                        fillOpacity: 1.0
                     };
                 }
                 return {
