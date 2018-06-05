@@ -27,7 +27,7 @@ export default class Controls extends React.Component {
         this.props.visual.findBinding(c).getAllValues().forEach(function (item) {
             var val2 = structure.NameableType.toString(item);
             var sel = val == val2 ? "true" : "false";
-            options.push(<option selected={sel}>{val2}</option>);
+            options.push(<Select.Item selected={sel}>{val2}</Select.Item>);
         });
         return options;
     }
