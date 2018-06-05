@@ -542,7 +542,7 @@ export class MapModel extends model.Model {
                 } else {
                     this.calc();
                     var dv = value;
-                    var ratio: number = ((dv - this.min) / (this.max - this.min));
+                    if( bc.isZeroOrigin()){this.min=0;}
                     if (this.min <= value && value <= this.max) {
                         //console.log("OK:" + this.ids[i] + ":" + dv + ":" + this.min + ":" + this.max);
                         fc = this.getColour(this.min, this.max, dv, [bc.getMinRed(), bc.getMinGreen(), bc.getMinBlue()], [bc.getMaxRed(), bc.getMaxGreen(), bc.getMaxBlue()]);
@@ -557,13 +557,6 @@ export class MapModel extends model.Model {
                         fillOpacity: 1.0
                     };
                 }
-                return {
-                    "color": "#000000",
-                    "weight": 0,
-                    "opacity": 0.5,
-                    fillColor: fc,
-                    fillOpacity: 1.0
-                };
             }
         }
         return {
@@ -1319,13 +1312,13 @@ export class CubeWalkUtils {
                     k.getDict().setValue(key, singles.getDict().getValue(key));
                 });
                 k.setComponent(percentOf.getConcept(), percentOf.getPercentOfItemType());
-                //console.log(k);
+                console.log(k);
                 var obs: sdmxdata.CubeObs = cube.findCubeObs(k);
                 if (obs == null) {
-                    //console.log("Obs is null");
+                    console.log("Obs is null");
                     return;
                 } else {
-                    //console.log(obs);
+                    console.log(obs);
                     // concept should be OBS_VALUE
                     var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue(concept));
                     percent *= 100;
@@ -1334,6 +1327,7 @@ export class CubeWalkUtils {
                     //console.log("Percent="+percent);
                 }
             } else {
+            console.log("PercentOfPoint");
                 // This Point is the PercentOf Point, do nothing
                 return;
             }

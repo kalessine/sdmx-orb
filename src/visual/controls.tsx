@@ -102,7 +102,7 @@ export default class Controls extends React.Component {
             html.push(<br />);
         }
         b = visual.getArea();
-        if (b != null) {
+        if (b != null&&visual.getPercentOf()==null) {
             var ba = b as bindings.BoundToArea;
             html.push(<Button class="btn whitetext" style="background: blue;" onClick={this.changeDensity.bind(this)}>{ba.isDensity()?"Density":"Raw Number"}</Button>);
         }
