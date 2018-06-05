@@ -12,8 +12,8 @@ import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "./bindings";
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import {Select} from 'preact-material-components/Select';
-import {Button} from 'preact-material-components/Button';
+import * as Select from 'preact-material-components/Select';
+import * as Button from 'preact-material-components/Button';
 import {DatePicker} from 'react-toolbox';
 export default class Controls extends React.Component {
     public props: any = {};
@@ -104,7 +104,7 @@ export default class Controls extends React.Component {
         b = visual.getArea();
         if (b != null) {
             var ba = b as bindings.BoundToArea;
-            html.push([<Buttton onClick={this.changeDensity.bind(this)} />,ba.isDensity()?"Density":"Raw Number"]);
+            html.push([<Button onClick={this.changeDensity.bind(this)} />,ba.isDensity()?"Density":"Raw Number"]);
         }
         return (<div>{html}</div>);
     }
