@@ -1246,7 +1246,7 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             o.typeid = BoundTo.BOUND_CONTINUOUS_COLOUR;
             o.typename = "BoundToContinuousColour";
             var bc = b as BoundToContinuousColour;
-            o.zeroOrigin = bc.getZeroOrigin();
+            o.zeroOrigin = bc.isZeroOrigin();
             o.concept = bc.getConcept();
             o.minR = bc.getMinRed();
             o.minG = bc.getMinGreen();

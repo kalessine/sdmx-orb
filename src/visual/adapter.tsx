@@ -1312,13 +1312,13 @@ export class CubeWalkUtils {
                     k.getDict().setValue(key, singles.getDict().getValue(key));
                 });
                 k.setComponent(percentOf.getConcept(), percentOf.getPercentOfItemType());
-                console.log(k);
+                //console.log(k);
                 var obs: sdmxdata.CubeObs = cube.findCubeObs(k);
                 if (obs == null) {
-                    console.log("Obs is null");
+                    //console.log("Obs is null");
                     return;
                 } else {
-                    console.log(obs);
+                    //console.log(obs);
                     // concept should be OBS_VALUE
                     var percent = parseFloat(dim.getValue()) / parseFloat(obs.getValue(concept));
                     percent *= 100;
@@ -1327,7 +1327,7 @@ export class CubeWalkUtils {
                     //console.log("Percent="+percent);
                 }
             } else {
-            console.log("PercentOfPoint");
+            //console.log("PercentOfPoint");
                 // This Point is the PercentOf Point, do nothing
                 return;
             }
