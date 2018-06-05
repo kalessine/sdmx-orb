@@ -12,8 +12,8 @@ import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "./bindings";
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import {Select} from 'preact-material-components/Select';
-import {Button} from 'preact-material-components/Button';
+import Select from 'preact-material-components/Select';
+import Button from 'preact-material-components/Button';
 import {DatePicker} from 'react-toolbox';
 export default class Controls extends React.Component {
     public props: any = {};
@@ -68,7 +68,7 @@ export default class Controls extends React.Component {
                 var cnc = b.getConceptName();
                 var val = structure.NameableType.toString(b.getCurrentValue());
                 html.push(<div>{cnc}</div>);
-                var o = <select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(), val)}</select>
+                var o = <Select title={b.getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(b.getConcept(), val)}</Select>
                 html.push(o);
                 html.push(<br />);
             }
@@ -81,7 +81,7 @@ export default class Controls extends React.Component {
             var cnc = visual.getCrossSection().getConceptName();
             var val = structure.NameableType.toString(visual.getCrossSection().getCurrentValue());
             html.push(<div>{cnc}</div>);
-            var o = <select title={visual.getCrossSection().getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(visual.getCrossSection().getConcept(), val)}</select>
+            var o = <Select title={visual.getCrossSection().getConcept()} value={val} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(visual.getCrossSection().getConcept(), val)}</Select>
             html.push(o);
             html.push(<br />);
         }
@@ -96,7 +96,7 @@ export default class Controls extends React.Component {
             html.push(<DatePicker onChange={(day) => this.onEndDateChange(day)} value={end} />);
             if (bt.getBoundTo() == bindings.BoundTo.BOUND_TIME_DROPDOWN) {
                 var val = structure.NameableType.toString(bt.getCurrentValue());
-                var o = <select title={bt.getConcept()} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(bt.getConcept(), val)}</select>
+                var o = <Select title={bt.getConcept()} onChange={this.changeDropDown.bind(this)}>{this.listDropDown(bt.getConcept(), val)}</Select>
                 html.push(o);
             }
             html.push(<br />);
@@ -104,7 +104,7 @@ export default class Controls extends React.Component {
         b = visual.getArea();
         if (b != null) {
             var ba = b as bindings.BoundToArea;
-            html.push(<button onClick={this.changeDensity.bind(this)}>{ba.isDensity()?"Density":"Raw Number"}</button>);
+            html.push(<Button onClick={this.changeDensity.bind(this)}>{ba.isDensity()?"Density":"Raw Number"}</Button>);
         }
         return (<div>{html}</div>);
     }
