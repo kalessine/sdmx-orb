@@ -230,7 +230,7 @@ export class ABS implements interfaces.Queryable, interfaces.RemoteRegistry {
     public toGetDataStructureQuery(keyFamily: string, providerRef: string, soapNamespace: string): string {
         var s: string = "";
         s += "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:sdmx=\"" + soapNamespace+"\">";
-        s += "<soapenv:Header/>";
+        s += "<soapenv:Header></soapenv:Header>";
         s += "<soapenv:Body>";
         s += "<sdmx:GetDataStructureDefinition>";
         s += "<!--Optional:-->";
