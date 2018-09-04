@@ -659,7 +659,7 @@ export class RechartsSparklineAdapter implements Adapter {
                 if (visual.getValues()[0].getSharedMaximum()) {
                     this.model.setMax(this.max);
                 }
-                if (visual.getValues()[0].getZeroOrigin()) {
+                if (visual.getValues()[0].isZeroOrigin()) {
                     this.model.setMin(this.min);
                 }
                 return this.model;
@@ -670,7 +670,7 @@ export class RechartsSparklineAdapter implements Adapter {
             if (visual.getValues()[0].getSharedMaximum()) {
                 this.model.setMax(this.max);
             }
-            if (visual.getValues()[0].getZeroOrigin()) {
+            if (visual.getValues()[0].isZeroOrigin()) {
                 this.model.setMin(this.min);
             }
             return this.model;
@@ -865,7 +865,7 @@ export class RechartsSeriesSparklineAdapter implements Adapter {
                 if (visual.getValues()[0].getSharedMaximum()) {
                     this.model.setMax(this.max);
                 }
-                if (visual.getValues()[0].getZeroOrigin()) {
+                if (visual.getValues()[0].isZeroOrigin()) {
                     this.model.setMin(this.min);
                 }
                 return this.model;
@@ -876,7 +876,7 @@ export class RechartsSeriesSparklineAdapter implements Adapter {
             if (visual.getValues()[0].getSharedMaximum()) {
                 this.model.setMax(this.max);
             }
-            if (visual.getValues()[0].getZeroOrigin()) {
+            if (visual.getValues()[0].isZeroOrigin()) {
                 this.model.setMin(this.min);
             }
             return this.model;
