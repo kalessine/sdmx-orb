@@ -63,14 +63,14 @@ export class SdmxIO {
         //return ["OECD"];
     }
     public static connect(s: string): interfaces.Queryable {
-        if (s == "ABS") return new abs.ABS("ABS", "https://cryptic-headland-94862.herokuapp.com/http://stat.data.abs.gov.au/sdmxws/sdmx.asmx ", "http://stats.oecd.org/OECDStatWS/SDMX/");
+        if (s == "ABS") return new abs.ABS("ABS", "http://cors-anywhere.herokuapp.com/http://stat.data.abs.gov.au/sdmxws/sdmx.asmx ", "http://stats.oecd.org/OECDStatWS/SDMX/");
         if (s == "KNOEMA") return new knoema.Knoema("KNOEMA", "http://knoema.com/api/1.0/sdmx", "");
         if (s == "NOMIS") return new nomis.NOMISRESTServiceRegistry("NOMIS", "http://www.nomisweb.co.uk/api", "uid=0xad235cca367972d98bd642ef04ea259da5de264f");
-        if (s == "OECD") return new oecd.OECD("OECD", "https://cryptic-headland-94862.herokuapp.com/http://stats.oecd.org/Sdmxws/sdmx.asmx", "http://stats.oecd.org/OECDStatWS/SDMX/");
+        if (s == "OECD") return new oecd.OECD("OECD", "https://cors-anywhere.herokuapp.com/http://stats.oecd.org/Sdmxws/sdmx.asmx", "http://stats.oecd.org/OECDStatWS/SDMX/");
         if (s == "AfDB") return new knoema.Knoema("AfDB", "http://opendataforafrica.org/api/1.0/sdmx", "");
-        if (s == "ILO") return new ilo.ILO("ILO", "https://cryptic-headland-94862.herokuapp.com/http://www.ilo.org/ilostat/sdmx/ws/rest", "");
+        if (s == "ILO") return new ilo.ILO("ILO", "http://cors-anywhere.herokuapp.com/http://www.ilo.org/ilostat/sdmx/ws/rest", "");
         if (s == "ESTAT") return new estat.ESTAT("ESTAT", "http://ec.europa.eu/eurostat/SDMX/diss-web/rest", "");
-        if (s == "INSEE") return new insee.INSEE("INSEE", "http://cors-anywhere.herokuapp.com/http://www.bdm.insee.fr/series/sdmx", "");
+        if (s == "INSEE") return new insee.INSEE("INSEE", "https://cors-anywhere.herokuapp.com/http://www.bdm.insee.fr/series/sdmx", "");
     }
     public static setTruncateNames(n: number) {
         SdmxIO.TRUNCATE_NAMES = n;
