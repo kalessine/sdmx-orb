@@ -10,8 +10,10 @@ import * as commonreferences from "../sdmx/commonreferences";
 import * as bindings from "../visual/bindings";
 import * as Promise from 'bluebird';
 export var embed = function (v) {
+    return new Promise(function(accept,reject){
     var vis = new Visual();
-    vis.parseVisualObject(v);
+    return accept(vis.parseVisualObject(v));
+    });
 }
 export class Visual {
 
@@ -555,6 +557,7 @@ export class Visual {
     }
     public getVisualObject(): object {
         var obj = {};
+        obj['visualId'] = this.visualId;
         if (this.getDataflow() != null) {
             obj["dataservice"] = this.getDataService();
             obj["dataflowAgency"] = this.getDataflow().getAgencyId().toString();
@@ -597,15 +600,18 @@ export class Visual {
     }
     public parseVisualObject(obj) {
         this.setDataService(obj["dataservice"]);
+        this.setVisualId(obj['visualId']);
         var ref = sdmx.SdmxIO.reference(obj["structureAgency"], obj["structureId"], obj["structureVersion"], null);
         var df: structure.Dataflow = new structure.Dataflow();
+        
         df.setAgencyId(obj["dataflowAgency"]);
         df.setId(obj["dataflowId"]);
         df.setVersion(obj["dataflowVersion"]);
         df.setNames([new common.Name(obj["dataflowNameLang"], obj["dataflowName"])]);
         df.setStructure(ref);
         this.setDataflow(df);
-        var struct = this.getQueryable().getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct) {
+        //var struct =
+        return this.getQueryable().getRemoteRegistry().findDataStructure(df.getStructure()).then(function (struct) {
             this.init();
             for (var i: number = 0; i < struct.getDataStructureComponents().getDimensionList().getDimensions().length; i++) {
                 var dim: structure.Dimension = struct.getDataStructureComponents().getDimensionList().getDimensions()[i];
@@ -638,8 +644,9 @@ export class Visual {
             }
             this.adapterInstance = adapter.object2Adapter(obj["adapter"]);
             this.check();
-            Promise.all(this.waitForPromises).then(function(){
+            return Promise.all(this.waitForPromises).then(function(){
                 this.renderVisual();
+                return this;
             }.bind(this));
         }.bind(this));
     }

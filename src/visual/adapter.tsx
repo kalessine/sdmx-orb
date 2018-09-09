@@ -343,6 +343,7 @@ export class LeafletMapAdapter {
     createModel(visual: visual.Visual, cube: sdmxdata.Cube): model.Model {
         var area: bindings.BoundToArea = visual.getArea();
         this.model = new MapModel();
+        this.model.setZoom(area.getZoom());
         this.model.setGeoJSON(area.getGeoJSON());
         this.model.setGeoJSONObject(area.getGeoJSONObject());
         this.model.setMatchField(area.getMatchField());
@@ -389,8 +390,8 @@ export class MapModel extends model.Model {
     private flat: boolean = true;
     private level: number = 0;
     private density: boolean = true;
-    private lat: number = -35.345;
-    private lon: number = 131.0361;
+    private lat: number = -31.345;
+    private lon: number = 115.0361;
     private zoom: number = 2;
     private ignoreTotal: boolean = true;
     private title: string = "ASGS2011";
@@ -568,7 +569,7 @@ export class MapModel extends model.Model {
         };
     }
     public getReact() {
-        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} onClick={(e) => {this.click(e)}}>
+        return (<Map center={[this.lat, this.lon]} zoom={this.zoom} onClick={(e) => {this.click(e)}} onMouseMove={(e) => {this.click(e)}}>
             <TileLayer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
             <GeoJSON data={this.geoJSONObject} style={this.styleFunc.bind(this)} onEachFeature={this.onEachFeature.bind(this)} />
         </Map>);

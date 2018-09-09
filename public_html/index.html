@@ -9,21 +9,47 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="css/orb.css">
-        <link rel="stylesheet" type="text/css" href="css/dialog.css">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <link rel="stylesheet" type="text/css" href="css/react-simpletabs.css">
-        <link rel="stylesheet" type="text/css" href="react-toolbox/theme.css">
-        <link rel="stylesheet" type="text/css" href="css/chartist.css">
-        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css">
     </head>
     <body>
-        <div id="app"></div><br/>
-        <div id="render"></div><br/>
-        <div id="controls" style="display:block;"></div><br/>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
-        <script src="js/sdmx-orb.js"></script>
+        <main id="maincontent" class="">               
+            <article>
+                <h1>How do we convince more people to move to regional areas?</h1>
+                <p>If we can convince industry to open more businesses in regional areas, then people would naturally follow to the available work in the regional area,
+                    here we look at some untapped resources within regional areas;
+                </p>
+                <h3>What Industry do people work in?</h3>
+                <div id="render"></div><br/>
+                <p>This visual shows how many people work in a particular industry over Western Australia
+                if you mouse over an area, record the number underneath the map as value 'A'</p>
+                <h3>What degrees do Regional People have that could be used by Industry?</h3>
+                <p>This visual shows how many people have degrees in a particular field that live in each area of Western Australia.
+                if you mouse over the same area as before, but think of the value at that area as value 'B'</p>
+                <p>If you subtract A from B, you will find a simple way to find the number of people that have relevant degrees in an area, but do not actually work in that field of study.
+                <p>We believe this is an untapped resource that potential businesses could form around the regional area where there is this untapped potential for work. </p>
+                <div id="render4"></div><br/>
+                <h3>For an Industry, what percentage of all people in that industry, work in a particular Occupation?</h3>
+                <div id="render2"></div><br/>
+                <h3>How many medium to large businesses(20+ Employees) are in rural areas?</h3>
+                <div id="render3"></div><br/>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+                <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css">
+                <script src="js/sdmx.js"></script>
+                <link rel="stylesheet" type="text/css" href="css/style.css">
+                <script>
+                    window.onload = function () {
+                    sdmx.embed({"visualId":"render", "dataservice":"ABS", "dataflowAgency":"ABS", "dataflowId":"ABS_CENSUS2011_T33", "dataflowVersion":"1.0", "dataflowName":"T33 Industry of Employment by Sex", "dataflowNameLang":"en", "structureAgency":"ABS", "structureId":"ABS_CENSUS2011_T33", "structureVersion":"1.0", "dimensions":{"INDP":{"values":["J"],"concept":"INDP", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "STATE":{"values":["5"],"concept":"STATE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGIONTYPE":{"values":["SA2"],"concept":"REGIONTYPE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGION":{"concept":"REGION", "typeid":4, "typename":"BoundToArea", "flat":true, "level":0, "density":false, "lat":115, "lon": -31, "zoom":5, "ignoreTotal":true, "title":"ASGS2011", "geoJSON":"asgs2011.geojson", "matchField":"ID", "area":"AREA"}, "FREQUENCY":{"concept":"FREQUENCY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}}, "time":{"concept":"TIME", "typeid":20, "typename":"BoundToTimeDropDown", "lastTime":0, "singleLatestTime":false, "chooseTime":true, "start":968394229829, "end":1473315829829}, "cross":{"values":["3"],"concept":"MEASURE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "values":[{"concept":"OBS_VALUE", "typeid":5, "typename":"BoundToContinuousColour", "zeroOrigin":false, "minR":255, "minG":255, "minB":255, "maxR":0, "maxG":0, "maxB":0}], "adapter":{"typeid":1002, "name":"Leaflet Map"}}).then(function(visual){
+                    sdmx.embed({"visualId":"render2", "dataservice":"ABS", "dataflowAgency":"ABS", "dataflowId":"ABS_CENSUS2011_B44", "dataflowVersion":"1.0", "dataflowName":"B44 Industry of Employment by Occupation", "dataflowNameLang":"en", "structureAgency":"ABS", "structureId":"ABS_CENSUS2011_B44", "structureVersion":"1.0", "dimensions":{"OCCP":{"concept":"OCCP", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "STATE":{"values":["5"],"concept":"STATE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGIONTYPE":{"values":["SA2"],"concept":"REGIONTYPE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGION":{"concept":"REGION", "typeid":4, "typename":"BoundToArea", "flat":true, "level":0, "density":false, "lat":115, "lon": -31, "zoom":5, "ignoreTotal":true, "title":"ASGS2011", "geoJSON":"asgs2011.geojson", "matchField":"ID", "area":"AREA"}, "FREQUENCY":{"concept":"FREQUENCY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}}, "time":{"concept":"TIME", "typeid":20, "typename":"BoundToTimeDropDown", "lastTime":0, "singleLatestTime":false, "chooseTime":true, "start":968396706902, "end":1473318306902}, "cross":{"values":["J"],"concept":"MEASURE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "values":[{"concept":"OBS_VALUE", "typeid":5, "typename":"BoundToContinuousColour", "zeroOrigin":false, "minR":255, "minG":255, "minB":255, "maxR":0, "maxG":0, "maxB":0}], "adapter":{"typeid":1002, "name":"Leaflet Map"}}).then(function(){
+                    sdmx.embed({"visualId":"render3", "dataservice":"ABS", "dataflowAgency":"ABS", "dataflowId":"ABS_REGIONAL_ASGS2016", "dataflowVersion":"1.0", "dataflowName":"Regional Statistics, ASGS 2016, 2011-2017", "dataflowNameLang":"en", "structureAgency":"ABS", "structureId":"ABS_REGIONAL_ASGS2016", "structureVersion":"1.0", "dimensions":{"REGIONTYPE":{"values":["SA2"],"concept":"REGIONTYPE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "ASGS_2016":{"concept":"ASGS_2016", "typeid":4, "typename":"BoundToArea", "flat":true, "level":0, "density":false, "lat":131.0361, "lon": - 35.345, "zoom":5, "ignoreTotal":true, "title":"ASGS2011", "geoJSON":"asgs2011.geojson", "matchField":"ID", "area":"AREA"}, "FREQUENCY":{"concept":"FREQUENCY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}}, "time":{"concept":"TIME", "typeid":20, "typename":"BoundToTimeDropDown", "lastTime":0, "singleLatestTime":false, "chooseTime":true, "start":968399651940, "end":1473321251940}, "cross":{"values":["CABEE_1"],"concept":"MEASURE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "values":[{"concept":"OBS_VALUE", "typeid":5, "typename":"BoundToContinuousColour", "zeroOrigin":false, "minR":255, "minG":255, "minB":255, "maxR":0, "maxG":0, "maxB":0}], "adapter":{"typeid":1002, "name":"Leaflet Map"}}).then(function(){
+                        setTimeout(sdmx.embed({"visualId":"render4", "dataservice":"ABS", "dataflowAgency":"ABS", "dataflowId":"ABS_CENSUS2011_T31", "dataflowVersion":"1.0", "dataflowName":"T31 Non-School Qualification: Field of Study by Age by Sex", "dataflowNameLang":"en", "structureAgency":"ABS", "structureId":"ABS_CENSUS2011_T31", "structureVersion":"1.0", "dimensions":{"QALFP":{"concept":"QALFP", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "SEX":{"values":["3"],"concept":"SEX", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "STATE":{"values":["5"],"concept":"STATE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGIONTYPE":{"concept":"REGIONTYPE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "REGION":{"concept":"REGION", "typeid":4, "typename":"BoundToArea", "flat":true, "level":0, "density":true, "lat":131.0361, "lon": - 35.345, "zoom":5, "ignoreTotal":true, "title":"ASGS2011", "geoJSON":"asgs2011.geojson", "matchField":"ID", "area":"AREA"}, "FREQUENCY":{"concept":"FREQUENCY", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}}, "time":{"concept":"TIME", "typeid":20, "typename":"BoundToTimeDropDown", "lastTime":0, "singleLatestTime":false, "chooseTime":true, "start":968406895127, "end":1473328495127}, "cross":{"concept":"MEASURE", "typeid":10, "typename":"BoundToDropdown", "clientSide":false, "flat":true, "perCentOfId":null}, "values":[{"concept":"OBS_VALUE", "typeid":5, "typename":"BoundToContinuousColour", "zeroOrigin":false, "minR":255, "minG":255, "minB":255, "maxR":0, "maxG":0, "maxB":0}], "adapter":{"typeid":1002, "name":"Leaflet Map"}}),'2000');
+                    });
+                    });
+                    });
+                    };
+
+                </script>
+                <p>This map shows the average daily maximum temperature for the whole of Australia</p>
+                <img src="img/mxtausan.png">
+            </article>
+        </main>
     </body>
 </html>

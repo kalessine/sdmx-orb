@@ -242,7 +242,7 @@ export class BoundTo {
     public setValues(s: Array<string>) {
         var result: Array<structure.ItemType> = [];
         for (var i: number = 0; i < s.length; i++) {
-            result.push(this.findValue(s[i]));
+            if(this.findValue(s[i])!=null){result.push(this.findValue(s[i]));}
         }
         this.setCurrentValues(result);
     }
@@ -1224,6 +1224,7 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             o.clientSide = b.isClientSide();
             o.flat = b.isFlat();
             o.perCentOfId = b.getPercentOfId();
+            o.values = b.getValues();
             break;
         case BoundTo.BOUND_DISCRETE_AREA:
             o.typeid = BoundTo.BOUND_DISCRETE_AREA;
@@ -1283,13 +1284,14 @@ export function defaultSaveBindingToObject(b: BoundTo): BoundTo {
             break;
         case BoundTo.BOUND_TIME_DROPDOWN:
             o.typeid = BoundTo.BOUND_TIME_DROPDOWN;
-            var by: BoundToTimeY = b as BoundToTimeY;
+            var by: BoundToTimeDropDown = b as BoundToTimeDropDown;
             o.typename = "BoundToTimeDropDown";
             o.lastTime = by.getLastTime();
             o.singleLatestTime = by.isSingleLatestTime();
             o.chooseTime = by.isChooseTime();
             o.start = by.getStartDate().getTime();
             o.end = by.getEndDate().getTime();
+            o.values = by.getValues();
             break;
         case BoundTo.BOUND_DISCRETE_LIST:
             o.typeid = BoundTo.BOUND_DISCRETE_LIST;
@@ -1320,6 +1322,7 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
         v.addToWaitFors(ba.setGeoJSON(o['geoJSON']));
         ba.setMatchField(o['matchField']);
         ba.setAreaField(o['area']);
+        
         b = ba;
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_DROPDOWN) {
@@ -1327,6 +1330,13 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
         b.setFlat(o['flat']);
         b.setClientSide(o['clientSide']);
         b.setPercentOfId(o['perCentOfId']);
+        if(o['values']!=null){
+            var result = [];
+            for(var k=0;k<o['values'].length;k++) {
+                result.push(b.findItemFromId(o['values'][k]));
+            }
+            b.setCurrentValues(result);
+        }
     }
     else if (o['typeid'] == BoundTo.BOUND_CONTINUOUS_X) {
         b = new BoundToContinuousX(v, o['concept']);
@@ -1379,6 +1389,13 @@ export function defaultParseObjectToBinding(o: object, v: visual.Visual): BoundT
         end.setTime(o['end']);
         b.setStartDate(start);
         b.setEndDate(end);
+        if(o['values']!=null){
+            var result = [];
+            for(var k=0;k<o['values'].length;k++) {
+                result.push(b.findItemFromId(o['values'][k]));
+            }
+            b.setCurrentValues(result);
+        }
     }
     else if (o['typeid'] == BoundTo.BOUND_DISCRETE_LIST) {
         b = new BoundToList(v, o['concept']);
